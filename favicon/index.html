@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator — Free Emoji & Text Favicon Maker</title>
+  <meta name="description" content="Generate favicons from any emoji or text instantly. Download as PNG, SVG, or ICO. Free, no signup, works in browser.">
+  <meta property="og:title" content="Favicon Generator — Free Emoji & Text Favicon Maker">
+  <meta property="og:description" content="Turn any emoji or text into a favicon in seconds. Download PNG, SVG, ICO. 100% free, no signup required.">
+  <meta property="og:type" content="website">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    .card {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #8888a8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: #0f0f13;
+      color: #e8e8f0;
+      font-size: 1.5rem;
+      outline: none;
+      transition: border-color 0.15s;
+      text-align: center;
+    }
+    input[type="text"]:focus { border-color: #f59e0b; }
+
+    .bg-picker-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .bg-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.1s;
+    }
+    .bg-swatch:hover { transform: scale(1.15); }
+    .bg-swatch.active { border-color: #f59e0b; }
+
+    input[type="color"] {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 2px solid #2a2a3a;
+      border-radius: 8px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .size-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .size-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .size-btn.active, .size-btn:hover {
+      border-color: #f59e0b;
+      color: #f59e0b;
+      background: rgba(245,158,11,0.08);
+    }
+
+    /* Preview */
+    .preview-section {
+      text-align: center;
+    }
+    .preview-canvas-wrap {
+      display: inline-block;
+      border-radius: 12px;
+      border: 1.5px solid #2a2a3a;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      background: #0f0f13;
+      padding: 1rem;
+    }
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .preview-sizes {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .size-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .size-preview span {
+      font-size: 0.7rem;
+      color: #555570;
+    }
+    .size-preview canvas {
+      border-radius: 4px;
+    }
+
+    /* Download buttons */
+    .dl-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .dl-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.85rem;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #e8e8f0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .dl-btn span.ext {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .dl-btn small {
+      font-size: 0.68rem;
+      color: #8888a8;
+      font-weight: 400;
+    }
+    .dl-btn:hover {
+      border-color: #f59e0b;
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+    }
+    .dl-btn:hover small { color: #c07a00; }
+
+    /* Tip card */
+    .tip-card {
+      background: rgba(245,158,11,0.05);
+      border: 1.5px solid rgba(245,158,11,0.2);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .tip-card h3 { font-size: 0.85rem; color: #f59e0b; margin-bottom: 0.4rem; }
+    .tip-card p { font-size: 0.8rem; color: #8888a8; line-height: 1.5; }
+    .tip-card code {
+      background: #0f0f13;
+      border-radius: 4px;
+      padding: 0.1em 0.4em;
+      font-size: 0.78rem;
+      color: #d0d0e8;
+    }
+
+    /* Tools nav */
+    .tools-nav {
+      text-align: center;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #2a2a3a;
+    }
+    .tools-nav p { color: #555570; font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .tools-nav a {
+      display: inline-block;
+      margin: 0.3rem;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #2a2a3a;
+      color: #8888a8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+    .tools-nav a:hover { border-color: #f59e0b; color: #f59e0b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🔥 Favicon Generator</h1>
+    <p>Type any emoji or text — download instantly as PNG, SVG, or ICO</p>
+  </header>
+
+  <div class="card">
+    <label>Emoji or Text</label>
+    <div class="input-row">
+      <input type="text" id="input" value="🚀" maxlength="4" autocomplete="off" spellcheck="false" placeholder="🎯">
+    </div>
+
+    <label>Background</label>
+    <div class="bg-picker-row" id="swatches">
+      <!-- filled by JS -->
+      <input type="color" id="customColor" title="Custom color" value="#1a1a26">
+    </div>
+
+    <label>Size</label>
+    <div class="size-row" id="sizeRow">
+      <button class="size-btn active" data-size="16">16×16</button>
+      <button class="size-btn active" data-size="32">32×32</button>
+      <button class="size-btn active" data-size="64">64×64</button>
+      <button class="size-btn active" data-size="128">128×128</button>
+      <button class="size-btn active" data-size="256">256×256</button>
+    </div>
+  </div>
+
+  <div class="card preview-section">
+    <label style="text-align:center">Preview</label>
+    <div class="preview-canvas-wrap">
+      <canvas id="mainCanvas" width="256" height="256" style="width:128px;height:128px;"></canvas>
+    </div>
+    <div class="preview-sizes" id="previewSizes"></div>
+    <div class="dl-row">
+      <button class="dl-btn" onclick="downloadPNG()">
+        <span class="ext">PNG</span>
+        <small>Transparent bg ok</small>
+      </button>
+      <button class="dl-btn" onclick="downloadSVG()">
+        <span class="ext">SVG</span>
+        <small>Scalable vector</small>
+      </button>
+      <button class="dl-btn" onclick="downloadICO()">
+        <span class="ext">ICO</span>
+        <small>Browser favicon</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <h3>📌 How to use your favicon</h3>
+    <p>Add this to your HTML <code>&lt;head&gt;</code>:<br>
+    <code>&lt;link rel="icon" type="image/png" href="/favicon.png"&gt;</code><br>
+    Or for ICO: <code>&lt;link rel="icon" href="/favicon.ico"&gt;</code></p>
+  </div>
+
+  <div class="tools-nav">
+    <p>More free tools by Goosnav</p>
+    <a href="/qr">QR Code Generator</a>
+    <a href="/og-preview">OG Preview</a>
+  </div>
+</div>
+
+<script>
+const SWATCHES = [
+  'transparent', '#ffffff', '#000000', '#1a1a26',
+  '#ef4444', '#f59e0b', '#10b981', '#3b82f6',
+  '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
+];
+
+let bgColor = 'transparent';
+let activeSizes = new Set([16, 32, 64, 128, 256]);
+
+// Build swatches
+const swatchRow = document.getElementById('swatches');
+SWATCHES.forEach(c => {
+  const s = document.createElement('div');
+  s.className = 'bg-swatch' + (c === bgColor ? ' active' : '');
+  s.style.background = c === 'transparent'
+    ? 'linear-gradient(135deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(135deg, #ccc 25%, #fff 25%, #fff 75%, #ccc 75%)'
+    : c;
+  s.style.backgroundSize = c === 'transparent' ? '8px 8px' : '';
+  s.title = c;
+  s.addEventListener('click', () => {
+    bgColor = c;
+    document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+    s.classList.add('active');
+    render();
+  });
+  swatchRow.insertBefore(s, document.getElementById('customColor'));
+});
+
+document.getElementById('customColor').addEventListener('input', e => {
+  bgColor = e.target.value;
+  document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+  render();
+});
+
+// Size toggles — all active by default (for download), display shows 256px preview
+document.querySelectorAll('.size-btn').forEach(btn => {
+  const sz = parseInt(btn.dataset.size);
+  btn.addEventListener('click', () => {
+    if (activeSizes.has(sz)) {
+      if (activeSizes.size > 1) { activeSizes.delete(sz); btn.classList.remove('active'); }
+    } else {
+      activeSizes.add(sz); btn.classList.add('active');
+    }
+    renderPreviews();
+  });
+});
+
+function drawFavicon(canvas, text, bg, size) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = size;
+  canvas.height = size;
+  ctx.clearRect(0, 0, size, size);
+
+  if (bg && bg !== 'transparent') {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  // font size: fill ~80% of canvas
+  const fontSize = Math.floor(size * 0.72);
+  ctx.font = `${fontSize}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text || '?', size / 2, size / 2 + size * 0.04);
+}
+
+function render() {
+  const text = document.getElementById('input').value || '?';
+  const canvas = document.getElementById('mainCanvas');
+  drawFavicon(canvas, text, bgColor, 256);
+  renderPreviews();
+}
+
+function renderPreviews() {
+  const text = document.getElementById('input').value || '?';
+  const wrap = document.getElementById('previewSizes');
+  wrap.innerHTML = '';
+  [16, 32, 64].forEach(sz => {
+    const div = document.createElement('div');
+    div.className = 'size-preview';
+    const c = document.createElement('canvas');
+    drawFavicon(c, text, bgColor, sz);
+    c.style.width = sz + 'px';
+    c.style.height = sz + 'px';
+    const label = document.createElement('span');
+    label.textContent = sz + 'px';
+    div.appendChild(c);
+    div.appendChild(label);
+    wrap.appendChild(div);
+  });
+}
+
+document.getElementById('input').addEventListener('input', render);
+
+function filename(ext, size) {
+  return `favicon${size ? `-${size}` : ''}.${ext}`;
+}
+
+function downloadPNG() {
+  const text = document.getElementById('input').value || '?';
+  const sizes = [...activeSizes].sort((a, b) => b - a);
+  // download largest active size
+  const sz = sizes[0];
+  const c = document.createElement('canvas');
+  drawFavicon(c, text, bgColor, sz);
+  const a = document.createElement('a');
+  a.href = c.toDataURL('image/png');
+  a.download = filename('png', sz);
+  a.click();
+}
+
+function downloadSVG() {
+  const text = document.getElementById('input').value || '?';
+  const bg = bgColor && bgColor !== 'transparent'
+    ? `<rect width="100" height="100" fill="${bgColor}"/>`
+    : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  ${bg}
+  <text x="50" y="54" dominant-baseline="middle" text-anchor="middle" font-size="72" font-family="serif">${text}</text>
+</svg>`;
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'favicon.svg';
+  a.click();
+}
+
+// ICO writer: 16x16 and 32x32 embedded
+async function downloadICO() {
+  const text = document.getElementById('input').value || '?';
+  const icoSizes = [16, 32].filter(s => activeSizes.has(s));
+  if (!icoSizes.length) icoSizes.push(16, 32);
+
+  const pngBuffers = await Promise.all(icoSizes.map(sz => {
+    const c = document.createElement('canvas');
+    drawFavicon(c, text, bgColor, sz);
+    return new Promise(res => c.toBlob(b => b.arrayBuffer().then(res), 'image/png'));
+  }));
+
+  // Build ICO binary
+  const numImages = icoSizes.length;
+  const dirEntrySize = 16;
+  const headerSize = 6 + dirEntrySize * numImages;
+  let offset = headerSize;
+
+  const entries = pngBuffers.map((buf, i) => {
+    const e = { buf, size: icoSizes[i], offset };
+    offset += buf.byteLength;
+    return e;
+  });
+
+  const total = offset;
+  const ico = new ArrayBuffer(total);
+  const view = new DataView(ico);
+
+  // ICONDIR header
+  view.setUint16(0, 0, true);      // reserved
+  view.setUint16(2, 1, true);      // type: 1 = ICO
+  view.setUint16(4, numImages, true);
+
+  entries.forEach((e, i) => {
+    const base = 6 + i * dirEntrySize;
+    const sz = e.size >= 256 ? 0 : e.size;
+    view.setUint8(base, sz);        // width
+    view.setUint8(base + 1, sz);    // height
+    view.setUint8(base + 2, 0);     // color count
+    view.setUint8(base + 3, 0);     // reserved
+    view.setUint16(base + 4, 1, true); // color planes
+    view.setUint16(base + 6, 32, true); // bit count
+    view.setUint32(base + 8, e.buf.byteLength, true);
+    view.setUint32(base + 12, e.offset, true);
+    // copy png bytes
+    new Uint8Array(ico, e.offset, e.buf.byteLength).set(new Uint8Array(e.buf));
+  });
+
+  const blob = new Blob([ico], { type: 'image/x-icon' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'favicon.ico';
+  a.click();
+}
+
+render();
+</script>
+</body>
+</html>
