@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Shadow Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS box shadows visually. Adjust offset, blur, spread, color, opacity, and inset. Add multiple layers. Copy the CSS — free, no signup.">
+  <meta property="og:title" content="CSS Box Shadow Generator — Free Online Tool">
+  <meta property="og:description" content="Build layered CSS box shadows with live preview. Adjust X/Y offset, blur, spread, color, opacity, and inset. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/box-shadow/">
+  <link rel="canonical" href="https://goosnav.github.io/box-shadow/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Box Shadow Generator",
+    "url": "https://goosnav.github.io/box-shadow/",
+    "description": "Generate CSS box shadows visually — live preview, multi-layer, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview area */
+    .preview-area {
+      width: 100%;
+      height: 200px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .preview-card {
+      width: 160px;
+      height: 100px;
+      border-radius: 10px;
+      background: #ffffff;
+      transition: box-shadow 0.2s;
+    }
+
+    .card {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Shadow layers */
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: #12121a;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .layer-row.active { border-color: #a78bfa; }
+
+    .layer-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid #3a3a4a;
+    }
+
+    .layer-label {
+      flex: 1;
+      font-size: 0.8rem;
+      color: #c8c8e0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .layer-visible {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1.5px solid #3a3a4a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .layer-visible:hover { border-color: #a78bfa; color: #a78bfa; }
+    .layer-visible.hidden { opacity: 0.4; }
+
+    .remove-layer {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1.5px solid #3a3a4a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .remove-layer:hover { border-color: #ef4444; color: #ef4444; }
+
+    .add-layer-btn {
+      width: 100%;
+      padding: 0.55rem;
+      border-radius: 8px;
+      border: 1.5px dashed #3a3a4a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-layer-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    /* Sliders */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label-row label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+    }
+
+    .control-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a78bfa;
+    }
+
+    input[type="range"].ctrl-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a2a3a;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ctrl-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+    }
+
+    /* Color + opacity row */
+    .color-opacity-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1.5px solid #3a3a4a;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    input[type="color"] {
+      width: 40px;
+      height: 40px;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+    }
+
+    .opacity-wrap { flex: 1; }
+
+    /* Inset toggle */
+    .inset-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .inset-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      flex: 1;
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: #2a2a3a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track { background: #a78bfa; }
+
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+
+    /* Presets */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .preset-btn {
+      padding: 0.55rem 0.5rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #c8c8e0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      text-align: center;
+    }
+    .preset-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    /* CSS Output */
+    .css-box {
+      background: #12121a;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-size: 0.82rem;
+      color: #a5b4fc;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      min-height: 52px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      background: #a78bfa;
+      color: #0f0f13;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    .copy-btn:hover { opacity: 0.9; }
+    .copy-btn:active { transform: scale(0.98); }
+    .copy-btn.copied { background: #34d399; }
+
+    /* More tools */
+    .more-tools {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid #2a2a3a;
+    }
+
+    .more-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 0.75rem;
+    }
+
+    .tool-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tool-link {
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .tool-link:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">← Goosnav Tools</a>
+      <h1>CSS Box Shadow Generator</h1>
+      <p>Build multi-layer box shadows visually. Copy the CSS — done.</p>
+    </header>
+
+    <!-- Live Preview -->
+    <div class="preview-area">
+      <div class="preview-card" id="previewCard"></div>
+    </div>
+
+    <!-- Shadow Layers -->
+    <div class="card">
+      <p class="card-title">Shadow Layers</p>
+      <div class="layer-list" id="layerList"></div>
+      <button class="add-layer-btn" id="addLayer">+ Add shadow layer</button>
+    </div>
+
+    <!-- Controls (for active layer) -->
+    <div class="card">
+      <p class="card-title">Edit Selected Layer</p>
+      <div class="controls">
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="sliderX">X Offset</label>
+            <span class="control-value" id="valX">0px</span>
+          </div>
+          <input type="range" class="ctrl-slider" id="sliderX" min="-100" max="100" value="0">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="sliderY">Y Offset</label>
+            <span class="control-value" id="valY">4px</span>
+          </div>
+          <input type="range" class="ctrl-slider" id="sliderY" min="-100" max="100" value="4">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="sliderBlur">Blur</label>
+            <span class="control-value" id="valBlur">24px</span>
+          </div>
+          <input type="range" class="ctrl-slider" id="sliderBlur" min="0" max="100" value="24">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="sliderSpread">Spread</label>
+            <span class="control-value" id="valSpread">0px</span>
+          </div>
+          <input type="range" class="ctrl-slider" id="sliderSpread" min="-50" max="50" value="0">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label>Color &amp; Opacity</label>
+            <span class="control-value" id="valOpacity">40%</span>
+          </div>
+          <div class="color-opacity-row">
+            <label class="color-swatch">
+              <input type="color" id="colorPicker" value="#000000">
+            </label>
+            <div class="opacity-wrap">
+              <input type="range" class="ctrl-slider" id="sliderOpacity" min="0" max="100" value="40">
+            </div>
+          </div>
+        </div>
+
+        <div class="inset-row">
+          <span class="inset-label">Inset (inner shadow)</span>
+          <label class="toggle">
+            <input type="checkbox" id="insetToggle">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="card">
+      <p class="card-title">Presets</p>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <!-- CSS Output -->
+    <div class="card">
+      <p class="card-title">CSS Code</p>
+      <div class="css-box" id="cssOutput"></div>
+      <button class="copy-btn" id="copyBtn">Copy CSS</button>
+    </div>
+
+    <div class="more-tools">
+      <p class="more-title">More free tools</p>
+      <div class="tool-links">
+        <a class="tool-link" href="/gradient/">🎨 Gradient Generator</a>
+        <a class="tool-link" href="/qr/">📱 QR Generator</a>
+        <a class="tool-link" href="/og-preview/">🖼️ OG Preview</a>
+        <a class="tool-link" href="/favicon/">⭐ Favicon Maker</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built by <a href="https://goosnav.com" style="color:#555;text-decoration:none;">Goosnav</a> · Runs 100% in your browser</p>
+    </footer>
+  </div>
+
+  <script>
+    const PRESETS = [
+      { name: "Soft",      layers: [{ x:0, y:4,   blur:24, spread:0,  hex:"#000000", opacity:40, inset:false }] },
+      { name: "Card",      layers: [{ x:0, y:8,   blur:32, spread:-4, hex:"#000000", opacity:30, inset:false }] },
+      { name: "Elevated",  layers: [{ x:0, y:20,  blur:60, spread:-8, hex:"#000000", opacity:25, inset:false }] },
+      { name: "Sharp",     layers: [{ x:4, y:4,   blur:0,  spread:0,  hex:"#000000", opacity:80, inset:false }] },
+      { name: "Neon Blue", layers: [{ x:0, y:0,   blur:20, spread:4,  hex:"#3b82f6", opacity:70, inset:false }] },
+      { name: "Neon Purple",layers:[{ x:0, y:0,   blur:20, spread:4,  hex:"#a78bfa", opacity:70, inset:false }] },
+      { name: "Inset",     layers: [{ x:0, y:2,   blur:8,  spread:0,  hex:"#000000", opacity:30, inset:true  }] },
+      { name: "Layered",   layers: [
+          { x:0, y:4,  blur:6,  spread:-1, hex:"#000000", opacity:10, inset:false },
+          { x:0, y:10, blur:40, spread:-8, hex:"#000000", opacity:20, inset:false }
+        ]
+      },
+      { name: "Long",      layers: [{ x:0, y:40,  blur:80, spread:-20,hex:"#000000", opacity:50, inset:false }] },
+    ];
+
+    let layers = [{ x:0, y:4, blur:24, spread:0, hex:"#000000", opacity:40, inset:false, visible:true }];
+    let activeIdx = 0;
+
+    function hexToRgb(hex) {
+      const r = parseInt(hex.slice(1,3),16);
+      const g = parseInt(hex.slice(3,5),16);
+      const b = parseInt(hex.slice(5,7),16);
+      return { r, g, b };
+    }
+
+    function layerToCSS(l) {
+      const { r, g, b } = hexToRgb(l.hex);
+      const a = (l.opacity / 100).toFixed(2);
+      const inset = l.inset ? "inset " : "";
+      return `${inset}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px rgba(${r},${g},${b},${a})`;
+    }
+
+    function buildBoxShadow() {
+      const visible = layers.filter(l => l.visible);
+      if (!visible.length) return "none";
+      return visible.map(layerToCSS).join(",\n         ");
+    }
+
+    function buildFullCSS() {
+      const visible = layers.filter(l => l.visible);
+      if (!visible.length) return "box-shadow: none;";
+      if (visible.length === 1) return `box-shadow: ${layerToCSS(visible[0])};`;
+      const parts = visible.map(layerToCSS).join(",\n            ");
+      return `box-shadow: ${parts};`;
+    }
+
+    function syncControls() {
+      const l = layers[activeIdx];
+      document.getElementById("sliderX").value = l.x;
+      document.getElementById("valX").textContent = l.x + "px";
+      document.getElementById("sliderY").value = l.y;
+      document.getElementById("valY").textContent = l.y + "px";
+      document.getElementById("sliderBlur").value = l.blur;
+      document.getElementById("valBlur").textContent = l.blur + "px";
+      document.getElementById("sliderSpread").value = l.spread;
+      document.getElementById("valSpread").textContent = l.spread + "px";
+      document.getElementById("colorPicker").value = l.hex;
+      document.getElementById("sliderOpacity").value = l.opacity;
+      document.getElementById("valOpacity").textContent = l.opacity + "%";
+      document.getElementById("insetToggle").checked = l.inset;
+    }
+
+    function renderLayerList() {
+      const list = document.getElementById("layerList");
+      list.innerHTML = "";
+      layers.forEach((l, i) => {
+        const row = document.createElement("div");
+        row.className = "layer-row" + (i === activeIdx ? " active" : "");
+        row.addEventListener("click", () => { activeIdx = i; syncControls(); renderLayerList(); });
+
+        const dot = document.createElement("div");
+        dot.className = "layer-dot";
+        const { r, g, b } = hexToRgb(l.hex);
+        dot.style.background = `rgba(${r},${g},${b},${l.opacity/100})`;
+
+        const label = document.createElement("span");
+        label.className = "layer-label";
+        label.textContent = layerToCSS(l);
+
+        const visBtn = document.createElement("button");
+        visBtn.className = "layer-visible" + (l.visible ? "" : " hidden");
+        visBtn.title = l.visible ? "Hide layer" : "Show layer";
+        visBtn.textContent = l.visible ? "👁" : "—";
+        visBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          layers[i].visible = !layers[i].visible;
+          render();
+        });
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-layer";
+        removeBtn.textContent = "×";
+        removeBtn.title = "Remove layer";
+        removeBtn.disabled = layers.length <= 1;
+        removeBtn.style.opacity = layers.length <= 1 ? "0.3" : "1";
+        removeBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          if (layers.length > 1) {
+            layers.splice(i, 1);
+            if (activeIdx >= layers.length) activeIdx = layers.length - 1;
+            syncControls();
+            render();
+          }
+        });
+
+        row.appendChild(dot);
+        row.appendChild(label);
+        row.appendChild(visBtn);
+        row.appendChild(removeBtn);
+        list.appendChild(row);
+      });
+    }
+
+    function render() {
+      const shadow = buildBoxShadow();
+      document.getElementById("previewCard").style.boxShadow = shadow;
+      document.getElementById("cssOutput").textContent = buildFullCSS();
+      renderLayerList();
+    }
+
+    // Slider wiring
+    function wireSlider(id, valId, suffix, prop) {
+      document.getElementById(id).addEventListener("input", e => {
+        const v = parseInt(e.target.value);
+        document.getElementById(valId).textContent = v + suffix;
+        layers[activeIdx][prop] = v;
+        render();
+      });
+    }
+
+    wireSlider("sliderX",       "valX",       "px", "x");
+    wireSlider("sliderY",       "valY",       "px", "y");
+    wireSlider("sliderBlur",    "valBlur",    "px", "blur");
+    wireSlider("sliderSpread",  "valSpread",  "px", "spread");
+    wireSlider("sliderOpacity", "valOpacity", "%",  "opacity");
+
+    document.getElementById("colorPicker").addEventListener("input", e => {
+      layers[activeIdx].hex = e.target.value;
+      render();
+    });
+
+    document.getElementById("insetToggle").addEventListener("change", e => {
+      layers[activeIdx].inset = e.target.checked;
+      render();
+    });
+
+    // Add layer
+    document.getElementById("addLayer").addEventListener("click", () => {
+      layers.push({ x:0, y:4, blur:24, spread:0, hex:"#000000", opacity:30, inset:false, visible:true });
+      activeIdx = layers.length - 1;
+      syncControls();
+      render();
+    });
+
+    // Copy
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      navigator.clipboard.writeText(buildFullCSS()).then(() => {
+        const btn = document.getElementById("copyBtn");
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "Copy CSS";
+          btn.classList.remove("copied");
+        }, 1800);
+      });
+    });
+
+    // Presets
+    const presetGrid = document.getElementById("presetGrid");
+    PRESETS.forEach(preset => {
+      const btn = document.createElement("button");
+      btn.className = "preset-btn";
+      btn.textContent = preset.name;
+      btn.addEventListener("click", () => {
+        layers = preset.layers.map(l => ({ ...l, visible: true }));
+        activeIdx = 0;
+        syncControls();
+        render();
+      });
+      presetGrid.appendChild(btn);
+    });
+
+    // Init
+    syncControls();
+    render();
+  </script>
+</body>
+</html>
