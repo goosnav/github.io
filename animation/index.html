@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Animation Generator — Free Online Keyframe Tool</title>
+  <meta name="description" content="Generate CSS animations visually. Pick presets, adjust duration, easing, delay, and iteration. Get the full @keyframes + animation CSS — free, no signup.">
+  <meta property="og:title" content="CSS Animation Generator — Free Online Keyframe Tool">
+  <meta property="og:description" content="Build CSS animations with live preview. 8 presets: Fade In, Slide Up, Bounce, Pulse, Spin, Shake, Flip, Zoom. Adjust timing, easing, iteration. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/animation/">
+  <link rel="canonical" href="https://goosnav.github.io/animation/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Animation Generator",
+    "url": "https://goosnav.github.io/animation/",
+    "description": "Generate CSS keyframe animations visually — live preview, presets, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview area */
+    .preview-area {
+      width: 100%;
+      min-height: 180px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-card {
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(167,139,250,0.3);
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-replay {
+      background: #2a2a3a;
+      border: 1.5px solid #3a3a4a;
+      color: #a78bfa;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-replay:hover { background: #3a3a4a; border-color: #a78bfa; }
+
+    /* Presets */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6666aa;
+      margin-bottom: 0.7rem;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 480px) { .presets-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #c8c8e8;
+      padding: 0.55rem 0.5rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover { background: #22223a; border-color: #a78bfa; color: #a78bfa; }
+    .preset-btn.active { background: #2d1f5e; border-color: #a78bfa; color: #a78bfa; }
+
+    /* Controls */
+    .controls { display: flex; flex-direction: column; gap: 1.1rem; margin-bottom: 1.5rem; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #9999bb;
+      width: 110px;
+      flex-shrink: 0;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.2);
+    }
+
+    select {
+      flex: 1;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #e8e8f0;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: #a78bfa; }
+
+    .value-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a78bfa;
+      min-width: 48px;
+      text-align: right;
+    }
+
+    /* Output */
+    .output-block {
+      background: #13131e;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .output-block pre {
+      font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: #c8c8e8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: #2a2a3a;
+      border: 1.5px solid #3a3a4a;
+      color: #8888a8;
+      padding: 0.3rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: #3a3a4a; color: #a78bfa; }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+    /* Related tools */
+    .related {
+      margin-top: 2.5rem;
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+    }
+    .related h2 { font-size: 0.85rem; color: #6666aa; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.9rem; }
+    .related-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .related-links a {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #9999bb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a class="back" href="/">← All Tools</a>
+    <h1>CSS Animation Generator</h1>
+    <p>Pick a preset, tweak the timing, copy the CSS.</p>
+  </header>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <div class="preview-card" id="previewCard">Preview</div>
+    <div class="preview-actions">
+      <button class="btn-replay" id="replayBtn">↺ Replay</button>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <p class="section-label">Presets</p>
+  <div class="presets-grid" id="presetsGrid">
+    <button class="preset-btn active" data-preset="fadeIn">Fade In</button>
+    <button class="preset-btn" data-preset="slideUp">Slide Up</button>
+    <button class="preset-btn" data-preset="bounce">Bounce</button>
+    <button class="preset-btn" data-preset="pulse">Pulse</button>
+    <button class="preset-btn" data-preset="spin">Spin</button>
+    <button class="preset-btn" data-preset="shake">Shake</button>
+    <button class="preset-btn" data-preset="flip">Flip</button>
+    <button class="preset-btn" data-preset="zoomIn">Zoom In</button>
+  </div>
+
+  <!-- Controls -->
+  <p class="section-label">Controls</p>
+  <div class="controls">
+    <div class="control-row">
+      <span class="control-label">Duration</span>
+      <input type="range" id="duration" min="0.1" max="3" step="0.05" value="0.6">
+      <span class="value-badge" id="durationVal">0.6s</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Delay</span>
+      <input type="range" id="delay" min="0" max="2" step="0.05" value="0">
+      <span class="value-badge" id="delayVal">0s</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Iterations</span>
+      <input type="range" id="iterations" min="1" max="10" step="1" value="1">
+      <span class="value-badge" id="iterationsVal">1</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Easing</span>
+      <select id="easing">
+        <option value="ease">ease</option>
+        <option value="ease-in">ease-in</option>
+        <option value="ease-out" selected>ease-out</option>
+        <option value="ease-in-out">ease-in-out</option>
+        <option value="linear">linear</option>
+        <option value="cubic-bezier(0.34,1.56,0.64,1)">spring (overshoot)</option>
+        <option value="cubic-bezier(0.68,-0.55,0.27,1.55)">back</option>
+        <option value="steps(6,end)">steps(6)</option>
+      </select>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Direction</span>
+      <select id="direction">
+        <option value="normal" selected>normal</option>
+        <option value="reverse">reverse</option>
+        <option value="alternate">alternate</option>
+        <option value="alternate-reverse">alternate-reverse</option>
+      </select>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Fill Mode</span>
+      <select id="fillMode">
+        <option value="none">none</option>
+        <option value="forwards" selected>forwards</option>
+        <option value="backwards">backwards</option>
+        <option value="both">both</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <p class="section-label">CSS Output</p>
+  <div class="output-block">
+    <pre id="cssOutput"></pre>
+    <button class="copy-btn" id="copyBtn">Copy</button>
+  </div>
+
+  <!-- Related -->
+  <div class="related">
+    <h2>More CSS Tools</h2>
+    <div class="related-links">
+      <a href="/box-shadow/">Box Shadow Generator</a>
+      <a href="/text-shadow/">Text Shadow Generator</a>
+      <a href="/gradient/">Gradient Generator</a>
+      <a href="/border-radius/">Border Radius Generator</a>
+    </div>
+  </div>
+</div>
+
+<style id="animStyle"></style>
+
+<script>
+  const PRESETS = {
+    fadeIn: {
+      keyframes: `@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}`,
+      easing: 'ease-out', duration: 0.6, fill: 'forwards'
+    },
+    slideUp: {
+      keyframes: `@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}`,
+      easing: 'ease-out', duration: 0.5, fill: 'forwards'
+    },
+    bounce: {
+      keyframes: `@keyframes bounce {
+  0%, 100% { transform: translateY(0); animation-timing-function: ease-in; }
+  50%       { transform: translateY(-24px); animation-timing-function: ease-out; }
+}`,
+      easing: 'ease', duration: 0.7, fill: 'none', iterations: 3
+    },
+    pulse: {
+      keyframes: `@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.1); opacity: 0.8; }
+}`,
+      easing: 'ease-in-out', duration: 1.0, fill: 'none', iterations: 3
+    },
+    spin: {
+      keyframes: `@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}`,
+      easing: 'linear', duration: 1.0, fill: 'none', iterations: 3
+    },
+    shake: {
+      keyframes: `@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}`,
+      easing: 'ease-in-out', duration: 0.5, fill: 'none', iterations: 2
+    },
+    flip: {
+      keyframes: `@keyframes flip {
+  0%   { transform: perspective(400px) rotateY(0); }
+  50%  { transform: perspective(400px) rotateY(90deg); }
+  100% { transform: perspective(400px) rotateY(0deg); }
+}`,
+      easing: 'ease-in-out', duration: 0.7, fill: 'none', iterations: 2
+    },
+    zoomIn: {
+      keyframes: `@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}`,
+      easing: 'cubic-bezier(0.34,1.56,0.64,1)', duration: 0.55, fill: 'forwards'
+    }
+  };
+
+  let currentPreset = 'fadeIn';
+  let animTimeout = null;
+
+  const card = document.getElementById('previewCard');
+  const animStyle = document.getElementById('animStyle');
+  const cssOutput = document.getElementById('cssOutput');
+  const copyBtn = document.getElementById('copyBtn');
+  const durationEl = document.getElementById('duration');
+  const delayEl = document.getElementById('delay');
+  const iterationsEl = document.getElementById('iterations');
+  const easingEl = document.getElementById('easing');
+  const directionEl = document.getElementById('direction');
+  const fillEl = document.getElementById('fillMode');
+
+  function getValues() {
+    return {
+      preset: currentPreset,
+      duration: parseFloat(durationEl.value),
+      delay: parseFloat(delayEl.value),
+      iterations: parseInt(iterationsEl.value),
+      easing: easingEl.value,
+      direction: directionEl.value,
+      fill: fillEl.value
+    };
+  }
+
+  function buildCSS(v) {
+    const kf = PRESETS[v.preset].keyframes;
+    const name = v.preset;
+    const iter = v.iterations === 1 ? '1' : v.iterations;
+    const anim = `animation: ${name} ${v.duration}s ${v.easing} ${v.delay}s ${iter} ${v.direction} ${v.fill};`;
+    return `${kf}\n\n.element {\n  ${anim}\n}`;
+  }
+
+  function replay() {
+    const v = getValues();
+    if (animTimeout) clearTimeout(animTimeout);
+
+    // inject keyframe CSS
+    animStyle.textContent = PRESETS[v.preset].keyframes;
+
+    // reset animation
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+
+    card.style.animation = [
+      v.preset,
+      v.duration + 's',
+      v.easing,
+      v.delay + 's',
+      v.iterations,
+      v.direction,
+      v.fill
+    ].join(' ');
+
+    cssOutput.textContent = buildCSS(v);
+  }
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    currentPreset = name;
+
+    durationEl.value = p.duration;
+    document.getElementById('durationVal').textContent = p.duration + 's';
+
+    if (p.iterations) {
+      iterationsEl.value = p.iterations;
+      document.getElementById('iterationsVal').textContent = p.iterations;
+    } else {
+      iterationsEl.value = 1;
+      document.getElementById('iterationsVal').textContent = '1';
+    }
+
+    // set easing select
+    const easingMatch = [...easingEl.options].find(o => o.value === p.easing);
+    if (easingMatch) easingEl.value = p.easing;
+    else easingEl.value = 'ease-out';
+
+    if (p.fill) fillEl.value = p.fill;
+
+    replay();
+  }
+
+  // Preset buttons
+  document.getElementById('presetsGrid').addEventListener('click', e => {
+    const btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyPreset(btn.dataset.preset);
+  });
+
+  // Range inputs
+  [durationEl, delayEl, iterationsEl].forEach(el => {
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value);
+      const id = el.id + 'Val';
+      const suffix = el.id === 'iterations' ? '' : 's';
+      document.getElementById(id).textContent = v + suffix;
+      replay();
+    });
+  });
+
+  // Select inputs
+  [easingEl, directionEl, fillEl].forEach(el => {
+    el.addEventListener('change', replay);
+  });
+
+  // Replay button
+  document.getElementById('replayBtn').addEventListener('click', replay);
+
+  // Copy
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(cssOutput.textContent).then(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1800);
+    });
+  });
+
+  // Init
+  applyPreset('fadeIn');
+</script>
+</body>
+</html>
