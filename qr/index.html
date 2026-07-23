@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoosQR — Free QR Code Generator</title>
+<meta name="description" content="Generate QR codes instantly, free. No signup, no watermarks. Download as PNG or SVG. For bulk generation, use the GoosQR API.">
+<meta property="og:title" content="GoosQR — Free QR Code Generator">
+<meta property="og:description" content="Generate QR codes instantly, free. No signup, no watermarks.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #6ee7b7;
+    --accent-dim: #34d399;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  button.generate {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  button.generate:hover { opacity: 0.85; }
+
+  .options {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .option-group {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  label.opt-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  select, input[type="color"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  input[type="color"] {
+    padding: 0.2rem 0.4rem;
+    height: 36px;
+    cursor: pointer;
+  }
+
+  .preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .preview canvas, .preview svg {
+    border-radius: 4px;
+  }
+
+  .placeholder-text {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  button.dl {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  button.dl:hover {
+    border-color: var(--accent);
+    background: #1f2f2b;
+  }
+
+  button.dl:disabled {
+    opacity: 0.35;
+    cursor: default;
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .api-cta {
+    margin-top: 2.5rem;
+    text-align: center;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .api-cta p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .api-cta a {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .api-cta a:hover { background: #1a2e27; }
+
+  footer {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🐦 GoosQR</div>
+  <h1>Free QR Code Generator</h1>
+  <p>No signup. No watermark. Instant download.</p>
+</header>
+
+<div class="card">
+  <div class="input-row">
+    <input type="text" id="qr-input" placeholder="https://example.com or any text" autofocus>
+    <button class="generate" onclick="generate()">Generate</button>
+  </div>
+
+  <div class="options">
+    <div class="option-group">
+      <label class="opt-label" for="size">Size</label>
+      <select id="size">
+        <option value="200">200 × 200</option>
+        <option value="300" selected>300 × 300</option>
+        <option value="400">400 × 400</option>
+        <option value="600">600 × 600</option>
+      </select>
+    </div>
+    <div class="option-group">
+      <label class="opt-label" for="fg-color">Foreground</label>
+      <input type="color" id="fg-color" value="#000000">
+    </div>
+    <div class="option-group">
+      <label class="opt-label" for="bg-color">Background</label>
+      <input type="color" id="bg-color" value="#ffffff">
+    </div>
+  </div>
+
+  <div class="preview" id="preview">
+    <span class="placeholder-text">Your QR code will appear here</span>
+  </div>
+
+  <div class="actions">
+    <button class="dl" id="dl-png" disabled onclick="downloadPNG()">Download PNG</button>
+    <button class="dl" id="dl-svg" disabled onclick="downloadSVG()">Download SVG</button>
+  </div>
+</div>
+
+<div class="api-cta">
+  <p>Need bulk QR codes or API access?</p>
+  <a href="https://goosqr.dev" target="_blank" rel="noopener">GoosQR API — 50 free / month →</a>
+</div>
+
+<footer>Free tool by GoosQR · No data stored · Works offline once loaded</footer>
+
+<!-- qrcode-generator: pure JS, no dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+let lastValue = '';
+let lastSVG = '';
+
+const input = document.getElementById('qr-input');
+const preview = document.getElementById('preview');
+const dlPng = document.getElementById('dl-png');
+const dlSvg = document.getElementById('dl-svg');
+
+input.addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+
+// Auto-generate on option change
+['size','fg-color','bg-color'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    if (lastValue) generate();
+  });
+});
+
+function generate() {
+  const value = input.value.trim();
+  if (!value) return;
+  lastValue = value;
+
+  const size = parseInt(document.getElementById('size').value);
+  const fg = document.getElementById('fg-color').value;
+  const bg = document.getElementById('bg-color').value;
+
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(value);
+    qr.make();
+
+    // SVG output
+    const moduleCount = qr.getModuleCount();
+    const cellSize = Math.floor(size / moduleCount);
+    const margin = Math.floor(cellSize * 4);
+    const svgSize = moduleCount * cellSize + margin * 2;
+
+    let cells = '';
+    for (let r = 0; r < moduleCount; r++) {
+      for (let c = 0; c < moduleCount; c++) {
+        if (qr.isDark(r, c)) {
+          cells += `<rect x="${margin + c * cellSize}" y="${margin + r * cellSize}" width="${cellSize}" height="${cellSize}" fill="${fg}"/>`;
+        }
+      }
+    }
+
+    lastSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}"><rect width="${svgSize}" height="${svgSize}" fill="${bg}"/>${cells}</svg>`;
+
+    preview.innerHTML = lastSVG;
+
+    const svgEl = preview.querySelector('svg');
+    const maxDisplay = 280;
+    svgEl.style.maxWidth = maxDisplay + 'px';
+    svgEl.style.maxHeight = maxDisplay + 'px';
+
+    dlPng.disabled = false;
+    dlSvg.disabled = false;
+  } catch(e) {
+    preview.innerHTML = '<span class="placeholder-text" style="color:#f87171">Text too long — try a shorter URL</span>';
+    dlPng.disabled = true;
+    dlSvg.disabled = true;
+  }
+}
+
+function downloadSVG() {
+  if (!lastSVG) return;
+  const blob = new Blob([lastSVG], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'goosqr-code.svg';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function downloadPNG() {
+  if (!lastSVG) return;
+  const size = parseInt(document.getElementById('size').value);
+  const img = new Image();
+  const blob = new Blob([lastSVG], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'goosqr-code.png';
+    a.click();
+  };
+  img.src = url;
+}
+</script>
+</body>
+</html>
