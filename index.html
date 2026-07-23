@@ -1,28 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goosnav Comic Viewer (Mk. 01)</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Developer Tools — Goosnav</title>
+  <meta name="description" content="Free browser-based developer tools. Generate QR codes, preview Open Graph images, and create favicons — instantly, no signup required.">
+  <meta property="og:title" content="Free Developer Tools — Goosnav">
+  <meta property="og:description" content="QR code generator, OG image previewer, favicon maker. Free, instant, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/">
+  <link rel="canonical" href="https://goosnav.github.io/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Goosnav Developer Tools",
+    "url": "https://goosnav.github.io/",
+    "description": "Free browser-based developer tools: QR code generator, OG image previewer, favicon maker.",
+    "hasPart": [
+      {
+        "@type": "WebApplication",
+        "name": "QR Code Generator",
+        "url": "https://goosnav.github.io/qr/",
+        "applicationCategory": "DeveloperApplication",
+        "offers": { "@type": "Offer", "price": "0" }
+      },
+      {
+        "@type": "WebApplication",
+        "name": "OG Image Previewer",
+        "url": "https://goosnav.github.io/og-preview/",
+        "applicationCategory": "DeveloperApplication",
+        "offers": { "@type": "Offer", "price": "0" }
+      },
+      {
+        "@type": "WebApplication",
+        "name": "Favicon Generator",
+        "url": "https://goosnav.github.io/favicon/",
+        "applicationCategory": "DeveloperApplication",
+        "offers": { "@type": "Offer", "price": "0" }
+      }
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #6ee7b7;
+      --text: #f0f0f0;
+      --muted: #888;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 5rem;
+    }
+
+    header {
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 3.5rem;
+    }
+
+    .wordmark {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .tagline {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 920px;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: border-color 0.18s, transform 0.18s;
+    }
+
+    .tool-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .tool-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .tool-name {
+      font-size: 1.15rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .tool-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+      flex: 1;
+    }
+
+    .tool-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+
+    .tool-cta::after { content: "→"; }
+
+    footer {
+      margin-top: 4rem;
+      font-size: 0.8rem;
+      color: #444;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="window">
-        <div class="title-bar">
-            <div class="title-bar-text">Goosnav Comic Viewer (Mk. 01)</div>
-            <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
-                <button aria-label="Close"></button>
-            </div>
-        </div>
-        <div class="window-body">
-            <div class="image-container">
-                <img id="image-display" src="" alt="Random Image">
-            </div>
-            <button id="change-button" class="button">Change Image</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
+  <header>
+    <p class="wordmark">Goosnav</p>
+    <h1>Free Developer Tools</h1>
+    <p class="tagline">Instant, browser-based utilities for developers and designers.<br>No signup. No watermarks. No nonsense.</p>
+  </header>
+
+  <main>
+    <section class="tools" aria-label="Available tools">
+
+      <a class="tool-card" href="/qr/" aria-label="Open QR Code Generator">
+        <span class="tool-icon">📱</span>
+        <span class="tool-name">QR Code Generator</span>
+        <p class="tool-desc">Turn any URL, text, or contact into a scannable QR code. Download as PNG or SVG. Works offline once loaded.</p>
+        <span class="tool-cta">Generate a QR code</span>
+      </a>
+
+      <a class="tool-card" href="/og-preview/" aria-label="Open OG Image Previewer">
+        <span class="tool-icon">🖼️</span>
+        <span class="tool-name">OG Image Previewer</span>
+        <p class="tool-desc">Preview how your URL will look when shared on Twitter, LinkedIn, Slack, and iMessage — before you publish.</p>
+        <span class="tool-cta">Preview a link</span>
+      </a>
+
+      <a class="tool-card" href="/favicon/" aria-label="Open Favicon Generator">
+        <span class="tool-icon">⭐</span>
+        <span class="tool-name">Favicon Generator</span>
+        <p class="tool-desc">Type any emoji or text to create a favicon. Download as PNG, SVG, or ICO (16+32 embedded). Transparent backgrounds supported.</p>
+        <span class="tool-cta">Make a favicon</span>
+      </a>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>Built by <a href="https://goosnav.com" style="color:#555;text-decoration:none;">Goosnav</a> · Tools run 100% in your browser</p>
+  </footer>
 </body>
 </html>
