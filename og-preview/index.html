@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OG Preview — See How Your Link Looks When Shared</title>
+  <meta name="description" content="Paste any URL and instantly preview how it appears on Twitter, LinkedIn, Facebook, Slack, and iMessage. Free OG tag checker.">
+  <meta property="og:title" content="OG Preview — Free Social Link Preview Checker">
+  <meta property="og:description" content="See exactly how your URL will look when shared on social media. Check Open Graph tags instantly.">
+  <meta property="og:type" content="website">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: #1a1a26;
+      color: #e8e8f0;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: #7c3aed; }
+    .search-bar input::placeholder { color: #55556a; }
+    .search-bar button {
+      padding: 0.85rem 1.4rem;
+      border-radius: 10px;
+      border: none;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .search-bar button:hover { background: #6d28d9; }
+    .search-bar button:disabled { background: #3a2060; cursor: not-allowed; }
+
+    #status { text-align: center; color: #8888a8; font-size: 0.9rem; margin-bottom: 1.5rem; min-height: 1.4em; }
+
+    /* Preview cards */
+    .platforms { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .platform { background: #1a1a26; border-radius: 14px; overflow: hidden; border: 1px solid #2a2a3a; }
+    .platform-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #55556a;
+      padding: 0.6rem 1rem 0;
+    }
+
+    /* Twitter card */
+    .twitter-card {
+      margin: 0.5rem;
+      border-radius: 10px;
+      border: 1px solid #2a2a3a;
+      overflow: hidden;
+    }
+    .twitter-card .card-image {
+      width: 100%;
+      aspect-ratio: 1200/630;
+      object-fit: cover;
+      background: #2a2a3a;
+      display: block;
+    }
+    .twitter-card .card-meta {
+      padding: 0.6rem 0.75rem;
+      background: #111;
+    }
+    .twitter-card .card-domain { font-size: 0.78rem; color: #6b7280; }
+    .twitter-card .card-title { font-size: 0.9rem; font-weight: 600; color: #e8e8f0; margin-top: 0.15rem; line-height: 1.3; }
+    .twitter-card .card-desc { font-size: 0.82rem; color: #8888a8; margin-top: 0.1rem; line-height: 1.4; }
+
+    /* LinkedIn card */
+    .linkedin-card {
+      margin: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #3a3a4a;
+      overflow: hidden;
+      background: #16213e;
+    }
+    .linkedin-card .card-image {
+      width: 100%;
+      aspect-ratio: 1200/627;
+      object-fit: cover;
+      background: #2a2a3a;
+      display: block;
+    }
+    .linkedin-card .card-meta {
+      padding: 0.7rem 0.75rem;
+      background: #1a2744;
+    }
+    .linkedin-card .card-title { font-size: 0.88rem; font-weight: 600; color: #e8e8f0; line-height: 1.3; }
+    .linkedin-card .card-domain { font-size: 0.78rem; color: #6b7280; margin-top: 0.15rem; text-transform: uppercase; font-size: 0.72rem; }
+
+    /* Slack card */
+    .slack-card {
+      margin: 0.5rem;
+      border-left: 4px solid #36c5f0;
+      padding: 0.6rem 0.75rem;
+      background: #1a1a2e;
+      border-radius: 0 6px 6px 0;
+    }
+    .slack-card .card-title { font-size: 0.9rem; font-weight: 600; color: #36c5f0; }
+    .slack-card .card-desc { font-size: 0.82rem; color: #aaaacc; margin-top: 0.25rem; }
+    .slack-card .card-image {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      background: #2a2a3a;
+      display: block;
+    }
+
+    /* Missing image warning */
+    .missing-image {
+      width: 100%;
+      aspect-ratio: 1200/630;
+      background: #1a0a2e;
+      border: 2px dashed #7c3aed44;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: #7c3aed;
+      font-size: 0.9rem;
+    }
+    .missing-image span { font-size: 2rem; }
+
+    /* Upsell */
+    .upsell {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #1e0a3c, #0a1e3c);
+      border-radius: 14px;
+      border: 1px solid #7c3aed44;
+      text-align: center;
+    }
+    .upsell h3 { font-size: 1.1rem; color: #a78bfa; margin-bottom: 0.5rem; }
+    .upsell p { font-size: 0.9rem; color: #8888a8; margin-bottom: 1rem; line-height: 1.6; }
+    .upsell a {
+      display: inline-block;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      background: #7c3aed;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .upsell a:hover { background: #6d28d9; }
+
+    .tools-nav {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .tools-nav a {
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      color: #8888a8;
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .tools-nav a:hover { border-color: #7c3aed; color: #a78bfa; }
+    .tools-nav a.active { border-color: #7c3aed; color: #a78bfa; }
+
+    .hidden { display: none !important; }
+    .img-placeholder {
+      width: 100%;
+      aspect-ratio: 1200/630;
+      background: #2a2a3a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>OG Preview</h1>
+      <p>See how any link looks when shared on social media</p>
+    </header>
+
+    <div class="search-bar">
+      <input type="url" id="urlInput" placeholder="https://yoursite.com/blog/post" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button id="previewBtn" onclick="fetchPreview()">Preview →</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="results" class="platforms hidden">
+
+      <!-- Twitter / X -->
+      <div class="platform">
+        <div class="platform-label">𝕏 Twitter / X</div>
+        <div class="twitter-card">
+          <div id="tw-img-wrap"></div>
+          <div class="card-meta">
+            <div class="card-domain" id="tw-domain"></div>
+            <div class="card-title" id="tw-title"></div>
+            <div class="card-desc" id="tw-desc"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinkedIn -->
+      <div class="platform">
+        <div class="platform-label">LinkedIn</div>
+        <div class="linkedin-card">
+          <div id="li-img-wrap"></div>
+          <div class="card-meta">
+            <div class="card-title" id="li-title"></div>
+            <div class="card-domain" id="li-domain"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slack -->
+      <div class="platform">
+        <div class="platform-label">Slack</div>
+        <div class="slack-card">
+          <div class="card-title" id="sl-title"></div>
+          <div class="card-desc" id="sl-desc"></div>
+          <div id="sl-img-wrap"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="upsell" class="upsell hidden">
+      <h3>🖼️ Missing OG Image Detected</h3>
+      <p>Your link will show up as a boring text link — no image, no clicks.<br>
+         <strong>SnapOG</strong> automatically generates beautiful social preview images for any URL, no code needed.</p>
+      <a href="https://snapog.com" target="_blank" rel="noopener">Generate OG Images with SnapOG →</a>
+    </div>
+
+    <nav class="tools-nav">
+      <a href="/og-preview/" class="active">OG Preview</a>
+      <a href="/qr/">QR Generator</a>
+    </nav>
+  </div>
+
+  <script>
+    const PROXY = 'https://api.allorigins.win/get?url=';
+
+    function getDomain(url) {
+      try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
+    }
+
+    function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+    function renderImage(wrapId, src, alt) {
+      const wrap = document.getElementById(wrapId);
+      if (src) {
+        const img = document.createElement('img');
+        img.className = 'card-image';
+        img.src = src;
+        img.alt = alt || '';
+        img.onerror = () => {
+          wrap.innerHTML = '';
+          renderMissingImage(wrapId);
+        };
+        wrap.appendChild(img);
+      } else {
+        renderMissingImage(wrapId);
+      }
+    }
+
+    function renderMissingImage(wrapId) {
+      const wrap = document.getElementById(wrapId);
+      wrap.innerHTML = '<div class="missing-image"><span>🖼️</span><div>No OG image found</div></div>';
+      document.getElementById('upsell').classList.remove('hidden');
+    }
+
+    async function fetchPreview() {
+      let url = document.getElementById('urlInput').value.trim();
+      if (!url) return;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+      const btn = document.getElementById('previewBtn');
+      btn.disabled = true;
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('upsell').classList.add('hidden');
+      setStatus('Fetching page…');
+
+      // clear old content
+      ['tw-img-wrap','li-img-wrap','sl-img-wrap'].forEach(id => document.getElementById(id).innerHTML = '');
+
+      try {
+        const res = await fetch(PROXY + encodeURIComponent(url));
+        if (!res.ok) throw new Error('Proxy error ' + res.status);
+        const json = await res.json();
+        const html = json.contents;
+
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const meta = (prop) => {
+          const el = doc.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
+          return el ? el.getAttribute('content') || '' : '';
+        };
+
+        const ogTitle = meta('og:title') || doc.title || getDomain(url);
+        const ogDesc  = meta('og:description') || meta('description') || '';
+        const ogImg   = meta('og:image') || '';
+        const domain  = getDomain(url);
+
+        // Twitter
+        document.getElementById('tw-domain').textContent  = domain;
+        document.getElementById('tw-title').textContent   = ogTitle;
+        document.getElementById('tw-desc').textContent    = ogDesc.slice(0, 120) + (ogDesc.length > 120 ? '…' : '');
+        renderImage('tw-img-wrap', ogImg, ogTitle);
+
+        // LinkedIn
+        document.getElementById('li-title').textContent  = ogTitle;
+        document.getElementById('li-domain').textContent = domain.toUpperCase();
+        renderImage('li-img-wrap', ogImg, ogTitle);
+
+        // Slack
+        document.getElementById('sl-title').textContent  = ogTitle;
+        document.getElementById('sl-desc').textContent   = ogDesc.slice(0, 100) + (ogDesc.length > 100 ? '…' : '');
+        if (ogImg) renderImage('sl-img-wrap', ogImg, ogTitle);
+
+        if (!ogImg) document.getElementById('upsell').classList.remove('hidden');
+
+        document.getElementById('results').classList.remove('hidden');
+        setStatus('');
+      } catch (e) {
+        setStatus('Could not fetch page. Try a different URL or check CORS settings.');
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('urlInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') fetchPreview();
+    });
+
+    // auto-preview if url param
+    const params = new URLSearchParams(location.search);
+    if (params.get('url')) {
+      document.getElementById('urlInput').value = params.get('url');
+      fetchPreview();
+    }
+  </script>
+</body>
+</html>

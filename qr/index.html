@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free QR Code Generator — No Signup, No Watermark</title>
+  <meta name="description" content="Generate QR codes instantly. Customize colors, download as PNG or SVG. Free, no account required.">
+  <meta property="og:title" content="Free QR Code Generator">
+  <meta property="og:description" content="Create custom QR codes instantly. No signup, no watermark, free forever.">
+  <meta property="og:type" content="website">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 560px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #34d399, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    .card {
+      background: #1a1a26;
+      border-radius: 16px;
+      border: 1px solid #2a2a3a;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label { display: block; font-size: 0.85rem; color: #8888a8; margin-bottom: 0.4rem; }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: #111118;
+      color: #e8e8f0;
+      font-size: 1rem;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    textarea:focus, input[type="text"]:focus { border-color: #10b981; }
+    textarea { min-height: 80px; }
+
+    .row { display: flex; gap: 1rem; margin-top: 1rem; }
+    .col { flex: 1; }
+
+    .color-row { display: flex; gap: 1rem; margin-top: 1rem; }
+    .color-field { flex: 1; }
+    .color-field input[type="color"] {
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: #111118;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: 1.5px solid #2a2a3a;
+      background: #111118;
+      color: #e8e8f0;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    #qr-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+      min-height: 220px;
+      align-items: center;
+    }
+    #qr-wrap canvas, #qr-wrap svg {
+      border-radius: 12px;
+      max-width: 100%;
+    }
+    #placeholder {
+      color: #44445a;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-primary { background: #10b981; color: #fff; }
+    .btn-primary:hover { background: #059669; }
+    .btn-secondary { background: #1e3a2e; color: #34d399; border: 1px solid #10b981; }
+    .btn-secondary:hover { background: #1a3326; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .upsell {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #0a1e3c, #1e0a3c);
+      border-radius: 14px;
+      border: 1px solid #3b82f644;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .upsell h3 { font-size: 1rem; color: #60a5fa; margin-bottom: 0.4rem; }
+    .upsell p { font-size: 0.85rem; color: #8888a8; margin-bottom: 0.9rem; line-height: 1.5; }
+    .upsell a {
+      display: inline-block;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .upsell a:hover { background: #2563eb; }
+
+    .tools-nav {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .tools-nav a {
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      color: #8888a8;
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .tools-nav a:hover { border-color: #10b981; color: #34d399; }
+    .tools-nav a.active { border-color: #10b981; color: #34d399; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>QR Generator</h1>
+      <p>Free, instant, no account required</p>
+    </header>
+
+    <div class="card">
+      <label for="qr-text">URL or text</label>
+      <textarea id="qr-text" placeholder="https://yoursite.com"></textarea>
+
+      <div class="color-row">
+        <div class="color-field">
+          <label>Foreground</label>
+          <input type="color" id="fg-color" value="#000000">
+        </div>
+        <div class="color-field">
+          <label>Background</label>
+          <input type="color" id="bg-color" value="#ffffff">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label style="margin-top:0.75rem">Size (px)</label>
+          <select id="qr-size">
+            <option value="200">200</option>
+            <option value="300" selected>300</option>
+            <option value="400">400</option>
+            <option value="600">600</option>
+          </select>
+        </div>
+        <div class="col">
+          <label style="margin-top:0.75rem">Error correction</label>
+          <select id="qr-ec">
+            <option value="M" selected>Medium (M)</option>
+            <option value="L">Low (L)</option>
+            <option value="Q">High (Q)</option>
+            <option value="H">Highest (H)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="qr-wrap">
+        <div id="placeholder">Enter text above to generate your QR code</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="dl-png" onclick="downloadPNG()" disabled>Download PNG</button>
+        <button class="btn btn-secondary" id="dl-svg" onclick="downloadSVG()" disabled>Download SVG</button>
+      </div>
+    </div>
+
+    <div class="upsell">
+      <h3>Need QR codes via API?</h3>
+      <p>GoosQR provides a simple REST API for generating QR codes at scale — perfect for SaaS apps, e-commerce, and print workflows.</p>
+      <a href="https://goosqr.com" target="_blank" rel="noopener">Explore GoosQR API →</a>
+    </div>
+
+    <nav class="tools-nav">
+      <a href="/qr/" class="active">QR Generator</a>
+      <a href="/og-preview/">OG Preview</a>
+    </nav>
+  </div>
+
+  <!-- QR generation via qrcodejs (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    let qrInstance = null;
+    let lastText = '';
+
+    function getInputs() {
+      return {
+        text: document.getElementById('qr-text').value.trim(),
+        fg: document.getElementById('fg-color').value,
+        bg: document.getElementById('bg-color').value,
+        size: parseInt(document.getElementById('qr-size').value),
+        ec: document.getElementById('qr-ec').value,
+      };
+    }
+
+    function generate() {
+      const { text, fg, bg, size, ec } = getInputs();
+      if (!text) return;
+
+      const wrap = document.getElementById('qr-wrap');
+      wrap.innerHTML = '';
+
+      const ecMap = { L: QRCode.CorrectLevel.L, M: QRCode.CorrectLevel.M, Q: QRCode.CorrectLevel.Q, H: QRCode.CorrectLevel.H };
+
+      qrInstance = new QRCode(wrap, {
+        text,
+        width: Math.min(size, wrap.offsetWidth || size),
+        height: Math.min(size, wrap.offsetWidth || size),
+        colorDark: fg,
+        colorLight: bg,
+        correctLevel: ecMap[ec] || QRCode.CorrectLevel.M,
+      });
+
+      document.getElementById('dl-png').disabled = false;
+      document.getElementById('dl-svg').disabled = false;
+    }
+
+    function downloadPNG() {
+      const canvas = document.querySelector('#qr-wrap canvas');
+      if (!canvas) return;
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'qrcode.png';
+      a.click();
+    }
+
+    function downloadSVG() {
+      const { text, fg, bg, size } = getInputs();
+      if (!text) return;
+      // Build minimal SVG QR via canvas pixel data
+      const canvas = document.querySelector('#qr-wrap canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const w = canvas.width, h = canvas.height;
+      const cellW = w, cellH = h;
+
+      // Simple: just embed canvas as SVG image
+      const dataURL = canvas.toDataURL('image/png');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+  <image href="${dataURL}" width="${size}" height="${size}"/>
+</svg>`;
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'qrcode.svg';
+      a.click();
+    }
+
+    // Auto-generate on input change
+    let debounce;
+    ['qr-text','fg-color','bg-color','qr-size','qr-ec'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(generate, 300);
+      });
+    });
+  </script>
+</body>
+</html>
