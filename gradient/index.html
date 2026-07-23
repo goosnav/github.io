@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Gradient Generator — Free Online Tool</title>
+  <meta name="description" content="Generate beautiful CSS gradients instantly. Pick colors, choose direction and type, copy the CSS code. Free, no signup, works in your browser.">
+  <meta property="og:title" content="CSS Gradient Generator — Free Online Tool">
+  <meta property="og:description" content="Create linear, radial, and conic CSS gradients. Live preview, one-click copy. 100% free, no signup required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/gradient/">
+  <link rel="canonical" href="https://goosnav.github.io/gradient/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Gradient Generator",
+    "url": "https://goosnav.github.io/gradient/",
+    "description": "Generate CSS gradients instantly — linear, radial, conic. Live preview and copy-ready code.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a5b4fc; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview */
+    .preview {
+      width: 100%;
+      height: 200px;
+      border-radius: 14px;
+      margin-bottom: 1.25rem;
+      border: 1.5px solid #2a2a3a;
+      transition: background 0.2s;
+    }
+
+    .card {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Type selector */
+    .type-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 0.55rem 0;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .type-btn.active {
+      border-color: #a78bfa;
+      color: #a78bfa;
+      background: rgba(167,139,250,0.08);
+    }
+
+    /* Color stops */
+    .stops {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stop-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1.5px solid #3a3a4a;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    input[type="color"] {
+      width: 40px;
+      height: 40px;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+    }
+
+    .stop-pos {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a2a3a;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .stop-pos::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+    }
+
+    .stop-label {
+      font-size: 0.8rem;
+      color: #8888a8;
+      width: 34px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .remove-stop {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1.5px solid #3a3a4a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .remove-stop:hover { border-color: #ef4444; color: #ef4444; }
+
+    .add-stop-btn {
+      width: 100%;
+      padding: 0.55rem;
+      border-radius: 8px;
+      border: 1.5px dashed #3a3a4a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-stop-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    /* Direction / angle */
+    .angle-section {
+      margin-top: 1.25rem;
+    }
+
+    .angle-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .angle-label-row label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+    }
+
+    .angle-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a78bfa;
+    }
+
+    input[type="range"].angle-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a2a3a;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].angle-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+    }
+
+    /* Direction presets */
+    .dir-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .dir-btn {
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .dir-btn:hover, .dir-btn.active {
+      border-color: #a78bfa;
+      color: #a78bfa;
+    }
+
+    /* CSS output */
+    .css-output {
+      position: relative;
+    }
+
+    .css-box {
+      background: #12121a;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-size: 0.82rem;
+      color: #a5b4fc;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      min-height: 52px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      background: #a78bfa;
+      color: #0f0f13;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    .copy-btn:hover { opacity: 0.9; }
+    .copy-btn:active { transform: scale(0.98); }
+    .copy-btn.copied { background: #34d399; }
+
+    /* Presets */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .preset-swatch {
+      height: 56px;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+
+    .preset-swatch:hover {
+      transform: scale(1.04);
+      border-color: #a78bfa;
+    }
+
+    .preset-swatch span {
+      position: absolute;
+      bottom: 4px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* More tools */
+    .more-tools {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid #2a2a3a;
+    }
+
+    .more-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 0.75rem;
+    }
+
+    .tool-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tool-link {
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .tool-link:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">← Goosnav Tools</a>
+      <h1>CSS Gradient Generator</h1>
+      <p>Build linear, radial, and conic gradients. Copy the CSS — done.</p>
+    </header>
+
+    <!-- Live Preview -->
+    <div class="preview" id="preview"></div>
+
+    <!-- Controls -->
+    <div class="card">
+      <p class="card-title">Type</p>
+      <div class="type-group">
+        <button class="type-btn active" data-type="linear">Linear</button>
+        <button class="type-btn" data-type="radial">Radial</button>
+        <button class="type-btn" data-type="conic">Conic</button>
+      </div>
+
+      <p class="card-title">Color Stops</p>
+      <div class="stops" id="stops"></div>
+      <button class="add-stop-btn" id="addStop">+ Add color stop</button>
+
+      <div class="angle-section" id="angleSection">
+        <div class="angle-label-row">
+          <label for="angleSlider">Direction / Angle</label>
+          <span class="angle-value" id="angleDisplay">135°</span>
+        </div>
+        <input type="range" class="angle-slider" id="angleSlider" min="0" max="360" value="135">
+        <div class="dir-presets">
+          <button class="dir-btn" data-angle="0">↑ 0°</button>
+          <button class="dir-btn" data-angle="45">↗ 45°</button>
+          <button class="dir-btn active" data-angle="135">↘ 135°</button>
+          <button class="dir-btn" data-angle="90">→ 90°</button>
+          <button class="dir-btn" data-angle="180">↓ 180°</button>
+          <button class="dir-btn" data-angle="225">↙ 225°</button>
+          <button class="dir-btn" data-angle="270">← 270°</button>
+          <button class="dir-btn" data-angle="315">↖ 315°</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="card">
+      <p class="card-title">Presets</p>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <!-- CSS Output -->
+    <div class="card">
+      <p class="card-title">CSS Code</p>
+      <div class="css-output">
+        <div class="css-box" id="cssOutput"></div>
+        <button class="copy-btn" id="copyBtn">Copy CSS</button>
+      </div>
+    </div>
+
+    <div class="more-tools">
+      <p class="more-title">More free tools</p>
+      <div class="tool-links">
+        <a class="tool-link" href="/qr/">📱 QR Generator</a>
+        <a class="tool-link" href="/og-preview/">🖼️ OG Preview</a>
+        <a class="tool-link" href="/favicon/">⭐ Favicon Maker</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built by <a href="https://goosnav.com" style="color:#555;text-decoration:none;">Goosnav</a> · Runs 100% in your browser</p>
+    </footer>
+  </div>
+
+  <script>
+    const PRESETS = [
+      { name: "Aurora",   stops: [{color:"#a78bfa",pos:0},{color:"#34d399",pos:100}], angle: 135 },
+      { name: "Sunset",   stops: [{color:"#f59e0b",pos:0},{color:"#ef4444",pos:100}], angle: 135 },
+      { name: "Ocean",    stops: [{color:"#0ea5e9",pos:0},{color:"#6366f1",pos:100}], angle: 135 },
+      { name: "Candy",    stops: [{color:"#f472b6",pos:0},{color:"#818cf8",pos:100}], angle: 90 },
+      { name: "Mint",     stops: [{color:"#6ee7b7",pos:0},{color:"#3b82f6",pos:100}], angle: 135 },
+      { name: "Fire",     stops: [{color:"#fbbf24",pos:0},{color:"#ef4444",pos:50},{color:"#7c3aed",pos:100}], angle: 135 },
+      { name: "Cosmic",   stops: [{color:"#1e1b4b",pos:0},{color:"#4c1d95",pos:50},{color:"#7c3aed",pos:100}], angle: 180 },
+      { name: "Peach",    stops: [{color:"#fde68a",pos:0},{color:"#fca5a5",pos:100}], angle: 90 },
+      { name: "Neon",     stops: [{color:"#4ade80",pos:0},{color:"#22d3ee",pos:100}], angle: 45 },
+      { name: "Steel",    stops: [{color:"#e2e8f0",pos:0},{color:"#94a3b8",pos:100}], angle: 135 },
+    ];
+
+    let state = {
+      type: "linear",
+      angle: 135,
+      stops: [
+        { color: "#a78bfa", pos: 0 },
+        { color: "#34d399", pos: 100 }
+      ]
+    };
+
+    function buildGradient() {
+      const sorted = [...state.stops].sort((a, b) => a.pos - b.pos);
+      const stopStr = sorted.map(s => `${s.color} ${s.pos}%`).join(", ");
+      if (state.type === "linear") {
+        return `linear-gradient(${state.angle}deg, ${stopStr})`;
+      } else if (state.type === "radial") {
+        return `radial-gradient(circle, ${stopStr})`;
+      } else {
+        return `conic-gradient(from ${state.angle}deg, ${stopStr})`;
+      }
+    }
+
+    function buildCSS() {
+      const g = buildGradient();
+      return `background: ${g};`;
+    }
+
+    function render() {
+      const g = buildGradient();
+      document.getElementById("preview").style.background = g;
+      document.getElementById("cssOutput").textContent = buildCSS();
+      renderStops();
+    }
+
+    function renderStops() {
+      const container = document.getElementById("stops");
+      container.innerHTML = "";
+      state.stops.forEach((stop, i) => {
+        const row = document.createElement("div");
+        row.className = "stop-row";
+
+        const swatchWrap = document.createElement("label");
+        swatchWrap.className = "color-swatch";
+        const picker = document.createElement("input");
+        picker.type = "color";
+        picker.value = stop.color;
+        picker.addEventListener("input", e => {
+          state.stops[i].color = e.target.value;
+          render();
+        });
+        swatchWrap.appendChild(picker);
+
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.className = "stop-pos";
+        slider.min = 0; slider.max = 100; slider.value = stop.pos;
+        slider.addEventListener("input", e => {
+          state.stops[i].pos = parseInt(e.target.value);
+          const label = row.querySelector(".stop-label");
+          if (label) label.textContent = e.target.value + "%";
+          render();
+        });
+
+        const label = document.createElement("span");
+        label.className = "stop-label";
+        label.textContent = stop.pos + "%";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-stop";
+        removeBtn.textContent = "×";
+        removeBtn.title = "Remove stop";
+        removeBtn.disabled = state.stops.length <= 2;
+        removeBtn.style.opacity = state.stops.length <= 2 ? "0.3" : "1";
+        removeBtn.addEventListener("click", () => {
+          if (state.stops.length > 2) {
+            state.stops.splice(i, 1);
+            render();
+          }
+        });
+
+        row.appendChild(swatchWrap);
+        row.appendChild(slider);
+        row.appendChild(label);
+        row.appendChild(removeBtn);
+        container.appendChild(row);
+      });
+    }
+
+    // Type buttons
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.type = btn.dataset.type;
+        const angleSection = document.getElementById("angleSection");
+        angleSection.style.display = state.type === "radial" ? "none" : "";
+        render();
+      });
+    });
+
+    // Angle slider
+    const angleSlider = document.getElementById("angleSlider");
+    angleSlider.addEventListener("input", e => {
+      state.angle = parseInt(e.target.value);
+      document.getElementById("angleDisplay").textContent = state.angle + "°";
+      document.querySelectorAll(".dir-btn").forEach(b => b.classList.remove("active"));
+      render();
+    });
+
+    // Direction presets
+    document.querySelectorAll(".dir-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const angle = parseInt(btn.dataset.angle);
+        state.angle = angle;
+        angleSlider.value = angle;
+        document.getElementById("angleDisplay").textContent = angle + "°";
+        document.querySelectorAll(".dir-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        render();
+      });
+    });
+
+    // Add stop
+    document.getElementById("addStop").addEventListener("click", () => {
+      const mid = Math.round((state.stops[state.stops.length - 1].pos + 100) / 2);
+      state.stops.push({ color: "#60a5fa", pos: Math.min(mid, 100) });
+      render();
+    });
+
+    // Copy button
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      const css = buildCSS();
+      navigator.clipboard.writeText(css).then(() => {
+        const btn = document.getElementById("copyBtn");
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "Copy CSS";
+          btn.classList.remove("copied");
+        }, 1800);
+      });
+    });
+
+    // Preset grid
+    const presetGrid = document.getElementById("presetGrid");
+    PRESETS.forEach(preset => {
+      const swatch = document.createElement("div");
+      swatch.className = "preset-swatch";
+      const sorted = [...preset.stops].sort((a,b) => a.pos - b.pos);
+      swatch.style.background = `linear-gradient(135deg, ${sorted.map(s => `${s.color} ${s.pos}%`).join(", ")})`;
+      const label = document.createElement("span");
+      label.textContent = preset.name;
+      swatch.appendChild(label);
+      swatch.addEventListener("click", () => {
+        state.stops = preset.stops.map(s => ({...s}));
+        state.angle = preset.angle;
+        angleSlider.value = preset.angle;
+        document.getElementById("angleDisplay").textContent = preset.angle + "°";
+        document.querySelectorAll(".dir-btn").forEach(b => b.classList.remove("active"));
+        document.querySelector(`.dir-btn[data-angle="${preset.angle}"]`)?.classList.add("active");
+        render();
+      });
+      presetGrid.appendChild(swatch);
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
