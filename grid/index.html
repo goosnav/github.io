@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Grid Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS grid layouts visually. Set columns, rows, gap, and auto-flow. 6 presets: Holy Grail, Card Grid, Dashboard, Sidebar, Magazine, Masonry. Free, no signup.">
+  <meta property="og:title" content="CSS Grid Generator — Free Online Tool">
+  <meta property="og:description" content="Build CSS grid layouts visually with live preview. Presets include Holy Grail, Dashboard, Sidebar, Card Grid, Magazine, and Masonry. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/grid/">
+  <link rel="canonical" href="https://goosnav.github.io/grid/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Grid Generator",
+    "url": "https://goosnav.github.io/grid/",
+    "description": "Generate CSS grid layouts visually — presets, live preview, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 8px;
+      color: #c8c8e0;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      border-color: #a78bfa;
+      color: #a78bfa;
+    }
+
+    /* Controls */
+    .controls {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.5rem;
+    }
+    @media (max-width: 520px) { .controls { grid-template-columns: 1fr; } }
+
+    .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .control-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+      display: flex;
+      justify-content: space-between;
+    }
+    .control-group label span { color: #a78bfa; font-variant-numeric: tabular-nums; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #a78bfa;
+      cursor: pointer;
+      height: 4px;
+    }
+
+    .control-group select {
+      background: #0f0f13;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 7px;
+      color: #e8e8f0;
+      font-size: 0.88rem;
+      padding: 0.45rem 0.6rem;
+      cursor: pointer;
+    }
+    .control-group select:focus { outline: none; border-color: #a78bfa; }
+
+    .col-span-2 { grid-column: span 2; }
+    @media (max-width: 520px) { .col-span-2 { grid-column: span 1; } }
+
+    /* Template string input */
+    .template-row {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .template-row label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .template-row input {
+      width: 100%;
+      background: #0f0f13;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 7px;
+      color: #e8e8f0;
+      font-family: 'SF Mono', 'Fira Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.55rem 0.75rem;
+    }
+    .template-row input:focus { outline: none; border-color: #a78bfa; }
+
+    /* Preview */
+    .preview-area {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .preview-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+      margin-bottom: 1rem;
+    }
+    #grid-preview {
+      display: grid;
+      min-height: 200px;
+      width: 100%;
+    }
+    .grid-cell {
+      background: linear-gradient(135deg, #a78bfa33, #60a5fa22);
+      border: 1.5px solid #a78bfa55;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #a78bfa99;
+      min-height: 60px;
+      transition: background 0.2s;
+    }
+    .grid-cell:hover {
+      background: linear-gradient(135deg, #a78bfa55, #60a5fa33);
+    }
+    .grid-cell.named {
+      font-size: 0.7rem;
+      color: #60a5fa99;
+      background: linear-gradient(135deg, #60a5fa22, #34d39922);
+      border-color: #60a5fa44;
+    }
+
+    /* Output */
+    .output-area {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .output-header span {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+    }
+
+    .copy-btn {
+      background: #a78bfa22;
+      border: 1.5px solid #a78bfa44;
+      border-radius: 8px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.4rem 0.9rem;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #a78bfa33; }
+    .copy-btn.copied { color: #34d399; border-color: #34d39944; background: #34d39922; }
+
+    pre {
+      font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+      font-size: 0.83rem;
+      line-height: 1.65;
+      color: #c8e6ff;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Related tools */
+    .related {
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+    }
+    .related p {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #555570;
+      margin-bottom: 0.75rem;
+    }
+    .related-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .related-links a {
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      border-radius: 7px;
+      color: #8888a8;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.75rem;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">← All Tools</a>
+      <h1>CSS Grid Generator</h1>
+      <p>Build grid layouts visually. Adjust columns, rows, gap, and flow — copy the CSS.</p>
+    </header>
+
+    <!-- Presets -->
+    <div class="presets" id="presets">
+      <button class="preset-btn active" data-preset="card-grid">Card Grid</button>
+      <button class="preset-btn" data-preset="holy-grail">Holy Grail</button>
+      <button class="preset-btn" data-preset="dashboard">Dashboard</button>
+      <button class="preset-btn" data-preset="sidebar">Sidebar Layout</button>
+      <button class="preset-btn" data-preset="magazine">Magazine</button>
+      <button class="preset-btn" data-preset="masonry">Masonry-style</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label>Columns <span id="cols-val">3</span></label>
+        <input type="range" id="cols" min="1" max="12" value="3">
+      </div>
+      <div class="control-group">
+        <label>Rows <span id="rows-val">3</span></label>
+        <input type="range" id="rows" min="1" max="8" value="3">
+      </div>
+      <div class="control-group">
+        <label>Gap <span id="gap-val">16px</span></label>
+        <input type="range" id="gap" min="0" max="48" value="16">
+      </div>
+      <div class="control-group">
+        <label>Auto Flow</label>
+        <select id="flow">
+          <option value="row">row</option>
+          <option value="column">column</option>
+          <option value="row dense">row dense</option>
+          <option value="column dense">column dense</option>
+        </select>
+      </div>
+      <div class="control-group col-span-2">
+        <label>Column Sizes</label>
+        <select id="col-size">
+          <option value="1fr">Equal (1fr each)</option>
+          <option value="repeat(auto-fit, minmax(200px, 1fr))">Auto-fit minmax 200px</option>
+          <option value="repeat(auto-fill, minmax(150px, 1fr))">Auto-fill minmax 150px</option>
+          <option value="custom">Custom template-columns…</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Custom template input (shown when custom selected) -->
+    <div class="template-row" id="custom-row" style="display:none">
+      <label>grid-template-columns</label>
+      <input type="text" id="custom-cols" placeholder="e.g. 200px 1fr 1fr" value="200px 1fr 1fr">
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area">
+      <div class="preview-label">Live Preview</div>
+      <div id="grid-preview"></div>
+    </div>
+
+    <!-- Output -->
+    <div class="output-area">
+      <div class="output-header">
+        <span>CSS Output</span>
+        <button class="copy-btn" id="copy-btn">Copy CSS</button>
+      </div>
+      <pre id="css-output"></pre>
+    </div>
+
+    <!-- Related -->
+    <div class="related">
+      <p>More CSS Tools</p>
+      <div class="related-links">
+        <a href="/gradient/">Gradient</a>
+        <a href="/box-shadow/">Box Shadow</a>
+        <a href="/border-radius/">Border Radius</a>
+        <a href="/text-shadow/">Text Shadow</a>
+        <a href="/animation/">Animation</a>
+        <a href="/filter/">Filter</a>
+        <a href="/transition/">Transition</a>
+        <a href="/clip-path/">Clip-Path</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PRESETS = {
+      'card-grid': {
+        cols: 3, rows: 3, gap: 16, flow: 'row',
+        colSize: 'repeat(auto-fit, minmax(200px, 1fr))',
+        areas: null,
+        label: 'Card Grid'
+      },
+      'holy-grail': {
+        cols: 3, rows: 3, gap: 16, flow: 'row',
+        colSize: '200px 1fr 200px',
+        areas: [
+          '"header header header"',
+          '"nav    main   aside"',
+          '"footer footer footer"'
+        ],
+        cellNames: ['header','nav','main','aside','footer'],
+        label: 'Holy Grail'
+      },
+      'dashboard': {
+        cols: 4, rows: 3, gap: 16, flow: 'row',
+        colSize: '1fr 1fr 1fr 1fr',
+        areas: [
+          '"metric metric stat   chart"',
+          '"table  table  table  chart"',
+          '"table  table  table  feed"'
+        ],
+        cellNames: ['metric','stat','chart','table','feed'],
+        label: 'Dashboard'
+      },
+      'sidebar': {
+        cols: 2, rows: 3, gap: 0, flow: 'row',
+        colSize: '260px 1fr',
+        areas: [
+          '"header  header"',
+          '"sidebar main"',
+          '"sidebar footer"'
+        ],
+        cellNames: ['header','sidebar','main','footer'],
+        label: 'Sidebar Layout'
+      },
+      'magazine': {
+        cols: 3, rows: 3, gap: 12, flow: 'row',
+        colSize: '1fr 1fr 1fr',
+        areas: [
+          '"hero   hero   feature"',
+          '"hero   hero   feature"',
+          '"card1  card2  card3"'
+        ],
+        cellNames: ['hero','feature','card1','card2','card3'],
+        label: 'Magazine'
+      },
+      'masonry': {
+        cols: 4, rows: 4, gap: 12, flow: 'row dense',
+        colSize: 'repeat(auto-fill, minmax(150px, 1fr))',
+        areas: null,
+        label: 'Masonry-style'
+      }
+    };
+
+    let state = {
+      preset: 'card-grid',
+      cols: 3,
+      rows: 3,
+      gap: 16,
+      flow: 'row',
+      colSize: 'repeat(auto-fit, minmax(200px, 1fr))',
+      customCols: '200px 1fr 1fr',
+      areas: null,
+      cellNames: null
+    };
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      state.preset = key;
+      state.cols = p.cols;
+      state.rows = p.rows;
+      state.gap = p.gap;
+      state.flow = p.flow;
+      state.colSize = p.colSize;
+      state.areas = p.areas || null;
+      state.cellNames = p.cellNames || null;
+
+      document.getElementById('cols').value = p.cols;
+      document.getElementById('rows').value = p.rows;
+      document.getElementById('gap').value = p.gap;
+      document.getElementById('flow').value = p.flow;
+
+      // set col-size select
+      const colSel = document.getElementById('col-size');
+      let matched = false;
+      for (const opt of colSel.options) {
+        if (opt.value === p.colSize) { colSel.value = p.colSize; matched = true; break; }
+      }
+      if (!matched) { colSel.value = 'custom'; document.getElementById('custom-cols').value = p.colSize; }
+      document.getElementById('custom-row').style.display = (colSel.value === 'custom') ? 'block' : 'none';
+
+      syncLabels();
+    }
+
+    function syncLabels() {
+      document.getElementById('cols-val').textContent = state.cols;
+      document.getElementById('rows-val').textContent = state.rows;
+      document.getElementById('gap-val').textContent = state.gap + 'px';
+    }
+
+    function getColsTemplate() {
+      const sel = document.getElementById('col-size').value;
+      if (sel === 'custom') return document.getElementById('custom-cols').value.trim() || `repeat(${state.cols}, 1fr)`;
+      if (sel === '1fr') return `repeat(${state.cols}, 1fr)`;
+      return sel;
+    }
+
+    function buildCSSOutput(colsTemplate) {
+      let css = `.grid-container {\n  display: grid;\n  grid-template-columns: ${colsTemplate};\n  grid-template-rows: repeat(${state.rows}, auto);\n  gap: ${state.gap}px;\n  grid-auto-flow: ${state.flow};`;
+      if (state.areas) {
+        css += `\n  grid-template-areas:\n    ${state.areas.join('\n    ')};`;
+      }
+      css += '\n}';
+      if (state.cellNames) {
+        css += '\n\n/* Named areas */';
+        const seen = new Set();
+        for (const name of state.cellNames) {
+          if (!seen.has(name)) {
+            seen.add(name);
+            css += `\n.${name} { grid-area: ${name}; }`;
+          }
+        }
+      }
+      return css;
+    }
+
+    function buildPreview(colsTemplate) {
+      const preview = document.getElementById('grid-preview');
+      preview.style.display = 'grid';
+      preview.style.gridTemplateColumns = colsTemplate;
+      preview.style.gridTemplateRows = `repeat(${state.rows}, minmax(60px, auto))`;
+      preview.style.gap = state.gap + 'px';
+      preview.style.gridAutoFlow = state.flow;
+
+      if (state.areas) {
+        preview.style.gridTemplateAreas = state.areas.join(' ');
+        const namedCells = [];
+        const seen = new Set();
+        for (const name of (state.cellNames || [])) {
+          if (!seen.has(name)) {
+            seen.add(name);
+            namedCells.push(name);
+          }
+        }
+        preview.innerHTML = namedCells.map(name =>
+          `<div class="grid-cell named" style="grid-area:${name}">${name}</div>`
+        ).join('');
+      } else {
+        preview.style.gridTemplateAreas = '';
+        const count = state.cols * state.rows;
+        preview.innerHTML = Array.from({length: count}, (_, i) =>
+          `<div class="grid-cell">${i + 1}</div>`
+        ).join('');
+      }
+    }
+
+    function update() {
+      const colsTemplate = getColsTemplate();
+      buildPreview(colsTemplate);
+      document.getElementById('css-output').textContent = buildCSSOutput(colsTemplate);
+    }
+
+    // Preset buttons
+    document.getElementById('presets').addEventListener('click', e => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(btn.dataset.preset);
+      update();
+    });
+
+    // Range sliders
+    document.getElementById('cols').addEventListener('input', e => {
+      state.cols = +e.target.value;
+      state.areas = null; state.cellNames = null;
+      syncLabels();
+      update();
+    });
+    document.getElementById('rows').addEventListener('input', e => {
+      state.rows = +e.target.value;
+      state.areas = null; state.cellNames = null;
+      syncLabels();
+      update();
+    });
+    document.getElementById('gap').addEventListener('input', e => {
+      state.gap = +e.target.value;
+      syncLabels();
+      update();
+    });
+    document.getElementById('flow').addEventListener('change', e => {
+      state.flow = e.target.value;
+      update();
+    });
+    document.getElementById('col-size').addEventListener('change', e => {
+      document.getElementById('custom-row').style.display = e.target.value === 'custom' ? 'block' : 'none';
+      state.areas = null; state.cellNames = null;
+      update();
+    });
+    document.getElementById('custom-cols').addEventListener('input', update);
+
+    // Copy
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const btn = document.getElementById('copy-btn');
+      navigator.clipboard.writeText(document.getElementById('css-output').textContent).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1800);
+      });
+    });
+
+    // Init
+    applyPreset('card-grid');
+    update();
+  </script>
+</body>
+</html>
