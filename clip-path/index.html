@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Clip-Path Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS clip-path shapes visually. Pick a preset shape, adjust parameters, get the CSS. Circle, triangle, polygon, star, arrow and more. Free, no signup.">
+  <meta property="og:title" content="CSS Clip-Path Generator — Free Online Tool">
+  <meta property="og:description" content="Build CSS clip-path shapes visually. Presets: Circle, Triangle, Diamond, Star, Arrow, Chevron, Pentagon, Parallelogram. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/clip-path/">
+  <link rel="canonical" href="https://goosnav.github.io/clip-path/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Clip-Path Generator",
+    "url": "https://goosnav.github.io/clip-path/",
+    "description": "Generate CSS clip-path shapes visually — presets, live preview, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview */
+    .preview-area {
+      width: 100%;
+      min-height: 220px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-bottom: 1.25rem;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .preview-label {
+      font-size: 0.75rem;
+      color: #6666aa;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+    }
+
+    .preview-shape {
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+      /* clip-path applied dynamically */
+      transition: clip-path 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6666aa;
+      margin-bottom: 0.7rem;
+    }
+
+    /* Presets */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 480px) { .presets-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #c8c8e8;
+      padding: 0.6rem 0.5rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .preset-btn:hover { background: #22223a; border-color: #a78bfa; color: #a78bfa; }
+    .preset-btn.active { background: #2d1f5e; border-color: #a78bfa; color: #a78bfa; }
+
+    .preset-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      /* clip-path set per button */
+    }
+
+    /* Controls */
+    .controls { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 1.5rem; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #9999bb;
+      width: 130px;
+      flex-shrink: 0;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.2);
+    }
+
+    .value-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a78bfa;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    /* Output */
+    .output-block {
+      background: #13131e;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .output-block pre {
+      font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #c8c8e8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding-right: 4rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: #2a2a3a;
+      border: 1.5px solid #3a3a4a;
+      color: #8888a8;
+      padding: 0.3rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: #3a3a4a; color: #a78bfa; }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+    /* Related */
+    .related {
+      margin-top: 2.5rem;
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+    }
+    .related h2 { font-size: 0.85rem; color: #6666aa; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.9rem; }
+    .related-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .related-links a {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #9999bb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a class="back" href="/">← All Tools</a>
+    <h1>CSS Clip-Path Generator</h1>
+    <p>Pick a shape, adjust the parameters, copy the CSS.</p>
+  </header>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <div class="preview-shape" id="previewShape"></div>
+    <span class="preview-label" id="previewLabel">clip-path: circle(50% at 50% 50%)</span>
+  </div>
+
+  <!-- Presets -->
+  <p class="section-label">Shape Presets</p>
+  <div class="presets-grid" id="presetsGrid">
+    <button class="preset-btn active" data-preset="circle">
+      <div class="preset-icon" style="clip-path:circle(50% at 50% 50%); border-radius:0;"></div>
+      Circle
+    </button>
+    <button class="preset-btn" data-preset="ellipse">
+      <div class="preset-icon" style="clip-path:ellipse(50% 35% at 50% 50%);"></div>
+      Ellipse
+    </button>
+    <button class="preset-btn" data-preset="triangle">
+      <div class="preset-icon" style="clip-path:polygon(50% 0%,100% 100%,0% 100%);"></div>
+      Triangle
+    </button>
+    <button class="preset-btn" data-preset="diamond">
+      <div class="preset-icon" style="clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);"></div>
+      Diamond
+    </button>
+    <button class="preset-btn" data-preset="pentagon">
+      <div class="preset-icon" style="clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></div>
+      Pentagon
+    </button>
+    <button class="preset-btn" data-preset="star">
+      <div class="preset-icon" style="clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);"></div>
+      Star
+    </button>
+    <button class="preset-btn" data-preset="arrow">
+      <div class="preset-icon" style="clip-path:polygon(0% 20%,60% 20%,60% 0%,100% 50%,60% 100%,60% 80%,0% 80%);"></div>
+      Arrow
+    </button>
+    <button class="preset-btn" data-preset="inset">
+      <div class="preset-icon" style="clip-path:inset(15% 15% 15% 15% round 12px);"></div>
+      Inset
+    </button>
+  </div>
+
+  <!-- Controls — circle -->
+  <div id="controls-circle" class="controls">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Radius</span>
+      <input type="range" id="circle-r" min="10" max="50" value="50">
+      <span class="value-badge" id="circle-r-val">50%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Center X</span>
+      <input type="range" id="circle-cx" min="0" max="100" value="50">
+      <span class="value-badge" id="circle-cx-val">50%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Center Y</span>
+      <input type="range" id="circle-cy" min="0" max="100" value="50">
+      <span class="value-badge" id="circle-cy-val">50%</span>
+    </div>
+  </div>
+
+  <!-- Controls — ellipse -->
+  <div id="controls-ellipse" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Radius X</span>
+      <input type="range" id="ellipse-rx" min="5" max="50" value="50">
+      <span class="value-badge" id="ellipse-rx-val">50%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Radius Y</span>
+      <input type="range" id="ellipse-ry" min="5" max="50" value="35">
+      <span class="value-badge" id="ellipse-ry-val">35%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Center X</span>
+      <input type="range" id="ellipse-cx" min="0" max="100" value="50">
+      <span class="value-badge" id="ellipse-cx-val">50%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Center Y</span>
+      <input type="range" id="ellipse-cy" min="0" max="100" value="50">
+      <span class="value-badge" id="ellipse-cy-val">50%</span>
+    </div>
+  </div>
+
+  <!-- Controls — triangle -->
+  <div id="controls-triangle" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Tip X</span>
+      <input type="range" id="tri-tip" min="0" max="100" value="50">
+      <span class="value-badge" id="tri-tip-val">50%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Skew</span>
+      <input type="range" id="tri-skew" min="-40" max="40" value="0">
+      <span class="value-badge" id="tri-skew-val">0%</span>
+    </div>
+  </div>
+
+  <!-- Controls — diamond -->
+  <div id="controls-diamond" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Top Point Y</span>
+      <input type="range" id="dia-top" min="0" max="40" value="0">
+      <span class="value-badge" id="dia-top-val">0%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Width</span>
+      <input type="range" id="dia-w" min="30" max="50" value="50">
+      <span class="value-badge" id="dia-w-val">50%</span>
+    </div>
+  </div>
+
+  <!-- Controls — pentagon (no sliders, shape is fixed) -->
+  <div id="controls-pentagon" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Top Y</span>
+      <input type="range" id="pent-top" min="0" max="20" value="0">
+      <span class="value-badge" id="pent-top-val">0%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Scale</span>
+      <input type="range" id="pent-scale" min="60" max="100" value="100">
+      <span class="value-badge" id="pent-scale-val">100%</span>
+    </div>
+  </div>
+
+  <!-- Controls — star -->
+  <div id="controls-star" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Inner Radius</span>
+      <input type="range" id="star-inner" min="20" max="48" value="35">
+      <span class="value-badge" id="star-inner-val">35%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Points</span>
+      <input type="range" id="star-points" min="3" max="8" step="1" value="5">
+      <span class="value-badge" id="star-points-val">5</span>
+    </div>
+  </div>
+
+  <!-- Controls — arrow -->
+  <div id="controls-arrow" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Shaft Height</span>
+      <input type="range" id="arr-h" min="10" max="80" value="60">
+      <span class="value-badge" id="arr-h-val">60%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Notch</span>
+      <input type="range" id="arr-notch" min="40" max="80" value="60">
+      <span class="value-badge" id="arr-notch-val">60%</span>
+    </div>
+  </div>
+
+  <!-- Controls — inset -->
+  <div id="controls-inset" class="controls hidden">
+    <p class="section-label">Parameters</p>
+    <div class="control-row">
+      <span class="control-label">Top</span>
+      <input type="range" id="inset-top" min="0" max="40" value="15">
+      <span class="value-badge" id="inset-top-val">15%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Right</span>
+      <input type="range" id="inset-right" min="0" max="40" value="15">
+      <span class="value-badge" id="inset-right-val">15%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Bottom</span>
+      <input type="range" id="inset-bottom" min="0" max="40" value="15">
+      <span class="value-badge" id="inset-bottom-val">15%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Left</span>
+      <input type="range" id="inset-left" min="0" max="40" value="15">
+      <span class="value-badge" id="inset-left-val">15%</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Border Radius</span>
+      <input type="range" id="inset-r" min="0" max="50" value="12">
+      <span class="value-badge" id="inset-r-val">12px</span>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <p class="section-label" style="margin-top:0.5rem;">CSS Output</p>
+  <div class="output-block">
+    <pre id="cssOutput">clip-path: circle(50% at 50% 50%);</pre>
+    <button class="copy-btn" id="copyBtn">Copy</button>
+  </div>
+
+  <!-- Related -->
+  <div class="related">
+    <h2>More CSS Tools</h2>
+    <div class="related-links">
+      <a href="/transition/">Transition Generator</a>
+      <a href="/animation/">Animation Generator</a>
+      <a href="/filter/">Filter Generator</a>
+      <a href="/box-shadow/">Box Shadow Generator</a>
+      <a href="/gradient/">Gradient Generator</a>
+      <a href="/border-radius/">Border Radius Generator</a>
+      <a href="/text-shadow/">Text Shadow Generator</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const shape = document.getElementById('previewShape');
+  const label = document.getElementById('previewLabel');
+  const output = document.getElementById('cssOutput');
+  let currentPreset = 'circle';
+
+  function pct(v) { return v + '%'; }
+
+  function buildCircle() {
+    const r  = document.getElementById('circle-r').value;
+    const cx = document.getElementById('circle-cx').value;
+    const cy = document.getElementById('circle-cy').value;
+    document.getElementById('circle-r-val').textContent  = pct(r);
+    document.getElementById('circle-cx-val').textContent = pct(cx);
+    document.getElementById('circle-cy-val').textContent = pct(cy);
+    return `circle(${r}% at ${cx}% ${cy}%)`;
+  }
+
+  function buildEllipse() {
+    const rx = document.getElementById('ellipse-rx').value;
+    const ry = document.getElementById('ellipse-ry').value;
+    const cx = document.getElementById('ellipse-cx').value;
+    const cy = document.getElementById('ellipse-cy').value;
+    document.getElementById('ellipse-rx-val').textContent = pct(rx);
+    document.getElementById('ellipse-ry-val').textContent = pct(ry);
+    document.getElementById('ellipse-cx-val').textContent = pct(cx);
+    document.getElementById('ellipse-cy-val').textContent = pct(cy);
+    return `ellipse(${rx}% ${ry}% at ${cx}% ${cy}%)`;
+  }
+
+  function buildTriangle() {
+    const tip  = parseInt(document.getElementById('tri-tip').value);
+    const skew = parseInt(document.getElementById('tri-skew').value);
+    document.getElementById('tri-tip-val').textContent  = pct(tip);
+    document.getElementById('tri-skew-val').textContent = pct(skew);
+    const bl = Math.max(0, 0 + skew);
+    const br = Math.min(100, 100 + skew);
+    return `polygon(${tip}% 0%, ${br}% 100%, ${bl}% 100%)`;
+  }
+
+  function buildDiamond() {
+    const top = parseInt(document.getElementById('dia-top').value);
+    const w   = parseInt(document.getElementById('dia-w').value);
+    document.getElementById('dia-top-val').textContent = pct(top);
+    document.getElementById('dia-w-val').textContent   = pct(w);
+    const cx = 50;
+    return `polygon(${cx}% ${top}%, ${cx+w}% 50%, ${cx}% ${100-top}%, ${cx-w}% 50%)`;
+  }
+
+  function buildPentagon() {
+    const topY  = parseInt(document.getElementById('pent-top').value);
+    const scale = parseInt(document.getElementById('pent-scale').value) / 100;
+    document.getElementById('pent-top-val').textContent   = pct(topY);
+    document.getElementById('pent-scale-val').textContent = pct(Math.round(scale*100));
+    // Standard pentagon points centered at 50,55, scaled
+    const pts = [
+      [50, topY],
+      [50 + 50*scale, 38*scale + (1-scale)*50],
+      [50 + 32*scale, 100 - (1-scale)*5],
+      [50 - 32*scale, 100 - (1-scale)*5],
+      [50 - 50*scale, 38*scale + (1-scale)*50],
+    ];
+    return `polygon(${pts.map(p => p.map(v=>Math.round(v)+'%').join(' ')).join(', ')})`;
+  }
+
+  function buildStar() {
+    const inner  = parseInt(document.getElementById('star-inner').value);
+    const points = parseInt(document.getElementById('star-points').value);
+    document.getElementById('star-inner-val').textContent  = pct(inner);
+    document.getElementById('star-points-val').textContent = points;
+    const outer = 50;
+    const cx = 50, cy = 50;
+    const pts = [];
+    for (let i = 0; i < points * 2; i++) {
+      const angle = (i * Math.PI / points) - Math.PI / 2;
+      const r = (i % 2 === 0) ? outer : inner;
+      pts.push([
+        Math.round(cx + r * Math.cos(angle)),
+        Math.round(cy + r * Math.sin(angle))
+      ]);
+    }
+    return `polygon(${pts.map(p => p.join('% ')).join('%, ')}%)`;
+  }
+
+  function buildArrow() {
+    const h      = parseInt(document.getElementById('arr-h').value);
+    const notch  = parseInt(document.getElementById('arr-notch').value);
+    document.getElementById('arr-h-val').textContent     = pct(h);
+    document.getElementById('arr-notch-val').textContent = pct(notch);
+    const top = (100 - h) / 2;
+    const bot = top + h;
+    return `polygon(0% ${top}%, ${notch}% ${top}%, ${notch}% 0%, 100% 50%, ${notch}% 100%, ${notch}% ${bot}%, 0% ${bot}%)`;
+  }
+
+  function buildInset() {
+    const t = document.getElementById('inset-top').value;
+    const r = document.getElementById('inset-right').value;
+    const b = document.getElementById('inset-bottom').value;
+    const l = document.getElementById('inset-left').value;
+    const br= document.getElementById('inset-r').value;
+    document.getElementById('inset-top-val').textContent    = pct(t);
+    document.getElementById('inset-right-val').textContent  = pct(r);
+    document.getElementById('inset-bottom-val').textContent = pct(b);
+    document.getElementById('inset-left-val').textContent   = pct(l);
+    document.getElementById('inset-r-val').textContent      = br + 'px';
+    return `inset(${t}% ${r}% ${b}% ${l}%${br > 0 ? ' round ' + br + 'px' : ''})`;
+  }
+
+  const builders = { circle: buildCircle, ellipse: buildEllipse, triangle: buildTriangle,
+    diamond: buildDiamond, pentagon: buildPentagon, star: buildStar, arrow: buildArrow, inset: buildInset };
+
+  function update() {
+    const val = builders[currentPreset]();
+    const css = `clip-path: ${val};`;
+    shape.style.clipPath = val;
+    label.textContent = css;
+    output.textContent = css;
+  }
+
+  function showControls(preset) {
+    document.querySelectorAll('[id^="controls-"]').forEach(el => el.classList.add('hidden'));
+    const el = document.getElementById('controls-' + preset);
+    if (el) el.classList.remove('hidden');
+  }
+
+  document.getElementById('presetsGrid').addEventListener('click', e => {
+    const btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPreset = btn.dataset.preset;
+    showControls(currentPreset);
+    update();
+  });
+
+  // Wire all range inputs
+  document.querySelectorAll('input[type="range"]').forEach(input => {
+    input.addEventListener('input', update);
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(output.textContent).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  });
+
+  // Init
+  showControls('circle');
+  update();
+</script>
+</body>
+</html>
