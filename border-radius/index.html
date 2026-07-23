@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Border Radius Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS border-radius visually. Control all 4 corners independently or lock them together. Pick presets like pill, circle, squircle. Copy the CSS — free, no signup.">
+  <meta property="og:title" content="CSS Border Radius Generator — Free Online Tool">
+  <meta property="og:description" content="Visual border-radius builder with per-corner control, live preview, 6 presets, and one-click CSS copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/border-radius/">
+  <link rel="canonical" href="https://goosnav.github.io/border-radius/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Border Radius Generator",
+    "url": "https://goosnav.github.io/border-radius/",
+    "description": "Visual border-radius builder — per-corner control, presets, live preview, one-click CSS copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview area */
+    .preview-area {
+      width: 100%;
+      height: 220px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .preview-box {
+      width: 160px;
+      height: 120px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      transition: border-radius 0.2s;
+    }
+
+    .card {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Linked toggle */
+    .linked-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .linked-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      flex: 1;
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: #2a2a3a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: #a78bfa; }
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+
+    /* Corner diagram */
+    .corner-diagram {
+      position: relative;
+      width: 200px;
+      height: 140px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .corner-diagram .shape {
+      position: absolute;
+      inset: 20px;
+      background: #2a2a3a;
+      border: 2px solid #4a4a6a;
+      transition: border-radius 0.2s;
+    }
+
+    .corner-label {
+      position: absolute;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #8888a8;
+    }
+    .corner-label.tl { top: 4px; left: 4px; }
+    .corner-label.tr { top: 4px; right: 4px; }
+    .corner-label.br { bottom: 4px; right: 4px; }
+    .corner-label.bl { bottom: 4px; left: 4px; }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label-row label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+    }
+
+    .control-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a78bfa;
+    }
+
+    input[type="range"].ctrl-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a2a3a;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].ctrl-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+    }
+
+    /* Unit toggle */
+    .unit-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .unit-btn {
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .unit-btn.active { border-color: #a78bfa; color: #a78bfa; }
+
+    /* Presets */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .preset-btn {
+      padding: 0.55rem 0.5rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #c8c8e0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .preset-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    .preset-preview {
+      width: 36px;
+      height: 26px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      pointer-events: none;
+    }
+
+    /* CSS Output */
+    .css-box {
+      background: #12121a;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-size: 0.82rem;
+      color: #a5b4fc;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      min-height: 52px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      background: #a78bfa;
+      color: #0f0f13;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    .copy-btn:hover { opacity: 0.9; }
+    .copy-btn:active { transform: scale(0.98); }
+    .copy-btn.copied { background: #34d399; }
+
+    /* More tools */
+    .more-tools {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid #2a2a3a;
+    }
+
+    .more-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888a8;
+      margin-bottom: 0.75rem;
+    }
+
+    .tool-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tool-link {
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      border: 1.5px solid #2a2a3a;
+      background: transparent;
+      color: #8888a8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .tool-link:hover { border-color: #a78bfa; color: #a78bfa; }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">← Goosnav Tools</a>
+      <h1>CSS Border Radius Generator</h1>
+      <p>Control each corner visually. Copy the CSS — done.</p>
+    </header>
+
+    <!-- Live Preview -->
+    <div class="preview-area">
+      <div class="preview-box" id="previewBox"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="card">
+      <p class="card-title">Corner Radius</p>
+
+      <div class="linked-row">
+        <span class="linked-label">Lock all corners together</span>
+        <label class="toggle">
+          <input type="checkbox" id="linkedToggle" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="unit-row">
+        <button class="unit-btn active" id="unitPx" data-unit="px">px</button>
+        <button class="unit-btn" id="unitPct" data-unit="%">%</button>
+      </div>
+
+      <div class="controls" id="controls">
+        <!-- injected by JS -->
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="card">
+      <p class="card-title">Presets</p>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <!-- CSS Output -->
+    <div class="card">
+      <p class="card-title">CSS Code</p>
+      <div class="css-box" id="cssOutput"></div>
+      <button class="copy-btn" id="copyBtn">Copy CSS</button>
+    </div>
+
+    <div class="more-tools">
+      <p class="more-title">More free tools</p>
+      <div class="tool-links">
+        <a class="tool-link" href="/gradient/">🎨 Gradient Generator</a>
+        <a class="tool-link" href="/box-shadow/">🌑 Box Shadow Generator</a>
+        <a class="tool-link" href="/qr/">📱 QR Generator</a>
+        <a class="tool-link" href="/og-preview/">🖼️ OG Preview</a>
+        <a class="tool-link" href="/favicon/">⭐ Favicon Maker</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built by <a href="https://goosnav.com" style="color:#555;text-decoration:none;">Goosnav</a> · Runs 100% in your browser</p>
+    </footer>
+  </div>
+
+  <script>
+    const CORNERS = [
+      { id: "tl", label: "Top Left" },
+      { id: "tr", label: "Top Right" },
+      { id: "br", label: "Bottom Right" },
+      { id: "bl", label: "Bottom Left" },
+    ];
+
+    const PRESETS = [
+      { name: "Rounded",    shape: "4px 4px 4px 4px",   tl:4,   tr:4,   br:4,   bl:4,   unit:"px" },
+      { name: "Card",       shape: "12px 12px 12px 12px",tl:12,  tr:12,  br:12,  bl:12,  unit:"px" },
+      { name: "Pill",       shape: "999px 999px 999px 999px", tl:999, tr:999, br:999, bl:999, unit:"px" },
+      { name: "Circle",     shape: "50% 50% 50% 50%",   tl:50,  tr:50,  br:50,  bl:50,  unit:"%" },
+      { name: "Squircle",   shape: "30% 30% 30% 30%",   tl:30,  tr:30,  br:30,  bl:30,  unit:"%" },
+      { name: "Bottom Sheet",shape:"24px 24px 0px 0px",  tl:24,  tr:24,  br:0,   bl:0,   unit:"px" },
+      { name: "Bubble",     shape:"18px 18px 18px 4px",  tl:18,  tr:18,  br:18,  bl:4,   unit:"px" },
+      { name: "Asymmetric", shape:"0px 48px 0px 48px",   tl:0,   tr:48,  br:0,   bl:48,  unit:"px" },
+    ];
+
+    let values = { tl: 12, tr: 12, br: 12, bl: 12 };
+    let linked = true;
+    let unit = "px";
+
+    function maxVal() { return unit === "%" ? 50 : 200; }
+
+    function buildRadiusCSS() {
+      const { tl, tr, br, bl } = values;
+      const u = unit;
+      if (tl === tr && tr === br && br === bl) {
+        const v = tl === 999 ? 999 : tl;
+        return `border-radius: ${v}${u};`;
+      }
+      return `border-radius: ${tl}${u} ${tr}${u} ${br}${u} ${bl}${u};`;
+    }
+
+    function applyPreview() {
+      const { tl, tr, br, bl } = values;
+      const u = unit;
+      const box = document.getElementById("previewBox");
+      box.style.borderRadius = `${tl}${u} ${tr}${u} ${br}${u} ${bl}${u}`;
+      document.getElementById("cssOutput").textContent = buildRadiusCSS();
+      // sync sliders
+      CORNERS.forEach(c => {
+        const slider = document.getElementById("slider-" + c.id);
+        const valEl = document.getElementById("val-" + c.id);
+        if (slider) {
+          slider.max = maxVal();
+          slider.value = Math.min(values[c.id], maxVal());
+          valEl.textContent = values[c.id] + unit;
+        }
+      });
+    }
+
+    function buildControls() {
+      const container = document.getElementById("controls");
+      container.innerHTML = "";
+      const corners = linked ? [CORNERS[0]] : CORNERS;
+      corners.forEach(c => {
+        const row = document.createElement("div");
+        row.className = "control-row";
+        row.innerHTML = `
+          <div class="control-label-row">
+            <label for="slider-${c.id}">${linked ? "All Corners" : c.label}</label>
+            <span class="control-value" id="val-${c.id}">${values[c.id]}${unit}</span>
+          </div>
+          <input type="range" class="ctrl-slider" id="slider-${c.id}"
+            min="0" max="${maxVal()}" value="${Math.min(values[c.id], maxVal())}">
+        `;
+        container.appendChild(row);
+        document.getElementById("slider-" + c.id).addEventListener("input", e => {
+          const v = parseInt(e.target.value);
+          document.getElementById("val-" + c.id).textContent = v + unit;
+          if (linked) {
+            CORNERS.forEach(cc => values[cc.id] = v);
+          } else {
+            values[c.id] = v;
+          }
+          applyPreview();
+        });
+      });
+    }
+
+    // Linked toggle
+    document.getElementById("linkedToggle").addEventListener("change", e => {
+      linked = e.target.checked;
+      if (linked) {
+        // sync all to tl
+        CORNERS.forEach(c => values[c.id] = values.tl);
+      }
+      buildControls();
+      applyPreview();
+    });
+
+    // Unit toggle
+    document.querySelectorAll(".unit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        unit = btn.dataset.unit;
+        document.querySelectorAll(".unit-btn").forEach(b => b.classList.toggle("active", b === btn));
+        // clamp values to new max
+        const mx = maxVal();
+        CORNERS.forEach(c => { if (values[c.id] > mx) values[c.id] = mx; });
+        buildControls();
+        applyPreview();
+      });
+    });
+
+    // Presets
+    const presetGrid = document.getElementById("presetGrid");
+    PRESETS.forEach(preset => {
+      const btn = document.createElement("button");
+      btn.className = "preset-btn";
+
+      const prev = document.createElement("div");
+      prev.className = "preset-preview";
+      prev.style.borderRadius = preset.shape;
+
+      const name = document.createElement("span");
+      name.textContent = preset.name;
+
+      btn.appendChild(prev);
+      btn.appendChild(name);
+
+      btn.addEventListener("click", () => {
+        unit = preset.unit;
+        document.querySelectorAll(".unit-btn").forEach(b => b.classList.toggle("active", b.dataset.unit === unit));
+        values = { tl: preset.tl, tr: preset.tr, br: preset.br, bl: preset.bl };
+        linked = preset.tl === preset.tr && preset.tr === preset.br && preset.br === preset.bl;
+        document.getElementById("linkedToggle").checked = linked;
+        buildControls();
+        applyPreview();
+      });
+
+      presetGrid.appendChild(btn);
+    });
+
+    // Copy
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      navigator.clipboard.writeText(buildRadiusCSS()).then(() => {
+        const btn = document.getElementById("copyBtn");
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "Copy CSS";
+          btn.classList.remove("copied");
+        }, 1800);
+      });
+    });
+
+    // Init
+    buildControls();
+    applyPreview();
+  </script>
+</body>
+</html>
