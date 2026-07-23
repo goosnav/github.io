@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Filter Generator — Free Online Image Filter Tool</title>
+  <meta name="description" content="Generate CSS filter effects visually. Adjust brightness, contrast, saturation, blur, hue-rotate, and more. Live preview on a real image — free, no signup.">
+  <meta property="og:title" content="CSS Filter Generator — Free Online Image Filter Tool">
+  <meta property="og:description" content="Build CSS image filters with live preview. Presets: Vintage, B&W, Vivid, Dramatic, Cool, Warm, Faded. Adjust brightness, contrast, blur, hue-rotate. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/filter/">
+  <link rel="canonical" href="https://goosnav.github.io/filter/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Filter Generator",
+    "url": "https://goosnav.github.io/filter/",
+    "description": "Generate CSS filter effects visually — live preview on a real image, presets, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview area */
+    .preview-area {
+      width: 100%;
+      min-height: 200px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-image-wrap {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    #previewImg {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      transition: filter 0.12s;
+    }
+
+    .preview-label {
+      font-size: 0.75rem;
+      color: #6666aa;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* Presets */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6666aa;
+      margin-bottom: 0.7rem;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 480px) { .presets-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #c8c8e8;
+      padding: 0.55rem 0.5rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover { background: #22223a; border-color: #a78bfa; color: #a78bfa; }
+    .preset-btn.active { background: #2d1f5e; border-color: #a78bfa; color: #a78bfa; }
+
+    /* Controls */
+    .controls { display: flex; flex-direction: column; gap: 1.1rem; margin-bottom: 1.5rem; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #9999bb;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.2);
+    }
+
+    .value-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a78bfa;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    /* Reset button */
+    .btn-reset {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #8888a8;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      margin-bottom: 1.5rem;
+    }
+    .btn-reset:hover { background: #2a2a3a; border-color: #a78bfa; color: #a78bfa; }
+
+    /* Output */
+    .output-block {
+      background: #13131e;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .output-block pre {
+      font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #c8c8e8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: #2a2a3a;
+      border: 1.5px solid #3a3a4a;
+      color: #8888a8;
+      padding: 0.3rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: #3a3a4a; color: #a78bfa; }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+    /* Related tools */
+    .related {
+      margin-top: 2.5rem;
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+    }
+    .related h2 { font-size: 0.85rem; color: #6666aa; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.9rem; }
+    .related-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .related-links a {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #9999bb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a class="back" href="/">← All Tools</a>
+    <h1>CSS Filter Generator</h1>
+    <p>Adjust image filters visually, copy the CSS one-liner.</p>
+  </header>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <div class="preview-image-wrap">
+      <!-- Unsplash nature photo — always available, no auth needed -->
+      <img id="previewImg" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="CSS filter preview" crossorigin="anonymous">
+    </div>
+    <span class="preview-label" id="previewLabel">none</span>
+  </div>
+
+  <!-- Presets -->
+  <p class="section-label">Presets</p>
+  <div class="presets-grid" id="presetsGrid">
+    <button class="preset-btn active" data-preset="none">None</button>
+    <button class="preset-btn" data-preset="vintage">Vintage</button>
+    <button class="preset-btn" data-preset="bw">B&amp;W</button>
+    <button class="preset-btn" data-preset="vivid">Vivid</button>
+    <button class="preset-btn" data-preset="dramatic">Dramatic</button>
+    <button class="preset-btn" data-preset="cool">Cool</button>
+    <button class="preset-btn" data-preset="warm">Warm</button>
+    <button class="preset-btn" data-preset="faded">Faded</button>
+  </div>
+
+  <!-- Controls -->
+  <p class="section-label">Controls</p>
+  <div class="controls">
+    <div class="control-row">
+      <span class="control-label">Brightness</span>
+      <input type="range" id="brightness" min="0" max="3" step="0.01" value="1">
+      <span class="value-badge" id="brightnessVal">1</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Contrast</span>
+      <input type="range" id="contrast" min="0" max="3" step="0.01" value="1">
+      <span class="value-badge" id="contrastVal">1</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Saturate</span>
+      <input type="range" id="saturate" min="0" max="3" step="0.01" value="1">
+      <span class="value-badge" id="saturateVal">1</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Blur</span>
+      <input type="range" id="blur" min="0" max="20" step="0.5" value="0">
+      <span class="value-badge" id="blurVal">0px</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Hue Rotate</span>
+      <input type="range" id="hueRotate" min="0" max="360" step="1" value="0">
+      <span class="value-badge" id="hueRotateVal">0°</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Opacity</span>
+      <input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
+      <span class="value-badge" id="opacityVal">1</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Sepia</span>
+      <input type="range" id="sepia" min="0" max="1" step="0.01" value="0">
+      <span class="value-badge" id="sepiaVal">0</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Grayscale</span>
+      <input type="range" id="grayscale" min="0" max="1" step="0.01" value="0">
+      <span class="value-badge" id="grayscaleVal">0</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Invert</span>
+      <input type="range" id="invert" min="0" max="1" step="0.01" value="0">
+      <span class="value-badge" id="invertVal">0</span>
+    </div>
+  </div>
+
+  <button class="btn-reset" id="resetBtn">↺ Reset to defaults</button>
+
+  <!-- Output -->
+  <p class="section-label">CSS Output</p>
+  <div class="output-block">
+    <pre id="cssOutput">filter: none;</pre>
+    <button class="copy-btn" id="copyBtn">Copy</button>
+  </div>
+
+  <!-- Related -->
+  <div class="related">
+    <h2>More CSS Tools</h2>
+    <div class="related-links">
+      <a href="/animation/">Animation Generator</a>
+      <a href="/box-shadow/">Box Shadow Generator</a>
+      <a href="/text-shadow/">Text Shadow Generator</a>
+      <a href="/gradient/">Gradient Generator</a>
+      <a href="/border-radius/">Border Radius Generator</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PRESETS = {
+    none:     { brightness: 1, contrast: 1, saturate: 1, blur: 0, hueRotate: 0, opacity: 1, sepia: 0, grayscale: 0, invert: 0 },
+    vintage:  { brightness: 1.05, contrast: 0.9, saturate: 0.75, blur: 0, hueRotate: 15, opacity: 1, sepia: 0.35, grayscale: 0, invert: 0 },
+    bw:       { brightness: 1, contrast: 1.1, saturate: 0, blur: 0, hueRotate: 0, opacity: 1, sepia: 0, grayscale: 1, invert: 0 },
+    vivid:    { brightness: 1.1, contrast: 1.15, saturate: 1.8, blur: 0, hueRotate: 0, opacity: 1, sepia: 0, grayscale: 0, invert: 0 },
+    dramatic: { brightness: 0.85, contrast: 1.5, saturate: 0.9, blur: 0, hueRotate: 0, opacity: 1, sepia: 0.1, grayscale: 0, invert: 0 },
+    cool:     { brightness: 1, contrast: 1.05, saturate: 1.1, blur: 0, hueRotate: 200, opacity: 1, sepia: 0, grayscale: 0, invert: 0 },
+    warm:     { brightness: 1.1, contrast: 1.05, saturate: 1.2, blur: 0, hueRotate: 340, opacity: 1, sepia: 0.15, grayscale: 0, invert: 0 },
+    faded:    { brightness: 1.1, contrast: 0.75, saturate: 0.7, blur: 0, hueRotate: 0, opacity: 0.9, sepia: 0.1, grayscale: 0, invert: 0 },
+  };
+
+  const DEFAULTS = PRESETS.none;
+
+  const controls = {
+    brightness: { el: null, badge: null, unit: '', decimals: 2 },
+    contrast:   { el: null, badge: null, unit: '', decimals: 2 },
+    saturate:   { el: null, badge: null, unit: '', decimals: 2 },
+    blur:       { el: null, badge: null, unit: 'px', decimals: 1 },
+    hueRotate:  { el: null, badge: null, unit: '°', decimals: 0 },
+    opacity:    { el: null, badge: null, unit: '', decimals: 2 },
+    sepia:      { el: null, badge: null, unit: '', decimals: 2 },
+    grayscale:  { el: null, badge: null, unit: '', decimals: 2 },
+    invert:     { el: null, badge: null, unit: '', decimals: 2 },
+  };
+
+  // Wire up DOM refs
+  for (const key of Object.keys(controls)) {
+    controls[key].el = document.getElementById(key);
+    controls[key].badge = document.getElementById(key + 'Val');
+  }
+
+  const previewImg = document.getElementById('previewImg');
+  const previewLabel = document.getElementById('previewLabel');
+  const cssOutput = document.getElementById('cssOutput');
+  const copyBtn = document.getElementById('copyBtn');
+
+  function getValues() {
+    const v = {};
+    for (const [key, c] of Object.entries(controls)) {
+      v[key] = parseFloat(c.el.value);
+    }
+    return v;
+  }
+
+  function buildFilterString(v) {
+    const parts = [];
+    if (v.brightness !== 1)   parts.push(`brightness(${v.brightness})`);
+    if (v.contrast !== 1)     parts.push(`contrast(${v.contrast})`);
+    if (v.saturate !== 1)     parts.push(`saturate(${v.saturate})`);
+    if (v.blur !== 0)         parts.push(`blur(${v.blur}px)`);
+    if (v.hueRotate !== 0)    parts.push(`hue-rotate(${v.hueRotate}deg)`);
+    if (v.opacity !== 1)      parts.push(`opacity(${v.opacity})`);
+    if (v.sepia !== 0)        parts.push(`sepia(${v.sepia})`);
+    if (v.grayscale !== 0)    parts.push(`grayscale(${v.grayscale})`);
+    if (v.invert !== 0)       parts.push(`invert(${v.invert})`);
+    return parts.length ? parts.join(' ') : 'none';
+  }
+
+  function update() {
+    const v = getValues();
+
+    // Update badges
+    for (const [key, c] of Object.entries(controls)) {
+      const raw = v[key];
+      c.badge.textContent = raw.toFixed(c.decimals) + c.unit;
+    }
+
+    const filterStr = buildFilterString(v);
+    previewImg.style.filter = filterStr;
+    previewLabel.textContent = filterStr;
+    cssOutput.textContent = `filter: ${filterStr};`;
+  }
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    for (const [key, c] of Object.entries(controls)) {
+      c.el.value = p[key];
+    }
+    update();
+  }
+
+  // Preset buttons
+  document.getElementById('presetsGrid').addEventListener('click', e => {
+    const btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyPreset(btn.dataset.preset);
+  });
+
+  // Range inputs
+  for (const c of Object.values(controls)) {
+    c.el.addEventListener('input', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-preset="none"]')?.classList.remove('active');
+      update();
+    });
+  }
+
+  // Reset
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    applyPreset('none');
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-preset="none"]').classList.add('active');
+  });
+
+  // Copy
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(cssOutput.textContent).then(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1800);
+    });
+  });
+
+  // Init
+  update();
+</script>
+</body>
+</html>
