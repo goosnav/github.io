@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS Box Shadow Generator — Free Online Tool</title>
-  <meta name="description" content="Generate CSS box shadows visually. Adjust offset, blur, spread, color, opacity, and inset. Add multiple layers. Copy the CSS — free, no signup.">
-  <meta property="og:title" content="CSS Box Shadow Generator — Free Online Tool">
-  <meta property="og:description" content="Build layered CSS box shadows with live preview. Adjust X/Y offset, blur, spread, color, opacity, and inset. One-click copy.">
+  <title>CSS Text Shadow Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS text shadows visually. Adjust offset, blur, color, opacity. Add multiple layers for glow, neon, and outline effects. Copy the CSS — free, no signup.">
+  <meta property="og:title" content="CSS Text Shadow Generator — Free Online Tool">
+  <meta property="og:description" content="Build multi-layer CSS text shadows with live preview. Adjust X/Y offset, blur, color, opacity. Presets: Glow, Neon, Lifted, Hard, Outline, Retro. One-click copy.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://goosnav.github.io/box-shadow/">
-  <link rel="canonical" href="https://goosnav.github.io/box-shadow/">
+  <meta property="og:url" content="https://goosnav.github.io/text-shadow/">
+  <link rel="canonical" href="https://goosnav.github.io/text-shadow/">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "CSS Box Shadow Generator",
-    "url": "https://goosnav.github.io/box-shadow/",
-    "description": "Generate CSS box shadows visually — live preview, multi-layer, one-click copy.",
+    "name": "CSS Text Shadow Generator",
+    "url": "https://goosnav.github.io/text-shadow/",
+    "description": "Generate CSS text shadows visually — live preview, multi-layer, one-click copy.",
     "applicationCategory": "DeveloperApplication",
     "offers": { "@type": "Offer", "price": "0" }
   }
@@ -65,22 +65,52 @@
     /* Preview area */
     .preview-area {
       width: 100%;
-      height: 200px;
+      min-height: 160px;
       border-radius: 14px;
       background: #1a1a26;
       border: 1.5px solid #2a2a3a;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 1rem;
       margin-bottom: 1.25rem;
+      padding: 1.5rem;
     }
 
-    .preview-card {
-      width: 160px;
-      height: 100px;
-      border-radius: 10px;
-      background: #ffffff;
-      transition: box-shadow 0.2s;
+    .preview-bg-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .preview-bg-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555570;
+    }
+
+    .bg-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1.5px solid #3a3a4a;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .bg-btn:hover { border-color: #a78bfa; }
+    .bg-btn.active { border-color: #a78bfa; }
+
+    .preview-text {
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      color: #ffffff;
+      transition: text-shadow 0.15s;
+      user-select: none;
     }
 
     .card {
@@ -268,56 +298,6 @@
 
     .opacity-wrap { flex: 1; }
 
-    /* Inset toggle */
-    .inset-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .inset-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #8888a8;
-      flex: 1;
-    }
-
-    .toggle {
-      position: relative;
-      width: 40px;
-      height: 22px;
-      flex-shrink: 0;
-    }
-
-    .toggle input { opacity: 0; width: 0; height: 0; }
-
-    .toggle-track {
-      position: absolute;
-      inset: 0;
-      border-radius: 22px;
-      background: #2a2a3a;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .toggle input:checked + .toggle-track { background: #a78bfa; }
-
-    .toggle-track::before {
-      content: '';
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      top: 3px;
-      left: 3px;
-      transition: transform 0.2s;
-    }
-
-    .toggle input:checked + .toggle-track::before { transform: translateX(18px); }
-
     /* Presets */
     .preset-grid {
       display: grid;
@@ -419,13 +399,20 @@
   <div class="container">
     <header>
       <a class="back" href="/">← Goosnav Tools</a>
-      <h1>CSS Box Shadow Generator</h1>
-      <p>Build multi-layer box shadows visually. Copy the CSS — done.</p>
+      <h1>CSS Text Shadow Generator</h1>
+      <p>Build multi-layer text shadows visually. Copy the CSS — done.</p>
     </header>
 
     <!-- Live Preview -->
-    <div class="preview-area">
-      <div class="preview-card" id="previewCard"></div>
+    <div class="preview-area" id="previewArea">
+      <div class="preview-bg-row">
+        <span class="preview-bg-label">Background</span>
+        <button class="bg-btn active" data-bg="#1a1a26" style="background:#1a1a26;" title="Dark"></button>
+        <button class="bg-btn" data-bg="#ffffff" style="background:#ffffff;" title="Light"></button>
+        <button class="bg-btn" data-bg="#0f172a" style="background:#0f172a;" title="Navy"></button>
+        <button class="bg-btn" data-bg="#111" style="background:#111;" title="Black"></button>
+      </div>
+      <div class="preview-text" id="previewText">Hello World</div>
     </div>
 
     <!-- Shadow Layers -->
@@ -445,54 +432,38 @@
             <label for="sliderX">X Offset</label>
             <span class="control-value" id="valX">0px</span>
           </div>
-          <input type="range" class="ctrl-slider" id="sliderX" min="-100" max="100" value="0">
+          <input type="range" class="ctrl-slider" id="sliderX" min="-50" max="50" value="0">
         </div>
 
         <div class="control-row">
           <div class="control-label-row">
             <label for="sliderY">Y Offset</label>
-            <span class="control-value" id="valY">4px</span>
+            <span class="control-value" id="valY">2px</span>
           </div>
-          <input type="range" class="ctrl-slider" id="sliderY" min="-100" max="100" value="4">
+          <input type="range" class="ctrl-slider" id="sliderY" min="-50" max="50" value="2">
         </div>
 
         <div class="control-row">
           <div class="control-label-row">
             <label for="sliderBlur">Blur</label>
-            <span class="control-value" id="valBlur">24px</span>
+            <span class="control-value" id="valBlur">4px</span>
           </div>
-          <input type="range" class="ctrl-slider" id="sliderBlur" min="0" max="100" value="24">
-        </div>
-
-        <div class="control-row">
-          <div class="control-label-row">
-            <label for="sliderSpread">Spread</label>
-            <span class="control-value" id="valSpread">0px</span>
-          </div>
-          <input type="range" class="ctrl-slider" id="sliderSpread" min="-50" max="50" value="0">
+          <input type="range" class="ctrl-slider" id="sliderBlur" min="0" max="80" value="4">
         </div>
 
         <div class="control-row">
           <div class="control-label-row">
             <label>Color &amp; Opacity</label>
-            <span class="control-value" id="valOpacity">40%</span>
+            <span class="control-value" id="valOpacity">50%</span>
           </div>
           <div class="color-opacity-row">
             <label class="color-swatch">
               <input type="color" id="colorPicker" value="#000000">
             </label>
             <div class="opacity-wrap">
-              <input type="range" class="ctrl-slider" id="sliderOpacity" min="0" max="100" value="40">
+              <input type="range" class="ctrl-slider" id="sliderOpacity" min="0" max="100" value="50">
             </div>
           </div>
-        </div>
-
-        <div class="inset-row">
-          <span class="inset-label">Inset (inner shadow)</span>
-          <label class="toggle">
-            <input type="checkbox" id="insetToggle">
-            <span class="toggle-track"></span>
-          </label>
         </div>
 
       </div>
@@ -514,8 +485,8 @@
     <div class="more-tools">
       <p class="more-title">More free tools</p>
       <div class="tool-links">
+        <a class="tool-link" href="/box-shadow/">🌑 Box Shadow Generator</a>
         <a class="tool-link" href="/gradient/">🎨 Gradient Generator</a>
-        <a class="tool-link" href="/text-shadow/">✍️ Text Shadow Generator</a>
         <a class="tool-link" href="/border-radius/">⬜ Border Radius Generator</a>
         <a class="tool-link" href="/qr/">📱 QR Generator</a>
         <a class="tool-link" href="/og-preview/">🖼️ OG Preview</a>
@@ -530,50 +501,66 @@
 
   <script>
     const PRESETS = [
-      { name: "Soft",      layers: [{ x:0, y:4,   blur:24, spread:0,  hex:"#000000", opacity:40, inset:false }] },
-      { name: "Card",      layers: [{ x:0, y:8,   blur:32, spread:-4, hex:"#000000", opacity:30, inset:false }] },
-      { name: "Elevated",  layers: [{ x:0, y:20,  blur:60, spread:-8, hex:"#000000", opacity:25, inset:false }] },
-      { name: "Sharp",     layers: [{ x:4, y:4,   blur:0,  spread:0,  hex:"#000000", opacity:80, inset:false }] },
-      { name: "Neon Blue", layers: [{ x:0, y:0,   blur:20, spread:4,  hex:"#3b82f6", opacity:70, inset:false }] },
-      { name: "Neon Purple",layers:[{ x:0, y:0,   blur:20, spread:4,  hex:"#a78bfa", opacity:70, inset:false }] },
-      { name: "Inset",     layers: [{ x:0, y:2,   blur:8,  spread:0,  hex:"#000000", opacity:30, inset:true  }] },
-      { name: "Layered",   layers: [
-          { x:0, y:4,  blur:6,  spread:-1, hex:"#000000", opacity:10, inset:false },
-          { x:0, y:10, blur:40, spread:-8, hex:"#000000", opacity:20, inset:false }
+      { name: "Soft",    layers: [{ x:1, y:1, blur:4,  hex:"#000000", opacity:50 }] },
+      { name: "Lifted",  layers: [{ x:2, y:4, blur:8,  hex:"#000000", opacity:40 }] },
+      { name: "Hard",    layers: [{ x:3, y:3, blur:0,  hex:"#000000", opacity:80 }] },
+      { name: "Glow",    layers: [{ x:0, y:0, blur:20, hex:"#a78bfa", opacity:80 }] },
+      { name: "Neon",    layers: [
+          { x:0, y:0, blur:7,  hex:"#22d3ee", opacity:100 },
+          { x:0, y:0, blur:20, hex:"#22d3ee", opacity:60  },
+          { x:0, y:0, blur:40, hex:"#22d3ee", opacity:30  }
         ]
       },
-      { name: "Long",      layers: [{ x:0, y:40,  blur:80, spread:-20,hex:"#000000", opacity:50, inset:false }] },
+      { name: "Outline", layers: [
+          { x: 1, y: 0, blur:0, hex:"#000000", opacity:100 },
+          { x:-1, y: 0, blur:0, hex:"#000000", opacity:100 },
+          { x: 0, y: 1, blur:0, hex:"#000000", opacity:100 },
+          { x: 0, y:-1, blur:0, hex:"#000000", opacity:100 }
+        ]
+      },
+      { name: "Retro",   layers: [
+          { x:3, y:3, blur:0, hex:"#ff6b6b", opacity:100 },
+          { x:6, y:6, blur:0, hex:"#ffd93d", opacity:100 }
+        ]
+      },
+      { name: "Fire",    layers: [
+          { x:0, y:0, blur:10, hex:"#ff4500", opacity:80 },
+          { x:0, y:2, blur:20, hex:"#ff8c00", opacity:60 },
+          { x:0, y:4, blur:30, hex:"#ffd700", opacity:40 }
+        ]
+      },
+      { name: "Long",    layers: [{ x:0, y:8, blur:20, hex:"#000000", opacity:60 }] },
     ];
 
-    let layers = [{ x:0, y:4, blur:24, spread:0, hex:"#000000", opacity:40, inset:false, visible:true }];
+    let layers = [{ x:1, y:1, blur:4, hex:"#000000", opacity:50, visible:true }];
     let activeIdx = 0;
 
     function hexToRgb(hex) {
-      const r = parseInt(hex.slice(1,3),16);
-      const g = parseInt(hex.slice(3,5),16);
-      const b = parseInt(hex.slice(5,7),16);
-      return { r, g, b };
+      return {
+        r: parseInt(hex.slice(1,3), 16),
+        g: parseInt(hex.slice(3,5), 16),
+        b: parseInt(hex.slice(5,7), 16)
+      };
     }
 
     function layerToCSS(l) {
       const { r, g, b } = hexToRgb(l.hex);
       const a = (l.opacity / 100).toFixed(2);
-      const inset = l.inset ? "inset " : "";
-      return `${inset}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px rgba(${r},${g},${b},${a})`;
+      return `${l.x}px ${l.y}px ${l.blur}px rgba(${r},${g},${b},${a})`;
     }
 
-    function buildBoxShadow() {
+    function buildTextShadow() {
       const visible = layers.filter(l => l.visible);
       if (!visible.length) return "none";
-      return visible.map(layerToCSS).join(",\n         ");
+      return visible.map(layerToCSS).join(",\n            ");
     }
 
     function buildFullCSS() {
       const visible = layers.filter(l => l.visible);
-      if (!visible.length) return "box-shadow: none;";
-      if (visible.length === 1) return `box-shadow: ${layerToCSS(visible[0])};`;
-      const parts = visible.map(layerToCSS).join(",\n            ");
-      return `box-shadow: ${parts};`;
+      if (!visible.length) return "text-shadow: none;";
+      if (visible.length === 1) return `text-shadow: ${layerToCSS(visible[0])};`;
+      const parts = visible.map(layerToCSS).join(",\n             ");
+      return `text-shadow: ${parts};`;
     }
 
     function syncControls() {
@@ -584,12 +571,9 @@
       document.getElementById("valY").textContent = l.y + "px";
       document.getElementById("sliderBlur").value = l.blur;
       document.getElementById("valBlur").textContent = l.blur + "px";
-      document.getElementById("sliderSpread").value = l.spread;
-      document.getElementById("valSpread").textContent = l.spread + "px";
       document.getElementById("colorPicker").value = l.hex;
       document.getElementById("sliderOpacity").value = l.opacity;
       document.getElementById("valOpacity").textContent = l.opacity + "%";
-      document.getElementById("insetToggle").checked = l.inset;
     }
 
     function renderLayerList() {
@@ -644,13 +628,12 @@
     }
 
     function render() {
-      const shadow = buildBoxShadow();
-      document.getElementById("previewCard").style.boxShadow = shadow;
+      const shadow = buildTextShadow();
+      document.getElementById("previewText").style.textShadow = shadow;
       document.getElementById("cssOutput").textContent = buildFullCSS();
       renderLayerList();
     }
 
-    // Slider wiring
     function wireSlider(id, valId, suffix, prop) {
       document.getElementById(id).addEventListener("input", e => {
         const v = parseInt(e.target.value);
@@ -663,7 +646,6 @@
     wireSlider("sliderX",       "valX",       "px", "x");
     wireSlider("sliderY",       "valY",       "px", "y");
     wireSlider("sliderBlur",    "valBlur",    "px", "blur");
-    wireSlider("sliderSpread",  "valSpread",  "px", "spread");
     wireSlider("sliderOpacity", "valOpacity", "%",  "opacity");
 
     document.getElementById("colorPicker").addEventListener("input", e => {
@@ -671,20 +653,13 @@
       render();
     });
 
-    document.getElementById("insetToggle").addEventListener("change", e => {
-      layers[activeIdx].inset = e.target.checked;
-      render();
-    });
-
-    // Add layer
     document.getElementById("addLayer").addEventListener("click", () => {
-      layers.push({ x:0, y:4, blur:24, spread:0, hex:"#000000", opacity:30, inset:false, visible:true });
+      layers.push({ x:0, y:0, blur:10, hex:"#a78bfa", opacity:60, visible:true });
       activeIdx = layers.length - 1;
       syncControls();
       render();
     });
 
-    // Copy
     document.getElementById("copyBtn").addEventListener("click", () => {
       navigator.clipboard.writeText(buildFullCSS()).then(() => {
         const btn = document.getElementById("copyBtn");
@@ -694,6 +669,18 @@
           btn.textContent = "Copy CSS";
           btn.classList.remove("copied");
         }, 1800);
+      });
+    });
+
+    // Background switcher
+    document.querySelectorAll(".bg-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".bg-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const bg = btn.dataset.bg;
+        document.getElementById("previewArea").style.background = bg;
+        // Flip text color for light bg
+        document.getElementById("previewText").style.color = bg === "#ffffff" ? "#111111" : "#ffffff";
       });
     });
 
@@ -712,7 +699,6 @@
       presetGrid.appendChild(btn);
     });
 
-    // Init
     syncControls();
     render();
   </script>
