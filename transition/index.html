@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Transition Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS transition shorthand visually. Pick property, duration, easing, and delay. Live hover/click preview. Free, no signup.">
+  <meta property="og:title" content="CSS Transition Generator — Free Online Tool">
+  <meta property="og:description" content="Build CSS transitions with live preview. Presets: Quick Fade, Smooth Slide, Snappy, Elastic, Slow Reveal. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/transition/">
+  <link rel="canonical" href="https://goosnav.github.io/transition/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Transition Generator",
+    "url": "https://goosnav.github.io/transition/",
+    "description": "Generate CSS transition shorthand visually — live preview, presets, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Preview */
+    .preview-area {
+      width: 100%;
+      min-height: 180px;
+      border-radius: 14px;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding: 2rem 1.5rem;
+    }
+
+    .preview-label {
+      font-size: 0.75rem;
+      color: #6666aa;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .preview-btn {
+      padding: 0.85rem 2.2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: #a78bfa;
+      color: #fff;
+      letter-spacing: 0.01em;
+      /* transition applied dynamically */
+    }
+    .preview-btn:hover, .preview-btn.active {
+      background: #34d399;
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 8px 30px rgba(52,211,153,0.35);
+    }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6666aa;
+      margin-bottom: 0.7rem;
+    }
+
+    /* Presets */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 480px) { .presets-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #c8c8e8;
+      padding: 0.55rem 0.5rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover { background: #22223a; border-color: #a78bfa; color: #a78bfa; }
+    .preset-btn.active { background: #2d1f5e; border-color: #a78bfa; color: #a78bfa; }
+
+    /* Controls */
+    .controls { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 1.5rem; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #9999bb;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    select {
+      flex: 1;
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #e8e8f0;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: #a78bfa; }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #a78bfa;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.2);
+    }
+
+    .value-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a78bfa;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    /* Reset */
+    .btn-reset {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #8888a8;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      margin-bottom: 1.5rem;
+    }
+    .btn-reset:hover { background: #2a2a3a; border-color: #a78bfa; color: #a78bfa; }
+
+    /* Output */
+    .output-block {
+      background: #13131e;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .output-block pre {
+      font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #c8c8e8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: #2a2a3a;
+      border: 1.5px solid #3a3a4a;
+      color: #8888a8;
+      padding: 0.3rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: #3a3a4a; color: #a78bfa; }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+    /* Related */
+    .related {
+      margin-top: 2.5rem;
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+    }
+    .related h2 { font-size: 0.85rem; color: #6666aa; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.9rem; }
+    .related-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .related-links a {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      color: #9999bb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a class="back" href="/">← All Tools</a>
+    <h1>CSS Transition Generator</h1>
+    <p>Build smooth transitions visually, copy the CSS shorthand.</p>
+  </header>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <button class="preview-btn" id="previewBtn">Hover or click me</button>
+    <span class="preview-label" id="previewLabel">transition: all 0.3s ease 0s</span>
+  </div>
+
+  <!-- Presets -->
+  <p class="section-label">Presets</p>
+  <div class="presets-grid" id="presetsGrid">
+    <button class="preset-btn active" data-preset="default">Default</button>
+    <button class="preset-btn" data-preset="quickfade">Quick Fade</button>
+    <button class="preset-btn" data-preset="smooth">Smooth Slide</button>
+    <button class="preset-btn" data-preset="snappy">Snappy</button>
+    <button class="preset-btn" data-preset="elastic">Elastic</button>
+    <button class="preset-btn" data-preset="slow">Slow Reveal</button>
+  </div>
+
+  <!-- Controls -->
+  <p class="section-label">Controls</p>
+  <div class="controls">
+    <div class="control-row">
+      <span class="control-label">Property</span>
+      <select id="property">
+        <option value="all">all</option>
+        <option value="opacity">opacity</option>
+        <option value="transform">transform</option>
+        <option value="color">color</option>
+        <option value="background">background</option>
+        <option value="box-shadow">box-shadow</option>
+        <option value="border-color">border-color</option>
+        <option value="width">width</option>
+        <option value="height">height</option>
+      </select>
+      <span class="value-badge" style="min-width:0"></span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Duration</span>
+      <input type="range" id="duration" min="0" max="3000" step="50" value="300">
+      <span class="value-badge" id="durationVal">300ms</span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Easing</span>
+      <select id="easing">
+        <option value="ease">ease</option>
+        <option value="ease-in">ease-in</option>
+        <option value="ease-out">ease-out</option>
+        <option value="ease-in-out">ease-in-out</option>
+        <option value="linear">linear</option>
+        <option value="cubic-bezier(0.34,1.56,0.64,1)">spring (bounce)</option>
+        <option value="cubic-bezier(0.68,-0.55,0.27,1.55)">elastic</option>
+        <option value="cubic-bezier(0.23,1,0.32,1)">expo out</option>
+        <option value="steps(4,end)">steps(4)</option>
+      </select>
+      <span class="value-badge" style="min-width:0"></span>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Delay</span>
+      <input type="range" id="delay" min="0" max="2000" step="50" value="0">
+      <span class="value-badge" id="delayVal">0ms</span>
+    </div>
+  </div>
+
+  <button class="btn-reset" id="resetBtn">↺ Reset to defaults</button>
+
+  <!-- Output -->
+  <p class="section-label">CSS Output</p>
+  <div class="output-block">
+    <pre id="cssOutput">transition: all 0.3s ease 0s;</pre>
+    <button class="copy-btn" id="copyBtn">Copy</button>
+  </div>
+
+  <!-- Related -->
+  <div class="related">
+    <h2>More CSS Tools</h2>
+    <div class="related-links">
+      <a href="/animation/">Animation Generator</a>
+      <a href="/filter/">Filter Generator</a>
+      <a href="/box-shadow/">Box Shadow Generator</a>
+      <a href="/text-shadow/">Text Shadow Generator</a>
+      <a href="/gradient/">Gradient Generator</a>
+      <a href="/border-radius/">Border Radius Generator</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PRESETS = {
+    default:   { property: 'all',       duration: 300,  easing: 'ease',                            delay: 0 },
+    quickfade: { property: 'opacity',   duration: 150,  easing: 'ease-out',                        delay: 0 },
+    smooth:    { property: 'transform', duration: 500,  easing: 'ease-in-out',                     delay: 0 },
+    snappy:    { property: 'all',       duration: 100,  easing: 'cubic-bezier(0.23,1,0.32,1)',     delay: 0 },
+    elastic:   { property: 'transform', duration: 600,  easing: 'cubic-bezier(0.68,-0.55,0.27,1.55)', delay: 0 },
+    slow:      { property: 'all',       duration: 1200, easing: 'ease-in-out',                     delay: 200 },
+  };
+
+  const propEl    = document.getElementById('property');
+  const durEl     = document.getElementById('duration');
+  const durBadge  = document.getElementById('durationVal');
+  const easingEl  = document.getElementById('easing');
+  const delayEl   = document.getElementById('delay');
+  const delayBadge= document.getElementById('delayVal');
+  const previewBtn= document.getElementById('previewBtn');
+  const previewLbl= document.getElementById('previewLabel');
+  const cssOutput = document.getElementById('cssOutput');
+  const copyBtn   = document.getElementById('copyBtn');
+
+  function msStr(v) { return v >= 1000 ? (v/1000).toFixed(1).replace(/\.0$/,'') + 's' : v + 'ms'; }
+
+  function buildCSS() {
+    const prop  = propEl.value;
+    const dur   = parseInt(durEl.value);
+    const eas   = easingEl.value;
+    const del   = parseInt(delayEl.value);
+    return `transition: ${prop} ${msStr(dur)} ${eas}${del ? ' ' + msStr(del) : ' 0s'};`;
+  }
+
+  function update() {
+    const css = buildCSS();
+    durBadge.textContent  = msStr(parseInt(durEl.value));
+    delayBadge.textContent= msStr(parseInt(delayEl.value));
+    previewBtn.style.transition = css.replace('transition: ', '').replace(';', '');
+    previewLbl.textContent = css.replace(';','');
+    cssOutput.textContent  = css;
+  }
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    propEl.value  = p.property;
+    durEl.value   = p.duration;
+    // match easing option value
+    let found = false;
+    for (const opt of easingEl.options) {
+      if (opt.value === p.easing) { easingEl.value = p.easing; found = true; break; }
+    }
+    if (!found) easingEl.value = 'ease';
+    delayEl.value = p.delay;
+    update();
+  }
+
+  document.getElementById('presetsGrid').addEventListener('click', e => {
+    const btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyPreset(btn.dataset.preset);
+  });
+
+  [propEl, easingEl].forEach(el => el.addEventListener('change', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    update();
+  }));
+  [durEl, delayEl].forEach(el => el.addEventListener('input', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    update();
+  }));
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-preset="default"]').classList.add('active');
+    applyPreset('default');
+  });
+
+  // Toggle active class on click for non-hover testing
+  previewBtn.addEventListener('click', () => {
+    previewBtn.classList.toggle('active');
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(cssOutput.textContent).then(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1800);
+    });
+  });
+
+  update();
+</script>
+</body>
+</html>
