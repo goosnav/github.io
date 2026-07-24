@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Z-Index Manager — Stacking Context Visualizer</title>
+  <meta name="description" content="Manage named z-index layers and visualize your stacking context. Define base, dropdown, sticky, modal, toast, and tooltip layers, customize values, and export as CSS custom properties. Free, no signup.">
+  <meta property="og:title" content="CSS Z-Index Manager — Stacking Context Visualizer">
+  <meta property="og:description" content="Named z-index layers with visual stacking diagram. Customize values, add layers, export as CSS variables. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-z-index/">
+  <link rel="canonical" href="https://goosnav.github.io/css-z-index/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Z-Index Manager",
+    "url": "https://goosnav.github.io/css-z-index/",
+    "description": "Named z-index layers with visual stacking diagram. Customize, add layers, export as CSS custom properties. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    header {
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+    }
+
+    header a.back {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.04em;
+    }
+    header a.back:hover { color: var(--accent); }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 560px;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover {
+      border-color: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* Layer editor */
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .layer-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 36px;
+      gap: 0.5rem;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+    }
+
+    .layer-row input[type="text"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 5px;
+      width: 100%;
+    }
+    .layer-row input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+    }
+
+    .layer-row input[type="number"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 5px;
+      width: 100%;
+      text-align: right;
+    }
+    .layer-row input[type="number"]:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+    }
+
+    .del-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .del-btn:hover { border-color: #c96e6e; color: #c96e6e; }
+
+    .add-btn {
+      align-self: flex-start;
+      background: var(--surface2);
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+    /* Visual diagram */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .diagram-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .diagram {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+    }
+
+    .diagram-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .layer-block {
+      flex: 1;
+      border-radius: 5px;
+      padding: 0.4rem 0.75rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+
+    .layer-value {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* Output */
+    .output-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .output-header span {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .copy-btn.copied { color: #6ec98e; border-color: #6ec98e; }
+
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre;
+    }
+
+    footer {
+      max-width: 760px;
+      margin: 3rem auto 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    footer a { color: #555; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/">← All tools</a>
+  <h1>CSS Z-Index Manager</h1>
+  <p>Name your stacking layers, set values, and visualize the order. Export as CSS custom properties for a consistent z-index system across your project.</p>
+</header>
+
+<main>
+
+  <!-- Presets -->
+  <div class="presets">
+    <button class="preset-btn" onclick="loadPreset('minimal')">Minimal (5 layers)</button>
+    <button class="preset-btn" onclick="loadPreset('app')">Full App (10 layers)</button>
+    <button class="preset-btn" onclick="loadPreset('bootstrap')">Bootstrap scale</button>
+  </div>
+
+  <!-- Layer editor -->
+  <div class="layer-list" id="layerList"></div>
+
+  <button class="add-btn" onclick="addLayer()">+ Add layer</button>
+
+  <!-- Diagram -->
+  <div class="diagram-wrap">
+    <div class="diagram-label">Stacking order (highest on top)</div>
+    <div class="diagram" id="diagram"></div>
+  </div>
+
+  <!-- CSS output -->
+  <div class="output-wrap">
+    <div class="output-header">
+      <span>CSS custom properties</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCSS()">Copy</button>
+    </div>
+    <pre id="cssOutput"></pre>
+  </div>
+
+</main>
+
+<footer>
+  <p>Built by <a href="https://goosnav.com">Goosnav</a> · Runs 100% in your browser</p>
+</footer>
+
+<script>
+  // Layer color palette (distinct hues, muted)
+  const PALETTE = [
+    { bg: 'rgba(100,130,200,0.18)', border: 'rgba(100,130,200,0.45)', text: '#8aabdd' },
+    { bg: 'rgba(120,180,130,0.18)', border: 'rgba(120,180,130,0.45)', text: '#8acf9a' },
+    { bg: 'rgba(201,169,110,0.18)', border: 'rgba(201,169,110,0.45)', text: '#c9a96e' },
+    { bg: 'rgba(180,110,110,0.18)', border: 'rgba(180,110,110,0.45)', text: '#cf8a8a' },
+    { bg: 'rgba(150,110,200,0.18)', border: 'rgba(150,110,200,0.45)', text: '#b08adf' },
+    { bg: 'rgba(110,180,200,0.18)', border: 'rgba(110,180,200,0.45)', text: '#8ac8df' },
+    { bg: 'rgba(200,150,100,0.18)', border: 'rgba(200,150,100,0.45)', text: '#dfa86e' },
+    { bg: 'rgba(140,200,160,0.18)', border: 'rgba(140,200,160,0.45)', text: '#8acfaa' },
+    { bg: 'rgba(200,120,170,0.18)', border: 'rgba(200,120,170,0.45)', text: '#df8abf' },
+    { bg: 'rgba(120,160,200,0.18)', border: 'rgba(120,160,200,0.45)', text: '#8ab8df' },
+  ];
+
+  const PRESETS = {
+    minimal: [
+      { name: 'base',     value: 0   },
+      { name: 'dropdown', value: 100 },
+      { name: 'sticky',   value: 200 },
+      { name: 'modal',    value: 300 },
+      { name: 'tooltip',  value: 400 },
+    ],
+    app: [
+      { name: 'base',        value: 0    },
+      { name: 'raised',      value: 10   },
+      { name: 'dropdown',    value: 100  },
+      { name: 'sticky',      value: 200  },
+      { name: 'overlay',     value: 250  },
+      { name: 'modal',       value: 300  },
+      { name: 'popover',     value: 350  },
+      { name: 'toast',       value: 400  },
+      { name: 'tooltip',     value: 500  },
+      { name: 'max',         value: 9999 },
+    ],
+    bootstrap: [
+      { name: 'dropdown',    value: 1000 },
+      { name: 'sticky',      value: 1020 },
+      { name: 'fixed',       value: 1030 },
+      { name: 'modal-backdrop', value: 1040 },
+      { name: 'offcanvas',   value: 1045 },
+      { name: 'modal',       value: 1050 },
+      { name: 'popover',     value: 1070 },
+      { name: 'tooltip',     value: 1080 },
+      { name: 'toast',       value: 1090 },
+    ],
+  };
+
+  let layers = [...PRESETS.minimal];
+
+  function loadPreset(name) {
+    layers = PRESETS[name].map(l => ({ ...l }));
+    render();
+  }
+
+  function addLayer() {
+    const maxVal = layers.length ? Math.max(...layers.map(l => l.value)) : 0;
+    layers.push({ name: 'layer', value: maxVal + 100 });
+    render();
+  }
+
+  function removeLayer(i) {
+    layers.splice(i, 1);
+    render();
+  }
+
+  function updateName(i, val) {
+    layers[i].name = val;
+    renderDiagram();
+    renderCSS();
+  }
+
+  function updateValue(i, val) {
+    layers[i].value = parseInt(val) || 0;
+    renderDiagram();
+    renderCSS();
+  }
+
+  function toVarName(name) {
+    return '--z-' + name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  }
+
+  function sortedLayers() {
+    return [...layers].map((l, i) => ({ ...l, origIndex: i })).sort((a, b) => a.value - b.value);
+  }
+
+  function renderEditor() {
+    const list = document.getElementById('layerList');
+    list.innerHTML = layers.map((l, i) => `
+      <div class="layer-row">
+        <input type="text" value="${escHtml(l.name)}" oninput="updateName(${i}, this.value)" placeholder="layer name" />
+        <input type="number" value="${l.value}" oninput="updateValue(${i}, this.value)" />
+        <button class="del-btn" onclick="removeLayer(${i})" title="Remove">×</button>
+      </div>
+    `).join('');
+  }
+
+  function renderDiagram() {
+    const diagram = document.getElementById('diagram');
+    const sorted = sortedLayers();
+    diagram.innerHTML = sorted.map((l, rank) => {
+      const col = PALETTE[l.origIndex % PALETTE.length];
+      return `
+        <div class="diagram-item">
+          <div class="layer-block" style="background:${col.bg};border-color:${col.border};color:${col.text}">
+            <span>${escHtml(l.name || 'layer')}</span>
+            <span class="layer-value">${l.value}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderCSS() {
+    const sorted = sortedLayers();
+    const lines = [':root {', ...sorted.map(l => `  ${toVarName(l.name)}: ${l.value};`), '}'];
+    document.getElementById('cssOutput').textContent = lines.join('\n');
+  }
+
+  function render() {
+    renderEditor();
+    renderDiagram();
+    renderCSS();
+  }
+
+  function copyCSS() {
+    const text = document.getElementById('cssOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  render();
+</script>
+</body>
+</html>
