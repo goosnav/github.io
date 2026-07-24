@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Spacing Scale Generator — Free Spacing System Tool</title>
+  <meta name="description" content="Generate a CSS spacing scale from any base unit. Get px and rem values for every step, a visual bar preview, and export as CSS custom properties. Tailwind, Bootstrap, and 8px presets. Free, no signup.">
+  <meta property="og:title" content="CSS Spacing Scale Generator — Free Spacing System Tool">
+  <meta property="og:description" content="Pick a base spacing unit and generate a full scale. Named steps, visual bars, CSS variables export. Tailwind and 8px presets included. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-spacing-scale/">
+  <link rel="canonical" href="https://goosnav.github.io/css-spacing-scale/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Spacing Scale Generator",
+    "url": "https://goosnav.github.io/css-spacing-scale/",
+    "description": "Generate a CSS spacing scale from any base unit. Named steps, visual bars, CSS variables export. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+      --bar-color: rgba(201, 169, 110, 0.25);
+      --bar-border: rgba(201, 169, 110, 0.5);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      transition: color 0.15s;
+    }
+    .back:hover { color: var(--accent); }
+
+    header { margin-bottom: 2.5rem; }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* Controls */
+    .controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .controls { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+
+    .field-full { grid-column: 1 / -1; }
+
+    /* Preset pills */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .preset {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.25rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .preset:hover { border-color: var(--accent-dim); color: var(--text); }
+    .preset.active { border-color: var(--accent); color: var(--accent); background: rgba(201, 169, 110, 0.08); }
+
+    /* Scale table */
+    .scale-section { margin-bottom: 1.5rem; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .scale-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .scale-header {
+      display: grid;
+      grid-template-columns: 140px 70px 80px 1fr;
+      gap: 0;
+      padding: 0.6rem 1.25rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 140px 70px 80px 1fr;
+      align-items: center;
+      padding: 0.55rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      gap: 0;
+    }
+
+    .scale-row:last-child { border-bottom: none; }
+    .scale-row:hover { background: var(--surface2); }
+
+    .row-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .row-px {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .row-rem {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    .bar-cell { padding-right: 1rem; }
+
+    .bar-track {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--bar-color);
+      border-right: 1px solid var(--bar-border);
+      border-radius: 4px;
+      transition: width 0.25s ease;
+    }
+
+    /* Export */
+    .export-section { margin-bottom: 1.5rem; }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201, 169, 110, 0.12);
+      border: 1px solid var(--accent-dim);
+      border-radius: 6px;
+      color: var(--accent);
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover { background: rgba(201, 169, 110, 0.22); }
+    .copy-btn.copied { color: #6ec98f; border-color: #3a7a52; background: rgba(110, 201, 143, 0.1); }
+
+    .code-body {
+      padding: 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .token-prop { color: #9cb0d8; }
+    .token-val { color: #c9a96e; }
+    .token-comment { color: #4a4a5a; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    footer a { color: var(--accent-dim); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .scale-header, .scale-row {
+        grid-template-columns: 110px 60px 70px 1fr;
+      }
+      .scale-header { font-size: 0.58rem; }
+      .row-name, .row-px, .row-rem { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back">← All Tools</a>
+
+    <header>
+      <div class="eyebrow">CSS Tool</div>
+      <h1>Spacing <em>Scale</em></h1>
+      <p class="subtitle">Pick a base unit and generate a complete spacing scale — named steps with px and rem values, a visual bar preview, and CSS custom properties export. Tailwind and 8px grid presets included.</p>
+    </header>
+
+    <div class="controls">
+      <div class="field">
+        <label for="base-unit">Base Unit (px)</label>
+        <input type="number" id="base-unit" value="4" min="1" max="16" step="1">
+      </div>
+      <div class="field">
+        <label for="root-size">Root Font Size (px)</label>
+        <input type="number" id="root-size" value="16" min="10" max="24" step="1">
+      </div>
+      <div class="field field-full">
+        <label>Presets</label>
+        <div class="presets" id="presets">
+          <button class="preset active" data-base="4" data-root="16">Tailwind / 4px base</button>
+          <button class="preset" data-base="8" data-root="16">8px grid</button>
+          <button class="preset" data-base="5" data-root="16">5px base</button>
+          <button class="preset" data-base="6" data-root="16">6px base</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scale-section">
+      <div class="section-label">Scale Steps</div>
+      <div class="scale-table">
+        <div class="scale-header">
+          <span>Variable</span>
+          <span>px</span>
+          <span>rem</span>
+          <span>Visual</span>
+        </div>
+        <div id="scale-rows"></div>
+      </div>
+    </div>
+
+    <div class="export-section">
+      <div class="section-label">CSS Custom Properties</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">:root { … }</span>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+        <div class="code-body" id="code-output"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Part of the <a href="/">Goosnav free CSS tools</a> collection.</p>
+      <p>No signup · No tracking · Runs entirely in your browser</p>
+    </footer>
+  </div>
+
+  <script>
+    // Steps: [name, multiplier] — 0 and px are fixed, rest multiply base unit
+    const STEPS = [
+      ['0',   null, 0],      // always 0px
+      ['px',  null, 1],      // always 1px
+      ['0.5', 0.5,  null],
+      ['1',   1,    null],
+      ['1.5', 1.5,  null],
+      ['2',   2,    null],
+      ['2.5', 2.5,  null],
+      ['3',   3,    null],
+      ['3.5', 3.5,  null],
+      ['4',   4,    null],
+      ['5',   5,    null],
+      ['6',   6,    null],
+      ['7',   7,    null],
+      ['8',   8,    null],
+      ['9',   9,    null],
+      ['10',  10,   null],
+      ['11',  11,   null],
+      ['12',  12,   null],
+      ['14',  14,   null],
+      ['16',  16,   null],
+      ['20',  20,   null],
+      ['24',  24,   null],
+      ['28',  28,   null],
+      ['32',  32,   null],
+      ['36',  36,   null],
+      ['40',  40,   null],
+      ['44',  44,   null],
+      ['48',  48,   null],
+      ['52',  52,   null],
+      ['56',  56,   null],
+      ['60',  60,   null],
+      ['64',  64,   null],
+      ['72',  72,   null],
+      ['80',  80,   null],
+      ['96',  96,   null],
+    ];
+
+    function getStepPx(step, base) {
+      const [name, mult, fixed] = step;
+      if (fixed !== null && fixed !== undefined) return fixed; // 0 or 1
+      return base * mult;
+    }
+
+    function fmt(n, d = 4) { return parseFloat(n.toFixed(d)); }
+
+    function render() {
+      const base = parseFloat(document.getElementById('base-unit').value) || 4;
+      const root = parseFloat(document.getElementById('root-size').value) || 16;
+
+      const computed = STEPS.map(s => {
+        const px = getStepPx(s, base);
+        const rem = px / root;
+        return { name: s[0], px, rem };
+      });
+
+      const maxPx = computed[computed.length - 1].px;
+
+      // Rows
+      const rows = computed.map(s => {
+        const barPct = maxPx > 0 ? Math.min(100, (s.px / maxPx) * 100) : 0;
+        const remStr = s.px === 0 ? '0' : fmt(s.rem) + 'rem';
+        const pxStr  = s.px === 0 ? '0' : s.px + 'px';
+        return `
+          <div class="scale-row">
+            <span class="row-name">--spacing-${s.name}</span>
+            <span class="row-px">${pxStr}</span>
+            <span class="row-rem">${remStr}</span>
+            <div class="bar-cell">
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${barPct}%"></div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+      document.getElementById('scale-rows').innerHTML = rows;
+
+      // CSS output
+      const lines = [
+        '<span class="token-comment">/* Spacing Scale — Base: ' + base + 'px · Root: ' + root + 'px */</span>',
+        '<span class="token-prop">:root</span> {',
+        ...computed.map(s => {
+          const remStr = s.px === 0 ? '0' : fmt(s.rem) + 'rem';
+          const pxComment = s.px === 0 ? '' : ' <span class="token-comment">/* ' + s.px + 'px */</span>';
+          return '  <span class="token-prop">--spacing-' + s.name + '</span>: <span class="token-val">' + remStr + '</span>;' + pxComment;
+        }),
+        '}',
+      ];
+      document.getElementById('code-output').innerHTML = lines.join('\n');
+    }
+
+    // Copy plain text
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      const base = parseFloat(document.getElementById('base-unit').value) || 4;
+      const root = parseFloat(document.getElementById('root-size').value) || 16;
+      const computed = STEPS.map(s => {
+        const px = getStepPx(s, base);
+        const rem = px / root;
+        return { name: s[0], px, rem };
+      });
+
+      const text = [
+        '/* Spacing Scale — Base: ' + base + 'px · Root: ' + root + 'px */',
+        ':root {',
+        ...computed.map(s => {
+          const remStr = s.px === 0 ? '0' : fmt(s.rem) + 'rem';
+          const pxComment = s.px === 0 ? '' : ' /* ' + s.px + 'px */';
+          return '  --spacing-' + s.name + ': ' + remStr + ';' + pxComment;
+        }),
+        '}',
+      ].join('\n');
+
+      navigator.clipboard.writeText(text).then(() => {
+        this.textContent = 'Copied!';
+        this.classList.add('copied');
+        setTimeout(() => { this.textContent = 'Copy'; this.classList.remove('copied'); }, 2000);
+      });
+    });
+
+    // Presets
+    document.getElementById('presets').addEventListener('click', function(e) {
+      const btn = e.target.closest('.preset');
+      if (!btn) return;
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('base-unit').value = btn.dataset.base;
+      document.getElementById('root-size').value = btn.dataset.root;
+      render();
+    });
+
+    // Inputs
+    ['base-unit', 'root-size'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        // Clear active preset if values no longer match
+        const base = document.getElementById('base-unit').value;
+        const root = document.getElementById('root-size').value;
+        document.querySelectorAll('.preset').forEach(b => {
+          b.classList.toggle('active', b.dataset.base === base && b.dataset.root === root);
+        });
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>
