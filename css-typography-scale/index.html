@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Typography Scale Generator — Free Type Scale Tool</title>
+  <meta name="description" content="Generate a CSS typography scale from any base size and ratio. Preview named steps (xs → 5xl), get px/rem/em values, and export as CSS custom properties. Free, no signup.">
+  <meta property="og:title" content="CSS Typography Scale Generator — Free Type Scale Tool">
+  <meta property="og:description" content="Enter a base font size and scale ratio to generate a full type scale. Named steps, live preview, CSS variables export. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-typography-scale/">
+  <link rel="canonical" href="https://goosnav.github.io/css-typography-scale/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Typography Scale Generator",
+    "url": "https://goosnav.github.io/css-typography-scale/",
+    "description": "Generate a CSS typography scale from any base size and ratio. Named steps, live preview, CSS variables export. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+      --step-bg: #12121a;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      transition: color 0.15s;
+    }
+    .back:hover { color: var(--accent); }
+
+    header { margin-bottom: 2.5rem; }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* Controls */
+    .controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .controls { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      padding-right: 2.25rem;
+      cursor: pointer;
+    }
+
+    .field-full { grid-column: 1 / -1; }
+
+    /* Preset ratios pills */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .preset {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.25rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .preset:hover { border-color: var(--accent-dim); color: var(--text); }
+    .preset.active { border-color: var(--accent); color: var(--accent); background: rgba(201, 169, 110, 0.08); }
+
+    /* Steps table */
+    .steps-section { margin-bottom: 1.5rem; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .steps-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .steps-header {
+      display: grid;
+      grid-template-columns: 90px 70px 80px 80px 1fr;
+      gap: 0;
+      padding: 0.6rem 1.25rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .step-row {
+      display: grid;
+      grid-template-columns: 90px 70px 80px 80px 1fr;
+      align-items: center;
+      padding: 0.7rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      gap: 0;
+    }
+
+    .step-row:last-child { border-bottom: none; }
+    .step-row:hover { background: var(--surface2); }
+
+    .step-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .step-px {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .step-rem, .step-em {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    .step-preview {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      line-height: 1;
+      color: var(--text);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* Live preview */
+    .preview-section { margin-bottom: 1.5rem; }
+
+    .preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+    }
+
+    .preview-step {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-step:last-child { border-bottom: none; }
+
+    .preview-step-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      min-width: 48px;
+      letter-spacing: 0.05em;
+    }
+
+    .preview-step-text {
+      font-family: 'DM Serif Display', serif;
+      line-height: 1.1;
+      color: var(--text);
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* Export */
+    .export-section { margin-bottom: 1.5rem; }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(201, 169, 110, 0.12);
+      border: 1px solid var(--accent-dim);
+      border-radius: 6px;
+      color: var(--accent);
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover { background: rgba(201, 169, 110, 0.22); }
+    .copy-btn.copied { color: #6ec98f; border-color: #3a7a52; background: rgba(110, 201, 143, 0.1); }
+
+    .code-body {
+      padding: 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .token-prop { color: #9cb0d8; }
+    .token-val { color: #c9a96e; }
+    .token-comment { color: #4a4a5a; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    footer a { color: var(--accent-dim); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .steps-header, .step-row {
+        grid-template-columns: 60px 60px 70px 70px 1fr;
+      }
+      .steps-header { font-size: 0.58rem; }
+      .step-name, .step-px, .step-rem, .step-em { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back">← All Tools</a>
+
+    <header>
+      <div class="eyebrow">CSS Tool</div>
+      <h1>Typography <em>Scale</em></h1>
+      <p class="subtitle">Enter a base size and ratio to generate a complete type scale — named steps from xs to 5xl, with px, rem, and em values plus a live preview. Export as CSS custom properties.</p>
+    </header>
+
+    <div class="controls">
+      <div class="field">
+        <label for="base-size">Base Size (px)</label>
+        <input type="number" id="base-size" value="16" min="8" max="32" step="1">
+      </div>
+      <div class="field">
+        <label for="ratio-input">Scale Ratio</label>
+        <input type="number" id="ratio-input" value="1.333" min="1.01" max="2" step="0.001">
+      </div>
+      <div class="field field-full">
+        <label>Preset Ratios</label>
+        <div class="presets" id="presets">
+          <button class="preset" data-ratio="1.125">Minor Second 1.125</button>
+          <button class="preset" data-ratio="1.2">Major Second 1.2</button>
+          <button class="preset" data-ratio="1.25">Major Third 1.25</button>
+          <button class="preset active" data-ratio="1.333">Perfect Fourth 1.333</button>
+          <button class="preset" data-ratio="1.414">Augmented Fourth 1.414</button>
+          <button class="preset" data-ratio="1.5">Perfect Fifth 1.5</button>
+          <button class="preset" data-ratio="1.618">Golden Ratio 1.618</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps-section">
+      <div class="section-label">Scale Steps</div>
+      <div class="steps-table">
+        <div class="steps-header">
+          <span>Name</span>
+          <span>px</span>
+          <span>rem</span>
+          <span>em</span>
+          <span>Preview</span>
+        </div>
+        <div id="steps-rows"></div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="section-label">Live Preview</div>
+      <div class="preview-box" id="preview-box"></div>
+    </div>
+
+    <div class="export-section">
+      <div class="section-label">CSS Custom Properties</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-title">:root { … }</span>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+        <div class="code-body" id="code-output"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Part of the <a href="/">Goosnav free CSS tools</a> collection.</p>
+      <p>No signup · No tracking · Runs entirely in your browser</p>
+    </footer>
+  </div>
+
+  <script>
+    const STEPS = [
+      { name: 'xs',   exp: -3 },
+      { name: 'sm',   exp: -2 },
+      { name: 'base', exp: -1 },  // base is ratio^0 = base px, but we offset
+      { name: 'lg',   exp:  0 },
+      { name: 'xl',   exp:  1 },
+      { name: '2xl',  exp:  2 },
+      { name: '3xl',  exp:  3 },
+      { name: '4xl',  exp:  4 },
+      { name: '5xl',  exp:  5 },
+    ];
+
+    // "base" step = basePx; steps around it are ratio powers relative to base
+    // xs = base / ratio^3, sm = base / ratio^2, base = base, lg = base * ratio, etc.
+    // So exp: -3 means base * ratio^-3
+
+    const PREVIEW_TEXT = 'The quick brown fox jumps';
+
+    function computeStep(basePx, ratio, exp) {
+      const px = basePx * Math.pow(ratio, exp);
+      const rem = px / 16;
+      const em = px / basePx;
+      return { px, rem, em };
+    }
+
+    function fmt(n, d = 3) { return parseFloat(n.toFixed(d)); }
+
+    function render() {
+      const basePx = parseFloat(document.getElementById('base-size').value) || 16;
+      const ratio  = parseFloat(document.getElementById('ratio-input').value) || 1.333;
+
+      const computed = STEPS.map(s => ({ ...s, ...computeStep(basePx, ratio, s.exp) }));
+
+      // Steps table
+      const rows = computed.map(s => `
+        <div class="step-row">
+          <span class="step-name">--font-size-${s.name}</span>
+          <span class="step-px">${fmt(s.px, 1)}px</span>
+          <span class="step-rem">${fmt(s.rem)}rem</span>
+          <span class="step-em">${fmt(s.em)}em</span>
+          <span class="step-preview" style="font-size:${Math.min(s.px, 36)}px">${PREVIEW_TEXT}</span>
+        </div>
+      `).join('');
+      document.getElementById('steps-rows').innerHTML = rows;
+
+      // Live preview (large to small)
+      const previewSteps = [...computed].reverse();
+      const preview = previewSteps.map(s => `
+        <div class="preview-step">
+          <span class="preview-step-tag">${s.name}</span>
+          <span class="preview-step-text" style="font-size:${s.px}px">${PREVIEW_TEXT}</span>
+        </div>
+      `).join('');
+      document.getElementById('preview-box').innerHTML = preview;
+
+      // CSS output
+      const lines = [
+        '<span class="token-comment">/* Typography Scale — Base: ' + basePx + 'px · Ratio: ' + fmt(ratio, 3) + ' */</span>',
+        '<span class="token-prop">:root</span> {',
+        ...computed.map(s =>
+          '  <span class="token-prop">--font-size-' + s.name + '</span>: <span class="token-val">' + fmt(s.rem) + 'rem</span>; <span class="token-comment">/* ' + fmt(s.px, 1) + 'px */</span>'
+        ),
+        '}',
+      ];
+      document.getElementById('code-output').innerHTML = lines.join('\n');
+    }
+
+    // Copy
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      const basePx = parseFloat(document.getElementById('base-size').value) || 16;
+      const ratio  = parseFloat(document.getElementById('ratio-input').value) || 1.333;
+      const computed = STEPS.map(s => ({ ...s, ...computeStep(basePx, ratio, s.exp) }));
+
+      const text = [
+        '/* Typography Scale — Base: ' + basePx + 'px · Ratio: ' + fmt(ratio, 3) + ' */',
+        ':root {',
+        ...computed.map(s => '  --font-size-' + s.name + ': ' + fmt(s.rem) + 'rem; /* ' + fmt(s.px, 1) + 'px */'),
+        '}',
+      ].join('\n');
+
+      navigator.clipboard.writeText(text).then(() => {
+        this.textContent = 'Copied!';
+        this.classList.add('copied');
+        setTimeout(() => { this.textContent = 'Copy'; this.classList.remove('copied'); }, 2000);
+      });
+    });
+
+    // Preset buttons
+    document.getElementById('presets').addEventListener('click', function(e) {
+      const btn = e.target.closest('.preset');
+      if (!btn) return;
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ratio-input').value = btn.dataset.ratio;
+      render();
+    });
+
+    // Input events
+    document.getElementById('base-size').addEventListener('input', render);
+    document.getElementById('ratio-input').addEventListener('input', function() {
+      // Clear active preset if custom ratio typed
+      const val = parseFloat(this.value);
+      document.querySelectorAll('.preset').forEach(b => {
+        b.classList.toggle('active', parseFloat(b.dataset.ratio) === val);
+      });
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
