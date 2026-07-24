@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Counter &amp; List Style Generator — Visual list-style &amp; counter Builder</title>
+  <meta name="description" content="Generate CSS list-style-type, custom counters with counter-reset/counter-increment, and ::before content tricks. Preview live, copy instantly. Free, no signup.">
+  <meta property="og:title" content="CSS Counter &amp; List Style Generator — Visual list-style &amp; counter Builder">
+  <meta property="og:description" content="Pick list-style-type, build custom CSS counters, preview live, copy CSS instantly. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-counter-list/">
+  <link rel="canonical" href="https://goosnav.github.io/css-counter-list/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Counter & List Style Generator",
+    "url": "https://goosnav.github.io/css-counter-list/",
+    "description": "Generate CSS list-style-type, custom counters, and ::before content tricks. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+      --danger: #e87070;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    a { color: var(--accent); }
+
+    .page-header {
+      max-width: 860px;
+      margin: 0 auto 2.5rem;
+    }
+    .breadcrumb {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--accent); }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.2;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: .95rem; }
+
+    .workspace {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .card-title {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Mode tabs */
+    .mode-tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.5rem;
+    }
+    .mode-tab {
+      flex: 1;
+      padding: .6rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: .9rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .mode-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d0d0f;
+      font-weight: 600;
+    }
+
+    /* List style panel */
+    .list-style-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: .5rem;
+    }
+    .style-btn {
+      padding: .5rem .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: .82rem;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: left;
+    }
+    .style-btn:hover { border-color: var(--accent-dim); }
+    .style-btn.active { border-color: var(--accent); background: #1e1a12; color: var(--accent); }
+
+    .list-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .field label {
+      display: block;
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+    }
+    .field input, .field select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      padding: .5rem .75rem;
+    }
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+    }
+
+    /* Counter panel */
+    .counter-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .counter-fields .field.full { grid-column: 1 / -1; }
+
+    .content-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin-top: .5rem;
+    }
+    .preset-btn {
+      padding: .3rem .65rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: .78rem;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .preset-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+
+    /* Preview */
+    .preview-area {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      min-height: 180px;
+    }
+    #preview-list {
+      padding-left: 2rem;
+      font-family: Georgia, serif;
+      font-size: 1rem;
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+    #preview-list.no-bullet { padding-left: 0; list-style: none; }
+
+    /* Output */
+    .output-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      line-height: 1.7;
+      white-space: pre;
+      overflow-x: auto;
+      color: #c8c0b0;
+    }
+    .kw  { color: #c678dd; }
+    .sel { color: #61afef; }
+    .prop{ color: #56b6c2; }
+    .val { color: #98c379; }
+    .str { color: #e5c07b; }
+    .cmt { color: #5c6370; font-style: italic; }
+
+    .copy-btn {
+      display: block;
+      width: 100%;
+      margin-top: .75rem;
+      padding: .7rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #0d0d0f;
+      font-family: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .copy-btn:hover { opacity: .85; }
+    .copy-btn.copied { background: #4caf80; }
+
+    /* Explainer */
+    .explainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .ex-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .ex-card h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: var(--accent);
+      margin-bottom: .4rem;
+    }
+    .ex-card p {
+      font-size: .8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 560px) {
+      .list-options, .counter-fields { grid-template-columns: 1fr; }
+      .counter-fields .field.full { grid-column: 1; }
+      .mode-tabs { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <p class="breadcrumb"><a href="/">← Goosnav Tools</a></p>
+  <h1>CSS Counter &amp; List Style Generator</h1>
+  <p class="subtitle">Build list-style-type rules and custom CSS counters visually. Preview live, copy instantly.</p>
+</div>
+
+<div class="workspace">
+
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="list">list-style-type</button>
+    <button class="mode-tab" data-mode="counter">Custom Counter</button>
+  </div>
+
+  <!-- LIST STYLE panel -->
+  <div class="card" id="panel-list">
+    <p class="card-title">List Style Type</p>
+    <div class="list-style-grid" id="style-grid"></div>
+
+    <div class="list-options">
+      <div class="field">
+        <label>list-style-position</label>
+        <select id="list-position">
+          <option value="outside">outside</option>
+          <option value="inside">inside</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Custom list-style-image URL (optional)</label>
+        <input id="list-image" type="text" placeholder='url("bullet.svg")' />
+      </div>
+    </div>
+  </div>
+
+  <!-- COUNTER panel -->
+  <div class="card" id="panel-counter" style="display:none">
+    <p class="card-title">Custom Counter</p>
+    <div class="counter-fields">
+      <div class="field">
+        <label>Counter name</label>
+        <input id="ctr-name" type="text" value="my-counter" />
+      </div>
+      <div class="field">
+        <label>Start value (counter-reset)</label>
+        <input id="ctr-start" type="number" value="0" />
+      </div>
+      <div class="field">
+        <label>Increment by (counter-increment)</label>
+        <input id="ctr-increment" type="number" value="1" />
+      </div>
+      <div class="field">
+        <label>Selector for counter parent</label>
+        <input id="ctr-parent" type="text" value="ol.custom" />
+      </div>
+      <div class="field full">
+        <label>content value for ::before</label>
+        <input id="ctr-content" type="text" value='counters(my-counter, ".") " "' />
+        <div class="content-presets">
+          <button class="preset-btn" data-content='counter(my-counter) ". "'># .</button>
+          <button class="preset-btn" data-content='counter(my-counter) ") "'># )</button>
+          <button class="preset-btn" data-content='"(" counter(my-counter) ") "'>(#)</button>
+          <button class="preset-btn" data-content='counters(my-counter, ".") " "'>nested</button>
+          <button class="preset-btn" data-content='"Step " counter(my-counter) ": "'>Step #:</button>
+          <button class="preset-btn" data-content='"§" counter(my-counter) " "'>§#</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <p class="card-title">Live Preview</p>
+    <div class="preview-area">
+      <ol id="preview-list">
+        <li>First item</li>
+        <li>Second item</li>
+        <li>Third item
+          <ol id="preview-nested">
+            <li>Nested item A</li>
+            <li>Nested item B</li>
+          </ol>
+        </li>
+        <li>Fourth item</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="card">
+    <p class="card-title">Generated CSS</p>
+    <div class="output-block" id="output"></div>
+    <button class="copy-btn" id="copy-btn">Copy CSS</button>
+  </div>
+
+  <!-- Explainer -->
+  <div class="card">
+    <p class="card-title">Quick Reference</p>
+    <div class="explainer">
+      <div class="ex-card">
+        <h3>list-style-type</h3>
+        <p>Controls the bullet or number marker on &lt;li&gt; elements. Works on both &lt;ul&gt; and &lt;ol&gt;.</p>
+      </div>
+      <div class="ex-card">
+        <h3>counter-reset</h3>
+        <p>Creates a new counter (or resets it to a value) on the parent element.</p>
+      </div>
+      <div class="ex-card">
+        <h3>counter-increment</h3>
+        <p>Advances the counter by N on each matched element. Negative values count down.</p>
+      </div>
+      <div class="ex-card">
+        <h3>counter() vs counters()</h3>
+        <p><code>counter(name)</code> reads the nearest counter. <code>counters(name,".")</code> concatenates all ancestor levels — useful for "1.2.3" outlines.</p>
+      </div>
+      <div class="ex-card">
+        <h3>::before content</h3>
+        <p>Inject the counter value as a pseudo-element. Combine with strings like <code>"Step " counter(n) ": "</code>.</p>
+      </div>
+      <div class="ex-card">
+        <h3>list-style: none</h3>
+        <p>Remove all markers. Pair with custom counters via ::before for full design control without browser defaults.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style id="preview-style"></style>
+
+<script>
+  const LIST_STYLES = [
+    'disc','circle','square','none',
+    'decimal','decimal-leading-zero',
+    'lower-alpha','upper-alpha',
+    'lower-roman','upper-roman',
+    'lower-greek','lower-latin','upper-latin',
+    'armenian','georgian',
+    'lower-latin','hiragana','katakana',
+    'hiragana-iroha','katakana-iroha',
+    'cjk-ideographic',
+  ];
+
+  // dedupe
+  const STYLES = [...new Set(LIST_STYLES)];
+
+  let state = {
+    mode: 'list',
+    listStyle: 'decimal',
+    listPosition: 'outside',
+    listImage: '',
+  };
+
+  // Build style grid
+  const grid = document.getElementById('style-grid');
+  STYLES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (s === state.listStyle ? ' active' : '');
+    btn.textContent = s;
+    btn.dataset.style = s;
+    grid.appendChild(btn);
+  });
+
+  function getCounterState() {
+    return {
+      name: document.getElementById('ctr-name').value.trim() || 'my-counter',
+      start: parseInt(document.getElementById('ctr-start').value) || 0,
+      increment: parseInt(document.getElementById('ctr-increment').value) || 1,
+      parent: document.getElementById('ctr-parent').value.trim() || 'ol.custom',
+      content: document.getElementById('ctr-content').value.trim(),
+    };
+  }
+
+  function buildListCSS() {
+    const pos = document.getElementById('list-position').value;
+    const img = document.getElementById('list-image').value.trim();
+    const lines = [];
+    lines.push(`ol, ul {`);
+    lines.push(`  list-style-type: ${state.listStyle};`);
+    if (pos !== 'outside') lines.push(`  list-style-position: ${pos};`);
+    if (img) lines.push(`  list-style-image: ${img};`);
+    lines.push(`}`);
+    return lines.join('\n');
+  }
+
+  function buildCounterCSS() {
+    const c = getCounterState();
+    const lines = [];
+    lines.push(`${c.parent} {`);
+    lines.push(`  list-style: none;`);
+    lines.push(`  counter-reset: ${c.name} ${c.start};`);
+    lines.push(`}`);
+    lines.push('');
+    lines.push(`${c.parent} li {`);
+    lines.push(`  counter-increment: ${c.name}${c.increment !== 1 ? ' ' + c.increment : ''};`);
+    lines.push(`  position: relative;`);
+    lines.push(`  padding-left: 2em;`);
+    lines.push(`}`);
+    lines.push('');
+    lines.push(`${c.parent} li::before {`);
+    lines.push(`  content: ${c.content};`);
+    lines.push(`  position: absolute;`);
+    lines.push(`  left: 0;`);
+    lines.push(`  font-weight: 600;`);
+    lines.push(`  color: #555;`);
+    lines.push(`}`);
+    return lines.join('\n');
+  }
+
+  function syntaxHL(css) {
+    return css
+      .replace(/\/\*.*?\*\//gs, m => `<span class="cmt">${m}</span>`)
+      .replace(/(ol|ul|li|ol\.[\w-]+|ul\.[\w-]+)([\s,{])/g, '<span class="sel">$1</span>$2')
+      .replace(/(::before|::after)/g, '<span class="sel">$1</span>')
+      .replace(/(list-style[\w-]*|counter-reset|counter-increment|content|position|padding-left|left|font-weight|color):/g, '<span class="prop">$1</span>:')
+      .replace(/:\s*([^;{}\n]+)/g, (m, v) => ': <span class="val">' + v.trim() + '</span>');
+  }
+
+  function applyPreviewStyle() {
+    const css = state.mode === 'list' ? buildListCSS() : buildCounterCSS();
+    const previewStyle = document.getElementById('preview-style');
+
+    if (state.mode === 'list') {
+      const pos = document.getElementById('list-position').value;
+      const img = document.getElementById('list-image').value.trim();
+      let s = `#preview-list { list-style-type: ${state.listStyle}; list-style-position: ${pos};`;
+      if (img) s += ` list-style-image: ${img};`;
+      s += ' }';
+      s += ' #preview-list li::before { content: none; } #preview-list li { counter-increment: none; padding-left: 0; position: static; }';
+      previewStyle.textContent = s;
+      document.getElementById('preview-list').className = '';
+    } else {
+      const c = getCounterState();
+      let s = `#preview-list { list-style: none; counter-reset: ${c.name} ${c.start}; padding-left: 0; }`;
+      s += ` #preview-list li { counter-increment: ${c.name}${c.increment !== 1 ? ' ' + c.increment : ''}; position: relative; padding-left: 2em; }`;
+      s += ` #preview-list li::before { content: ${c.content}; position: absolute; left: 0; font-weight: 600; color: #555; }`;
+      previewStyle.textContent = s;
+      document.getElementById('preview-list').className = 'no-bullet';
+    }
+
+    document.getElementById('output').innerHTML = syntaxHL(css);
+  }
+
+  // Events
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      state.mode = tab.dataset.mode;
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.getElementById('panel-list').style.display = state.mode === 'list' ? '' : 'none';
+      document.getElementById('panel-counter').style.display = state.mode === 'counter' ? '' : 'none';
+      applyPreviewStyle();
+    });
+  });
+
+  grid.addEventListener('click', e => {
+    if (!e.target.dataset.style) return;
+    state.listStyle = e.target.dataset.style;
+    grid.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === state.listStyle));
+    applyPreviewStyle();
+  });
+
+  document.getElementById('list-position').addEventListener('change', applyPreviewStyle);
+  document.getElementById('list-image').addEventListener('input', applyPreviewStyle);
+
+  ['ctr-name','ctr-start','ctr-increment','ctr-parent','ctr-content'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      // sync counter name in content if it matches old name
+      applyPreviewStyle();
+    });
+  });
+
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('ctr-content').value = btn.dataset.content;
+      applyPreviewStyle();
+    });
+  });
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    const raw = state.mode === 'list' ? buildListCSS() : buildCounterCSS();
+    navigator.clipboard.writeText(raw).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+
+  applyPreviewStyle();
+</script>
+</body>
+</html>
