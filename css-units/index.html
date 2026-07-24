@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Units Converter — px, rem, em, vw, vh, % and more</title>
+  <meta name="description" content="Convert CSS units instantly: px ↔ rem ↔ em ↔ vw ↔ vh ↔ %. Set your base font size and viewport dimensions. Free, in-browser, no signup.">
+  <meta property="og:title" content="CSS Units Converter — px, rem, em, vw, vh, % and more">
+  <meta property="og:description" content="Convert between px, rem, em, vw, vh, %, pt, and cm with configurable base font size and viewport. Free, in-browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-units/">
+  <link rel="canonical" href="https://goosnav.github.io/css-units/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Units Converter",
+    "url": "https://goosnav.github.io/css-units/",
+    "description": "Convert CSS units instantly: px, rem, em, vw, vh, %, pt, cm with configurable base font size and viewport dimensions. Free, in-browser.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --surface2: #f0efe9;
+      --border: #e2e0d8;
+      --text: #1a1917;
+      --muted: #6b6860;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 1rem;
+    }
+
+    header {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 0 1.5rem;
+    }
+
+    header a.back {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+      transition: color 0.15s;
+    }
+    header a.back:hover { color: var(--text); }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    h1 span { color: var(--muted); font-weight: 400; }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding-bottom: 4rem;
+    }
+
+    /* Config strip */
+    .config-strip {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .config-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .config-input {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      width: 72px;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .config-input:focus { border-color: var(--accent); }
+
+    .config-unit {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* Converter grid */
+    .converter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .unit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem 0.9rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .unit-card:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .unit-card.highlight {
+      border-color: var(--accent);
+    }
+
+    .unit-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .unit-name-full {
+      font-size: 0.65rem;
+      color: #aaa;
+    }
+
+    .unit-input {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      padding: 0;
+    }
+
+    .unit-suffix {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.2rem 0.45rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      opacity: 0;
+    }
+    .unit-card:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .copy-btn.copied { background: #16a34a; color: #fff; border-color: #16a34a; opacity: 1; }
+
+    /* Common sizes quick-ref */
+    .quick-ref {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .quick-ref h2 {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .ref-chip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.7rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+    .ref-chip:hover { border-color: var(--accent); background: var(--accent-light); }
+
+    .ref-chip-label { color: var(--muted); }
+    .ref-chip-val { color: var(--text); font-weight: 500; }
+
+    /* Cheat sheet */
+    .cheat-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .cheat-sheet h2 {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .cheat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    .cheat-table th {
+      font-family: var(--mono);
+      font-weight: 500;
+      text-align: left;
+      padding: 0.4rem 0.75rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .cheat-table td {
+      font-family: var(--mono);
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid var(--surface2);
+      color: var(--text);
+    }
+    .cheat-table tr:last-child td { border-bottom: none; }
+    .cheat-table td:first-child { font-weight: 600; color: var(--accent); }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/">← All Tools</a>
+  <h1>CSS Units Converter <span>/ px rem em vw vh %</span></h1>
+  <p class="subtitle">Type in any unit — all others update instantly. Adjust base font size and viewport below.</p>
+</header>
+
+<main>
+
+  <!-- Config strip -->
+  <div class="config-strip">
+    <div class="config-group">
+      <span class="config-label">Base font size</span>
+      <div class="config-row">
+        <input class="config-input" id="baseFontSize" type="number" value="16" min="1" max="64" step="0.5">
+        <span class="config-unit">px</span>
+      </div>
+    </div>
+    <div class="config-group">
+      <span class="config-label">Parent / context font size (for em)</span>
+      <div class="config-row">
+        <input class="config-input" id="parentFontSize" type="number" value="16" min="1" max="128" step="0.5">
+        <span class="config-unit">px</span>
+      </div>
+    </div>
+    <div class="config-group">
+      <span class="config-label">Viewport width</span>
+      <div class="config-row">
+        <input class="config-input" id="vpWidth" type="number" value="1440" min="1" max="9999" step="1">
+        <span class="config-unit">px</span>
+      </div>
+    </div>
+    <div class="config-group">
+      <span class="config-label">Viewport height</span>
+      <div class="config-row">
+        <input class="config-input" id="vpHeight" type="number" value="900" min="1" max="9999" step="1">
+        <span class="config-unit">px</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unit cards -->
+  <div class="converter-grid" id="converterGrid">
+    <!-- injected by JS -->
+  </div>
+
+  <!-- Common sizes quick ref -->
+  <div class="quick-ref">
+    <h2>Common sizes — click to load</h2>
+    <div class="ref-grid" id="refGrid"></div>
+  </div>
+
+  <!-- Cheat sheet -->
+  <div class="cheat-sheet">
+    <h2>Unit reference</h2>
+    <table class="cheat-table">
+      <thead>
+        <tr>
+          <th>Unit</th>
+          <th>Name</th>
+          <th>Relative to</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>px</td><td>Pixel</td><td>Screen pixel (device-independent)</td><td>Borders, shadows, precise sizing</td></tr>
+        <tr><td>rem</td><td>Root em</td><td>Root (&lt;html&gt;) font-size</td><td>Font sizes, spacing — scales with user pref</td></tr>
+        <tr><td>em</td><td>Em</td><td>Current element's font-size</td><td>Padding/margin relative to text size</td></tr>
+        <tr><td>vw</td><td>Viewport width</td><td>1% of viewport width</td><td>Fluid widths, responsive type</td></tr>
+        <tr><td>vh</td><td>Viewport height</td><td>1% of viewport height</td><td>Full-screen sections, hero heights</td></tr>
+        <tr><td>%</td><td>Percent</td><td>Parent element value</td><td>Width, height relative to parent</td></tr>
+        <tr><td>pt</td><td>Point</td><td>1/72 inch (96px = 72pt)</td><td>Print stylesheets</td></tr>
+        <tr><td>cm</td><td>Centimeter</td><td>Physical centimeter</td><td>Print layouts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  <p>Built by <a href="https://goosnav.com">Goosnav</a> · Runs 100% in your browser · <a href="/">More free tools</a></p>
+</footer>
+
+<script>
+  const UNITS = [
+    { key: 'px',  label: 'px',  name: 'Pixels',           decimals: 3 },
+    { key: 'rem', label: 'rem', name: 'Root em',           decimals: 4 },
+    { key: 'em',  label: 'em',  name: 'Em (parent)',       decimals: 4 },
+    { key: 'vw',  label: 'vw',  name: 'Viewport width %', decimals: 4 },
+    { key: 'vh',  label: 'vh',  name: 'Viewport height %',decimals: 4 },
+    { key: '%',   label: '%',   name: 'Percent (parent)',  decimals: 3 },
+    { key: 'pt',  label: 'pt',  name: 'Points (print)',    decimals: 3 },
+    { key: 'cm',  label: 'cm',  name: 'Centimeters',       decimals: 5 },
+  ];
+
+  const COMMON = [
+    { label: '1px border',   px: 1 },
+    { label: '4px gap',      px: 4 },
+    { label: '8px spacing',  px: 8 },
+    { label: '12px small',   px: 12 },
+    { label: '16px base',    px: 16 },
+    { label: '20px body',    px: 20 },
+    { label: '24px h3',      px: 24 },
+    { label: '32px h2',      px: 32 },
+    { label: '48px h1',      px: 48 },
+    { label: '64px display', px: 64 },
+    { label: '320px mobile', px: 320 },
+    { label: '768px tablet', px: 768 },
+    { label: '1200px desktop', px: 1200 },
+  ];
+
+  function getConfig() {
+    return {
+      base:   parseFloat(document.getElementById('baseFontSize').value)  || 16,
+      parent: parseFloat(document.getElementById('parentFontSize').value) || 16,
+      vpW:    parseFloat(document.getElementById('vpWidth').value)        || 1440,
+      vpH:    parseFloat(document.getElementById('vpHeight').value)       || 900,
+    };
+  }
+
+  // Convert any unit value → px
+  function toPx(value, unit, cfg) {
+    switch (unit) {
+      case 'px':  return value;
+      case 'rem': return value * cfg.base;
+      case 'em':  return value * cfg.parent;
+      case 'vw':  return (value / 100) * cfg.vpW;
+      case 'vh':  return (value / 100) * cfg.vpH;
+      case '%':   return (value / 100) * cfg.parent; // treat parent as reference length
+      case 'pt':  return value * (96 / 72);
+      case 'cm':  return value * (96 / 2.54);
+      default:    return value;
+    }
+  }
+
+  // Convert px → any unit
+  function fromPx(px, unit, cfg) {
+    switch (unit) {
+      case 'px':  return px;
+      case 'rem': return px / cfg.base;
+      case 'em':  return px / cfg.parent;
+      case 'vw':  return (px / cfg.vpW) * 100;
+      case 'vh':  return (px / cfg.vpH) * 100;
+      case '%':   return (px / cfg.parent) * 100;
+      case 'pt':  return px * (72 / 96);
+      case 'cm':  return px * (2.54 / 96);
+      default:    return px;
+    }
+  }
+
+  function fmt(v, decimals) {
+    if (!isFinite(v)) return '';
+    // trim trailing zeros up to `decimals` places
+    return parseFloat(v.toFixed(decimals)).toString();
+  }
+
+  let inputs = {};
+  let sourceKey = 'px';
+
+  function buildGrid() {
+    const grid = document.getElementById('converterGrid');
+    grid.innerHTML = '';
+    UNITS.forEach(u => {
+      const card = document.createElement('div');
+      card.className = 'unit-card';
+      card.id = `card-${u.key}`;
+      card.innerHTML = `
+        <div class="unit-label">
+          <span>${u.label}</span>
+          <span class="unit-name-full">${u.name}</span>
+        </div>
+        <input class="unit-input" id="input-${u.key}" type="number" step="any" placeholder="0" aria-label="${u.label} value">
+        <div class="unit-suffix">${u.label}</div>
+        <button class="copy-btn" data-unit="${u.key}">copy</button>
+      `;
+      grid.appendChild(card);
+
+      const inp = card.querySelector('.unit-input');
+      inputs[u.key] = inp;
+
+      inp.addEventListener('input', () => {
+        sourceKey = u.key;
+        recalc();
+      });
+      inp.addEventListener('focus', () => {
+        document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('highlight'));
+        card.classList.add('highlight');
+      });
+
+      card.querySelector('.copy-btn').addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const val = inp.value;
+        if (!val) return;
+        navigator.clipboard.writeText(`${val}${u.key}`).then(() => {
+          btn.textContent = '✓';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
+        });
+      });
+    });
+  }
+
+  function recalc() {
+    const cfg = getConfig();
+    const src = UNITS.find(u => u.key === sourceKey);
+    const srcVal = parseFloat(inputs[sourceKey].value);
+    if (isNaN(srcVal)) {
+      UNITS.forEach(u => { if (u.key !== sourceKey) inputs[u.key].value = ''; });
+      return;
+    }
+    const px = toPx(srcVal, sourceKey, cfg);
+    UNITS.forEach(u => {
+      if (u.key === sourceKey) return;
+      inputs[u.key].value = fmt(fromPx(px, u.key, cfg), u.decimals);
+    });
+  }
+
+  function buildRefGrid() {
+    const grid = document.getElementById('refGrid');
+    grid.innerHTML = '';
+    COMMON.forEach(item => {
+      const chip = document.createElement('button');
+      chip.className = 'ref-chip';
+      chip.innerHTML = `<span class="ref-chip-label">${item.label}</span><span class="ref-chip-val">${item.px}px</span>`;
+      chip.addEventListener('click', () => {
+        sourceKey = 'px';
+        inputs['px'].value = item.px;
+        document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('highlight'));
+        document.getElementById('card-px').classList.add('highlight');
+        recalc();
+        inputs['px'].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+      grid.appendChild(chip);
+    });
+  }
+
+  // Config changes trigger recalc
+  ['baseFontSize', 'parentFontSize', 'vpWidth', 'vpHeight'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalc);
+  });
+
+  buildGrid();
+  buildRefGrid();
+
+  // Seed with 16px
+  inputs['px'].value = 16;
+  recalc();
+</script>
+</body>
+</html>
