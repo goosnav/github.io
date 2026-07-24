@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll Snap Builder — Visual scroll-snap-type &amp; scroll-snap-align Generator</title>
+  <meta name="description" content="Build CSS scroll snap containers visually. Set scroll-snap-type, scroll-snap-align, scroll-padding, scroll-margin. Live preview, copy CSS instantly. Free, no signup.">
+  <meta property="og:title" content="CSS Scroll Snap Builder — Visual scroll-snap-type &amp; scroll-snap-align Generator">
+  <meta property="og:description" content="Build CSS scroll snap containers visually. Set scroll-snap-type, scroll-snap-align, scroll-padding, scroll-margin. Live preview, copy CSS instantly.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-scroll-snap/">
+  <link rel="canonical" href="https://goosnav.github.io/css-scroll-snap/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Scroll Snap Builder",
+    "url": "https://goosnav.github.io/css-scroll-snap/",
+    "description": "Build CSS scroll snap containers visually. Set scroll-snap-type, scroll-snap-align, scroll-padding, scroll-margin. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    a { color: var(--accent); }
+
+    .page-header {
+      max-width: 860px;
+      margin: 0 auto 2.5rem;
+    }
+    .breadcrumb {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--accent); }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.2;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: .95rem; }
+
+    .workspace {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-title {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Controls grid */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 600px) { .controls-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field label { font-size: .82rem; color: var(--text-muted); }
+
+    select, input[type="number"], input[type="text"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: .45rem .7rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      width: 100%;
+      appearance: none;
+      cursor: pointer;
+    }
+    select:focus, input:focus {
+      outline: 2px solid var(--accent-dim);
+      border-color: var(--accent-dim);
+    }
+
+    /* Pill toggles */
+    .pill-group { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .pill {
+      padding: .3rem .75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      font-size: .8rem;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all .15s;
+      user-select: none;
+    }
+    .pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d0d0f;
+      font-weight: 600;
+    }
+
+    /* Child align table */
+    .child-table { width: 100%; border-collapse: collapse; }
+    .child-table th {
+      font-size: .75rem;
+      color: var(--text-muted);
+      text-align: left;
+      padding: .4rem .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .child-table td { padding: .4rem .5rem; }
+    .child-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+    .child-label { font-family: 'DM Mono', monospace; font-size: .8rem; color: var(--accent); }
+
+    /* Preview */
+    .preview-wrap {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .preview-label {
+      font-size: .72rem;
+      color: var(--text-muted);
+      margin-bottom: .75rem;
+      font-style: italic;
+    }
+
+    /* Scroll snap preview container */
+    #snap-preview-x {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 0;
+      width: 100%;
+      background: var(--code-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    #snap-preview-y {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      gap: 0;
+      width: 100%;
+      height: 280px;
+      background: var(--code-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    #snap-preview-both {
+      display: grid;
+      overflow: auto;
+      scroll-behavior: smooth;
+      background: var(--code-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      width: 100%;
+      height: 280px;
+    }
+
+    .snap-item {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      border-radius: 4px;
+      margin: 4px;
+      user-select: none;
+    }
+
+    /* Output */
+    .output-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      line-height: 1.7;
+      color: #d4d0c8;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .tok-sel { color: #c9a96e; }
+    .tok-prop { color: #8ab4f8; }
+    .tok-val { color: #a8d8a8; }
+    .tok-comment { color: #555; font-style: italic; }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .5rem 1.1rem;
+      background: var(--accent);
+      color: #0d0d0f;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: opacity .15s;
+    }
+    .copy-btn:hover { opacity: .85; }
+    .copy-btn.copied { background: #6fcc8a; }
+
+    .section-sep { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    /* scrollbar styling for preview */
+    #snap-preview-x::-webkit-scrollbar,
+    #snap-preview-y::-webkit-scrollbar,
+    #snap-preview-both::-webkit-scrollbar { height: 6px; width: 6px; }
+    #snap-preview-x::-webkit-scrollbar-track,
+    #snap-preview-y::-webkit-scrollbar-track,
+    #snap-preview-both::-webkit-scrollbar-track { background: transparent; }
+    #snap-preview-x::-webkit-scrollbar-thumb,
+    #snap-preview-y::-webkit-scrollbar-thumb,
+    #snap-preview-both::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <p class="breadcrumb"><a href="/">← goosnav</a> / CSS Scroll Snap Builder</p>
+  <h1>CSS Scroll Snap Builder</h1>
+  <p class="subtitle">Configure <code>scroll-snap-type</code>, <code>scroll-snap-align</code>, <code>scroll-padding</code>, and <code>scroll-margin</code> visually. Live preview + instant copy.</p>
+</div>
+
+<div class="workspace">
+
+  <!-- Container settings -->
+  <div class="card">
+    <div class="card-title">Container Settings</div>
+    <div class="controls-grid">
+
+      <div class="field">
+        <label>scroll-snap-type — axis</label>
+        <div class="pill-group" id="axis-group">
+          <span class="pill active" data-val="x">x</span>
+          <span class="pill" data-val="y">y</span>
+          <span class="pill" data-val="both">both</span>
+          <span class="pill" data-val="block">block</span>
+          <span class="pill" data-val="inline">inline</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>scroll-snap-type — strictness</label>
+        <div class="pill-group" id="strict-group">
+          <span class="pill active" data-val="mandatory">mandatory</span>
+          <span class="pill" data-val="proximity">proximity</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>scroll-padding (px)</label>
+        <input type="number" id="scroll-padding" value="0" min="0" max="200">
+      </div>
+
+      <div class="field">
+        <label>overflow (container)</label>
+        <select id="overflow-sel">
+          <option value="auto" selected>auto</option>
+          <option value="scroll">scroll</option>
+          <option value="hidden">hidden</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Child settings -->
+  <div class="card">
+    <div class="card-title">Children — scroll-snap-align &amp; scroll-margin</div>
+
+    <table class="child-table" id="child-table">
+      <thead>
+        <tr>
+          <th>Child</th>
+          <th>scroll-snap-align</th>
+          <th>scroll-margin (px)</th>
+        </tr>
+      </thead>
+      <tbody id="child-tbody"></tbody>
+    </table>
+
+    <hr class="section-sep">
+
+    <div class="controls-grid">
+      <div class="field">
+        <label>Number of children</label>
+        <input type="number" id="child-count" value="5" min="2" max="12">
+      </div>
+      <div class="field">
+        <label>Child size</label>
+        <select id="child-size">
+          <option value="full" selected>Full viewport width/height</option>
+          <option value="partial">~80% — peeking next</option>
+          <option value="small">~50% — two visible</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="card">
+    <div class="card-title">Live Preview — scroll to snap</div>
+    <p class="preview-label">Scroll inside the box below to see snapping in action.</p>
+    <div id="preview-container"></div>
+  </div>
+
+  <!-- CSS Output -->
+  <div class="card">
+    <div class="card-title">CSS Output</div>
+    <div class="output-block" id="css-output"></div>
+    <button class="copy-btn" id="copy-btn">Copy CSS</button>
+  </div>
+
+</div>
+
+<script>
+  // State
+  const state = {
+    axis: 'x',
+    strictness: 'mandatory',
+    scrollPadding: 0,
+    overflow: 'auto',
+    childCount: 5,
+    childSize: 'full',
+    // per-child: align, margin
+    children: []
+  };
+
+  const COLORS = [
+    '#c9a96e','#8ab4f8','#a8d8a8','#f8a8a8','#c8a8f8',
+    '#f8d0a8','#a8e8f8','#f8a8d8','#d8f8a8','#f8e8a8',
+    '#b8c8f8','#f8b8c8'
+  ];
+
+  const ALIGN_OPTS = ['start','center','end','none'];
+
+  function initChildren() {
+    const n = state.childCount;
+    while (state.children.length < n)
+      state.children.push({ align: 'start', margin: 0 });
+    state.children.length = n;
+  }
+
+  function renderChildTable() {
+    initChildren();
+    const tbody = document.getElementById('child-tbody');
+    tbody.innerHTML = '';
+    state.children.forEach((c, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="child-label">child-${i+1}</span></td>
+        <td>
+          <div class="pill-group" style="flex-wrap:nowrap">
+            ${ALIGN_OPTS.map(a => `<span class="pill${c.align===a?' active':''}" data-child="${i}" data-align="${a}">${a}</span>`).join('')}
+          </div>
+        </td>
+        <td>
+          <input type="number" value="${c.margin}" min="0" max="100" data-child="${i}" class="margin-inp" style="width:70px">
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.pill').forEach(p => {
+      p.addEventListener('click', () => {
+        const idx = +p.dataset.child;
+        state.children[idx].align = p.dataset.align;
+        renderChildTable();
+        update();
+      });
+    });
+    tbody.querySelectorAll('.margin-inp').forEach(inp => {
+      inp.addEventListener('input', () => {
+        state.children[+inp.dataset.child].margin = +inp.value || 0;
+        update();
+      });
+    });
+  }
+
+  function renderPreview() {
+    const container = document.getElementById('preview-container');
+    const axis = state.axis;
+    const isY = axis === 'y' || axis === 'block';
+    const isBoth = axis === 'both';
+
+    let height = isY || isBoth ? '280px' : '220px';
+
+    const sizeMap = { full: isY ? '100%' : '100%', partial: '80%', small: '50%' };
+    const childW = state.childSize === 'full' ? (isY ? '100%' : '100%') : state.childSize === 'partial' ? '80%' : '50%';
+    const childH = state.childSize === 'full' ? (isY ? '100%' : '180px') : state.childSize === 'partial' ? '80%' : '50%';
+
+    const strictness = state.strictness === 'none' ? '' : ` ${state.strictness}`;
+    const ssType = `${axis}${strictness}`;
+    const overflowProp = isY ? 'overflow-y' : isBoth ? 'overflow' : 'overflow-x';
+
+    const pad = state.scrollPadding;
+
+    let containerStyle = `
+      display: ${isY ? 'flex; flex-direction: column' : isBoth ? 'grid' : 'flex'};
+      ${overflowProp}: ${state.overflow};
+      scroll-snap-type: ${ssType};
+      ${pad ? `scroll-padding: ${pad}px;` : ''}
+      width: 100%;
+      height: ${height};
+      background: var(--code-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 0;
+    `.replace(/\n\s+/g, ' ');
+
+    if (isBoth) {
+      containerStyle += ' grid-template-columns: repeat(3, 100%); grid-auto-rows: 100%;';
+    }
+
+    let items = '';
+    for (let i = 0; i < state.childCount; i++) {
+      const c = state.children[i] || { align: 'start', margin: 0 };
+      const color = COLORS[i % COLORS.length];
+      const w = isBoth ? '100%' : isY ? '100%' : childW;
+      const h = isBoth ? '100%' : isY ? childH : '100%';
+      const marginProp = c.margin ? (isY ? `scroll-margin-top: ${c.margin}px;` : `scroll-margin-left: ${c.margin}px;`) : '';
+      items += `<div style="
+        flex-shrink:0;
+        width:${w};
+        height:${h};
+        min-width:${w};
+        min-height:${isY ? childH : 'auto'};
+        display:flex;align-items:center;justify-content:center;
+        background:${color}22;
+        border:2px solid ${color}66;
+        border-radius:4px;
+        margin:4px;
+        font-family:'DM Serif Display',serif;
+        font-size:1.4rem;
+        color:${color};
+        scroll-snap-align:${c.align === 'none' ? 'none' : c.align};
+        ${marginProp}
+        box-sizing:border-box;
+      ">${i+1}</div>`;
+    }
+
+    container.innerHTML = `<div style="${containerStyle}">${items}</div>`;
+  }
+
+  function buildCSS() {
+    const axis = state.axis;
+    const isY = axis === 'y' || axis === 'block';
+    const isBoth = axis === 'both';
+    const strictness = state.strictness;
+    const ssType = `${axis} ${strictness}`;
+    const overflowProp = isY ? 'overflow-y' : isBoth ? 'overflow' : 'overflow-x';
+    const pad = state.scrollPadding;
+
+    const lines = [];
+    lines.push({ type: 'comment', val: '/* Scroll container */' });
+    lines.push({ type: 'sel', val: '.scroll-container {' });
+    lines.push({ type: 'prop', prop: 'display', val: isY ? 'flex' : isBoth ? 'grid' : 'flex' });
+    if (isY) lines.push({ type: 'prop', prop: 'flex-direction', val: 'column' });
+    if (isBoth) {
+      lines.push({ type: 'prop', prop: 'grid-template-columns', val: 'repeat(3, 100%)' });
+      lines.push({ type: 'prop', prop: 'grid-auto-rows', val: '100%' });
+    }
+    lines.push({ type: 'prop', prop: overflowProp, val: state.overflow });
+    lines.push({ type: 'prop', prop: 'scroll-snap-type', val: ssType });
+    if (pad) lines.push({ type: 'prop', prop: 'scroll-padding', val: `${pad}px` });
+    lines.push({ type: 'close', val: '}' });
+
+    lines.push({ type: 'blank' });
+
+    // Group children by align+margin to emit shared selectors
+    const groups = {};
+    state.children.forEach((c, i) => {
+      const key = `${c.align}|${c.margin}`;
+      if (!groups[key]) groups[key] = { align: c.align, margin: c.margin, indices: [] };
+      groups[key].indices.push(i + 1);
+    });
+
+    const allSame = Object.keys(groups).length === 1;
+    if (allSame) {
+      const g = Object.values(groups)[0];
+      lines.push({ type: 'comment', val: '/* All children */' });
+      lines.push({ type: 'sel', val: '.scroll-container > * {' });
+      lines.push({ type: 'prop', prop: 'scroll-snap-align', val: g.align });
+      if (g.margin) lines.push({ type: 'prop', prop: isY ? 'scroll-margin-top' : 'scroll-margin-left', val: `${g.margin}px` });
+      lines.push({ type: 'close', val: '}' });
+    } else {
+      Object.values(groups).forEach(g => {
+        const sels = g.indices.map(n => `.scroll-container > *:nth-child(${n})`).join(',\n');
+        lines.push({ type: 'sel', val: `${sels} {` });
+        lines.push({ type: 'prop', prop: 'scroll-snap-align', val: g.align });
+        if (g.margin) lines.push({ type: 'prop', prop: isY ? 'scroll-margin-top' : 'scroll-margin-left', val: `${g.margin}px` });
+        lines.push({ type: 'close', val: '}' });
+        lines.push({ type: 'blank' });
+      });
+    }
+
+    return lines;
+  }
+
+  function renderCSS() {
+    const lines = buildCSS();
+    const out = document.getElementById('css-output');
+    out.innerHTML = lines.map(l => {
+      if (l.type === 'blank') return '';
+      if (l.type === 'comment') return `<span class="tok-comment">${l.val}</span>`;
+      if (l.type === 'sel') return `<span class="tok-sel">${l.val}</span>`;
+      if (l.type === 'close') return `<span class="tok-sel">}</span>`;
+      if (l.type === 'prop') return `  <span class="tok-prop">${l.prop}</span>: <span class="tok-val">${l.val}</span>;`;
+      return '';
+    }).join('\n');
+  }
+
+  function plainCSS() {
+    return buildCSS().map(l => {
+      if (l.type === 'blank') return '';
+      if (l.type === 'comment') return l.val;
+      if (l.type === 'sel') return l.val;
+      if (l.type === 'close') return '}';
+      if (l.type === 'prop') return `  ${l.prop}: ${l.val};`;
+      return '';
+    }).join('\n');
+  }
+
+  function update() {
+    renderPreview();
+    renderCSS();
+  }
+
+  // Wire up controls
+  document.querySelectorAll('#axis-group .pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#axis-group .pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      state.axis = p.dataset.val;
+      update();
+    });
+  });
+
+  document.querySelectorAll('#strict-group .pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#strict-group .pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      state.strictness = p.dataset.val;
+      update();
+    });
+  });
+
+  document.getElementById('scroll-padding').addEventListener('input', e => {
+    state.scrollPadding = +e.target.value || 0;
+    update();
+  });
+
+  document.getElementById('overflow-sel').addEventListener('change', e => {
+    state.overflow = e.target.value;
+    update();
+  });
+
+  document.getElementById('child-count').addEventListener('input', e => {
+    state.childCount = Math.max(2, Math.min(12, +e.target.value || 5));
+    initChildren();
+    renderChildTable();
+    update();
+  });
+
+  document.getElementById('child-size').addEventListener('change', e => {
+    state.childSize = e.target.value;
+    update();
+  });
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(plainCSS()).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1800);
+    });
+  });
+
+  // Init
+  initChildren();
+  renderChildTable();
+  update();
+</script>
+
+</body>
+</html>
