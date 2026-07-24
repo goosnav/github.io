@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Specificity Calculator — Visual Selector Specificity Score</title>
+  <meta name="description" content="Paste any CSS selector and instantly see its (a,b,c) specificity score with a visual breakdown by IDs, classes/attributes/pseudo-classes, and elements. Free, no signup.">
+  <meta property="og:title" content="CSS Specificity Calculator — Visual Selector Specificity Score">
+  <meta property="og:description" content="Calculate CSS selector specificity instantly. See (a,b,c) scores, compare multiple selectors, and understand why one rule wins. Free, in-browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-specificity/">
+  <link rel="canonical" href="https://goosnav.github.io/css-specificity/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Specificity Calculator",
+    "url": "https://goosnav.github.io/css-specificity/",
+    "description": "Calculate CSS selector specificity with a visual (a,b,c) breakdown. Compare multiple selectors and understand cascade priority. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f3ef;
+      --surface: #ffffff;
+      --surface2: #f8f7f4;
+      --border: #d8d6ce;
+      --border-strong: #b0ada4;
+      --text: #1a1916;
+      --text-muted: #6b6960;
+      --text-faint: #9e9c94;
+      --accent: #1a1916;
+      --col-a: #7c3aed; /* ID — purple */
+      --col-b: #1d4ed8; /* class/attr/pseudo-class — blue */
+      --col-c: #047857; /* element/pseudo-element — green */
+      --col-special: #b45309; /* !important / inline — amber */
+      --rule: 1px solid var(--border);
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Layout ─── */
+    .header {
+      border-bottom: var(--rule);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: var(--surface);
+    }
+
+    .back {
+      font-size: .8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .back:hover { color: var(--text); }
+    .back::before { content: '←  '; }
+
+    .header-title { flex: 1; }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    .header-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: .2rem;
+    }
+
+    /* ─── Main ─── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ─── Input area ─── */
+    .input-section {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+
+    .input-section label {
+      display: block;
+      font-size: .8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .6rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: .75rem;
+      align-items: stretch;
+    }
+
+    #selectorInput {
+      flex: 1;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      padding: .6rem .75rem;
+      border: var(--rule);
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    #selectorInput:focus { border-color: var(--border-strong); }
+
+    .btn {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .85rem;
+      font-weight: 500;
+      padding: .6rem 1.1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: var(--accent);
+      color: #f4f3ef;
+      letter-spacing: .02em;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: .8; }
+
+    .btn-ghost {
+      background: transparent;
+      border: var(--rule);
+      color: var(--text-muted);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border-strong); opacity: 1; }
+
+    .examples {
+      margin-top: .75rem;
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .examples-label {
+      font-size: .75rem;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .example-chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem;
+      padding: .2rem .5rem;
+      border: var(--rule);
+      border-radius: 3px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: border-color .12s, color .12s;
+    }
+    .example-chip:hover { border-color: var(--border-strong); color: var(--text); }
+
+    /* ─── Results list ─── */
+    #resultsList {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .result-card.winner {
+      border-color: var(--col-a);
+    }
+
+    /* top bar */
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .9rem 1.25rem;
+      border-bottom: var(--rule);
+      flex-wrap: wrap;
+    }
+
+    .selector-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .95rem;
+      font-weight: 500;
+      flex: 1;
+      min-width: 0;
+      word-break: break-all;
+    }
+
+    .score-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    .winner-badge {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .15rem .45rem;
+      border-radius: 3px;
+      background: var(--col-a);
+      color: #fff;
+    }
+
+    .remove-btn {
+      font-size: .75rem;
+      color: var(--text-faint);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: .2rem;
+      line-height: 1;
+    }
+    .remove-btn:hover { color: var(--text); }
+
+    /* tier breakdown */
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    .tier {
+      background: var(--surface2);
+      padding: .75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+    .tier-label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .tier-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tier-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .tier-parts {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .tier-a .tier-dot { background: var(--col-a); }
+    .tier-a .tier-count { color: var(--col-a); }
+    .tier-b .tier-dot { background: var(--col-b); }
+    .tier-b .tier-count { color: var(--col-b); }
+    .tier-c .tier-dot { background: var(--col-c); }
+    .tier-c .tier-count { color: var(--col-c); }
+
+    /* bar viz */
+    .bar-row {
+      padding: .75rem 1.25rem;
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+    .bar-seg {
+      height: 100%;
+      transition: width .3s ease;
+    }
+    .bar-seg-a { background: var(--col-a); }
+    .bar-seg-b { background: var(--col-b); }
+    .bar-seg-c { background: var(--col-c); }
+
+    .bar-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* special flags */
+    .flags {
+      padding: .5rem 1.25rem .75rem;
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .flag {
+      font-size: .72rem;
+      padding: .15rem .5rem;
+      border-radius: 3px;
+      font-weight: 500;
+      letter-spacing: .03em;
+    }
+    .flag-important { background: #fef3c7; color: #92400e; }
+    .flag-universal { background: #f0fdf4; color: #166534; }
+    .flag-inline { background: #ede9fe; color: #5b21b6; }
+
+    /* ─── Legend ─── */
+    .legend {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+    }
+    .legend h2 {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-faint);
+      margin-bottom: .75rem;
+    }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: .75rem;
+    }
+    .legend-item {
+      display: flex;
+      gap: .6rem;
+      align-items: flex-start;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: .2rem;
+    }
+    .legend-item p { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
+    .legend-item strong { color: var(--text); }
+
+    /* ─── Empty state ─── */
+    .empty {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-faint);
+      font-size: .9rem;
+    }
+
+    /* ─── Error ─── */
+    .error-msg {
+      font-size: .8rem;
+      color: #b91c1c;
+      margin-top: .4rem;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    @media (max-width: 580px) {
+      .header { padding: 1rem; gap: 1rem; }
+      main { padding: 1.25rem 1rem; }
+      .tiers { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; }
+      .score-badge { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back" href="/">All Tools</a>
+  <div class="header-title">
+    <h1>CSS Specificity Calculator</h1>
+    <p class="header-sub">Paste a selector — get its (a,b,c) score with a visual breakdown</p>
+  </div>
+</header>
+
+<main>
+  <div class="input-section">
+    <label for="selectorInput">Selector</label>
+    <div class="input-row">
+      <input type="text" id="selectorInput" placeholder=".nav > li:first-child a.active" autocomplete="off" spellcheck="false">
+      <button class="btn" id="addBtn">Add</button>
+      <button class="btn btn-ghost" id="clearBtn">Clear all</button>
+    </div>
+    <div id="errorMsg" class="error-msg" hidden></div>
+    <div class="examples">
+      <span class="examples-label">Try:</span>
+      <span class="example-chip">#header</span>
+      <span class="example-chip">.nav a</span>
+      <span class="example-chip">div > p:first-child</span>
+      <span class="example-chip">[type="text"]</span>
+      <span class="example-chip">::before</span>
+      <span class="example-chip">#main .card:hover > span</span>
+      <span class="example-chip">h1, h2</span>
+      <span class="example-chip">*</span>
+    </div>
+  </div>
+
+  <div id="resultsList">
+    <div class="empty">Add a selector above to calculate its specificity score.</div>
+  </div>
+
+  <div class="legend">
+    <h2>How specificity works</h2>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--col-a)"></div>
+        <p><strong>A — ID selectors</strong><br>#id counts as (1,0,0). Higher A always wins.</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--col-b)"></div>
+        <p><strong>B — Classes, attributes, pseudo-classes</strong><br>.class, [attr], :hover, :nth-child() → (0,1,0) each.</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--col-c)"></div>
+        <p><strong>C — Elements & pseudo-elements</strong><br>div, p, ::before, ::after → (0,0,1) each.</p>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--text-faint)"></div>
+        <p><strong>* and combinators</strong><br>Universal selector (*) and combinators (+, ~, >, space) add zero specificity.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── Specificity parser ──────────────────────────────────────────────
+  // Handles: IDs, classes, attributes, pseudo-classes (incl. :is/:not/:has),
+  // pseudo-elements, elements, universal, combinators, comma-lists.
+  // Returns { a, b, c, parts, hasImportant, hasUniversal, raw }
+
+  function calcSpecificity(selector) {
+    const raw = selector.trim();
+    let a = 0, b = 0, c = 0;
+    const parts = { a: [], b: [], c: [] };
+    let hasUniversal = false;
+
+    // Check for !important (not a selector thing, but devs often paste full rules)
+    const hasImportant = /!important/i.test(raw);
+
+    // Strip pseudo-element parts (:before, ::before etc) before main parse
+    // We'll count them separately
+    let work = raw
+      .replace(/\/\*.*?\*\//g, '') // strip css comments
+      .replace(/!important/gi, '');
+
+    // Comma-separated: take the first selector for display (we'll handle multi below)
+    // Actually we sum over each in comma list? No — CSS comma = OR, each has own specificity.
+    // We return an array if comma-detected; caller handles it.
+    if (/,/.test(work)) {
+      // Return array signal
+      return work.split(',').map(s => calcSpecificity(s.trim()));
+    }
+
+    // Tokenize — walk char by char building tokens
+    // Strategy: consume known patterns in order of priority
+
+    // 1. Extract pseudo-elements (::xxx or :before/:after/:first-line/:first-letter/:selection/:placeholder)
+    const pseudoElems = [':before',':after',':first-line',':first-letter',':selection',':placeholder',
+                         ':file-selector-button',':marker',':backdrop',':spelling-error',':grammar-error',
+                         ':highlight',':slotted',':cue',':part'];
+    work = work.replace(/::([\w-]+)/g, (m, name) => {
+      c++;
+      parts.c.push('::' + name);
+      return '';
+    });
+    // Single-colon pseudo-elements (legacy)
+    pseudoElems.forEach(pe => {
+      const re = new RegExp(pe.replace(':', ':'), 'gi');
+      work = work.replace(re, () => {
+        c++;
+        parts.c.push(pe);
+        return '';
+      });
+    });
+
+    // 2. Remove combinators and universal selector (no specificity)
+    // Keep a note of universal
+    work = work.replace(/\*/g, () => { hasUniversal = true; return ''; });
+    work = work.replace(/[>+~]/g, ' '); // combinators → spaces
+
+    // 3. IDs
+    work = work.replace(/#([\w-]+)/g, (m, name) => {
+      a++;
+      parts.a.push('#' + name);
+      return '';
+    });
+
+    // 4. Functional pseudo-classes :is(), :not(), :has(), :where()
+    // :where() → 0 specificity always
+    // :is(), :not(), :has() → specificity of their most specific argument
+    work = work.replace(/:where\([^)]*\)/gi, () => ''); // zero specificity
+
+    // :is(), :not(), :has() — take max specificity of arguments
+    work = work.replace(/:(?:is|not|has)\(([^)]*)\)/gi, (m, inner) => {
+      const innerSels = inner.split(',').map(s => s.trim()).filter(Boolean);
+      let maxA = 0, maxB = 0, maxC = 0;
+      innerSels.forEach(s => {
+        const r = calcSpecificity(s);
+        const r1 = Array.isArray(r) ? r[0] : r;
+        if (r1) {
+          if (r1.a > maxA || (r1.a === maxA && r1.b > maxB) || (r1.a === maxA && r1.b === maxB && r1.c > maxC)) {
+            maxA = r1.a; maxB = r1.b; maxC = r1.c;
+          }
+        }
+      });
+      a += maxA; b += maxB; c += maxC;
+      parts.b.push(m);
+      return '';
+    });
+
+    // 5. Attributes
+    work = work.replace(/\[([^\]]*)\]/g, (m) => {
+      b++;
+      parts.b.push(m);
+      return '';
+    });
+
+    // 6. Classes
+    work = work.replace(/\.([\w-]+)/g, (m, name) => {
+      b++;
+      parts.b.push('.' + name);
+      return '';
+    });
+
+    // 7. Remaining pseudo-classes (things like :hover :focus :nth-child etc)
+    work = work.replace(/:([\w-]+)(?:\([^)]*\))?/g, (m, name) => {
+      b++;
+      parts.b.push(m);
+      return '';
+    });
+
+    // 8. Element type selectors (remaining word chars)
+    work.replace(/\b([a-z][\w-]*)\b/gi, (m) => {
+      c++;
+      parts.c.push(m);
+    });
+
+    return { a, b, c, parts, hasImportant, hasUniversal, raw };
+  }
+
+  // ── UI ────────────────────────────────────────────────────────────
+  const input = document.getElementById('selectorInput');
+  const addBtn = document.getElementById('addBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const list = document.getElementById('resultsList');
+  const errorMsg = document.getElementById('errorMsg');
+
+  let results = []; // array of { id, selector, spec }
+
+  let idCounter = 0;
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.hidden = false;
+  }
+  function clearError() {
+    errorMsg.hidden = true;
+    errorMsg.textContent = '';
+  }
+
+  function addSelector(rawSel) {
+    clearError();
+    if (!rawSel) { showError('Enter a selector.'); return; }
+
+    let specs = calcSpecificity(rawSel);
+    if (!Array.isArray(specs)) specs = [specs];
+
+    // Filter out empty
+    specs = specs.filter(s => s && s.raw);
+
+    if (!specs.length) { showError('Could not parse selector.'); return; }
+
+    specs.forEach(spec => {
+      results.push({ id: idCounter++, spec });
+    });
+
+    render();
+    input.value = '';
+    input.focus();
+  }
+
+  function render() {
+    if (!results.length) {
+      list.innerHTML = '<div class="empty">Add a selector above to calculate its specificity score.</div>';
+      return;
+    }
+
+    // Find winner (highest specificity among all)
+    let winnerId = null;
+    if (results.length > 1) {
+      let best = results[0];
+      for (const r of results) {
+        if (compareSpec(r.spec, best.spec) > 0) best = r;
+      }
+      winnerId = best.id;
+    }
+
+    // Max total for bar scaling
+    const maxTotal = Math.max(...results.map(r => r.spec.a * 100 + r.spec.b * 10 + r.spec.c), 1);
+
+    list.innerHTML = results.map(r => {
+      const { spec, id } = r;
+      const { a, b, c, parts, hasImportant, hasUniversal, raw } = spec;
+      const total = a * 100 + b * 10 + c;
+      const pct = pct => Math.round((pct / maxTotal) * 100);
+      const isWinner = id === winnerId;
+
+      const segA = pct(a * 100);
+      const segB = pct(b * 10);
+      const segC = pct(c);
+      const segRem = 100 - segA - segB - segC;
+
+      return `
+      <div class="result-card${isWinner ? ' winner' : ''}" data-id="${id}">
+        <div class="card-top">
+          <span class="selector-text">${escHtml(raw)}</span>
+          <span class="score-badge">(${a},${b},${c})</span>
+          ${isWinner ? '<span class="winner-badge">Winner</span>' : ''}
+          <button class="remove-btn" data-remove="${id}" title="Remove">✕</button>
+        </div>
+        <div class="tiers">
+          <div class="tier tier-a">
+            <span class="tier-label"><span class="tier-dot"></span>A — IDs</span>
+            <span class="tier-count">${a}</span>
+            <span class="tier-parts">${parts.a.length ? parts.a.join('\n') : '—'}</span>
+          </div>
+          <div class="tier tier-b">
+            <span class="tier-label"><span class="tier-dot"></span>B — Classes / Attrs</span>
+            <span class="tier-count">${b}</span>
+            <span class="tier-parts">${parts.b.length ? parts.b.join('\n') : '—'}</span>
+          </div>
+          <div class="tier tier-c">
+            <span class="tier-label"><span class="tier-dot"></span>C — Elements</span>
+            <span class="tier-count">${c}</span>
+            <span class="tier-parts">${parts.c.length ? parts.c.join('\n') : '—'}</span>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-track">
+            <div class="bar-seg bar-seg-a" style="width:${segA}%"></div>
+            <div class="bar-seg bar-seg-b" style="width:${segB}%"></div>
+            <div class="bar-seg bar-seg-c" style="width:${segC}%"></div>
+          </div>
+          <span class="bar-label">${total}</span>
+        </div>
+        ${hasImportant || hasUniversal ? `<div class="flags">
+          ${hasImportant ? '<span class="flag flag-important">Contains !important</span>' : ''}
+          ${hasUniversal ? '<span class="flag flag-universal">Contains * (zero specificity)</span>' : ''}
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    // Remove buttons
+    list.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = +btn.dataset.remove;
+        results = results.filter(r => r.id !== id);
+        render();
+      });
+    });
+  }
+
+  function compareSpec(a, b) {
+    if (a.a !== b.a) return a.a - b.a;
+    if (a.b !== b.b) return a.b - b.b;
+    return a.c - b.c;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  addBtn.addEventListener('click', () => addSelector(input.value.trim()));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') addSelector(input.value.trim()); });
+  clearBtn.addEventListener('click', () => { results = []; render(); });
+
+  document.querySelectorAll('.example-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      input.value = chip.textContent;
+      addSelector(chip.textContent);
+    });
+  });
+
+  // Load a starter example
+  addSelector('#header .nav > li:first-child a.active');
+</script>
+</body>
+</html>
