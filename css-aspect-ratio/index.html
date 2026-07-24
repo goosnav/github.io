@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Aspect Ratio Calculator — Modern & Legacy CSS</title>
+  <meta name="description" content="Calculate aspect ratios and generate CSS. Input width or height, pick a ratio (16:9, 4:3, 1:1, 21:9, custom), get the modern aspect-ratio property and the legacy padding-bottom hack. Free, no signup.">
+  <meta property="og:title" content="CSS Aspect Ratio Calculator — Modern & Legacy CSS">
+  <meta property="og:description" content="Generate aspect-ratio CSS for any ratio. Modern property + legacy padding-bottom hack. Live preview, one-click copy. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-aspect-ratio/">
+  <link rel="canonical" href="https://goosnav.github.io/css-aspect-ratio/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Aspect Ratio Calculator",
+    "url": "https://goosnav.github.io/css-aspect-ratio/",
+    "description": "Calculate aspect ratios and generate CSS. Modern aspect-ratio property plus legacy padding-bottom hack. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    header {
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .85rem;
+      margin-bottom: 1.5rem;
+      transition: color .15s;
+    }
+    .back:hover { color: var(--accent); }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: .5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: .95rem;
+      line-height: 1.6;
+    }
+
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ratio presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .preset-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      padding: .4rem .85rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .preset-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .preset-btn.active { background: #1f1a0f; border-color: var(--accent); color: var(--accent); }
+
+    /* inputs */
+    .inputs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .95rem;
+      padding: .55rem .75rem;
+      transition: border-color .15s;
+      -moz-appearance: textfield;
+    }
+    .field input::-webkit-outer-spin-button,
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input:focus { outline: none; border-color: var(--accent-dim); }
+
+    .ratio-custom-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .ratio-custom-row input {
+      width: 70px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .95rem;
+      padding: .45rem .6rem;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    .ratio-custom-row input::-webkit-outer-spin-button,
+    .ratio-custom-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .ratio-custom-row input:focus { outline: none; border-color: var(--accent-dim); }
+    .ratio-sep { color: var(--text-muted); font-size: 1.1rem; font-weight: 600; }
+
+    /* result values */
+    .result-dims {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      background: var(--code-bg);
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .dim-item { display: flex; flex-direction: column; gap: .2rem; }
+    .dim-label { font-size: .72rem; color: var(--text-muted); }
+    .dim-value { font-family: 'DM Mono', monospace; font-size: 1.1rem; color: var(--accent); }
+    .dim-sep { color: var(--border); font-size: 1.4rem; }
+
+    /* preview */
+    .preview-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 140px;
+      background: var(--code-bg);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      padding: 1.2rem;
+    }
+
+    .preview-box {
+      background: linear-gradient(135deg, #1f1a0f 0%, #2a2010 100%);
+      border: 2px solid var(--accent-dim);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+      max-height: 220px;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-label {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--accent);
+      opacity: .7;
+      white-space: nowrap;
+    }
+
+    /* code blocks */
+    .code-section { display: flex; flex-direction: column; gap: 1rem; }
+
+    .code-block-wrap { position: relative; }
+    .code-block-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .badge {
+      font-size: .65rem;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+    .badge-modern { background: #0f2a1a; color: #4ade80; border: 1px solid #1a5c30; }
+    .badge-legacy { background: #1a1020; color: #a78bfa; border: 1px solid #3d2465; }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: #c8c0b4;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 2rem;
+      right: .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: .72rem;
+      padding: .25rem .6rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .copy-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .copy-btn.copied { color: #4ade80; border-color: #1a5c30; }
+
+    /* explainer */
+    .explainer { display: flex; flex-direction: column; gap: .85rem; }
+    .explainer-item { }
+    .explainer-item h3 { font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
+    .explainer-item p { font-size: .82rem; color: var(--text-muted); line-height: 1.6; }
+    .explainer-item code {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      background: var(--code-bg);
+      padding: .1em .35em;
+      border-radius: 3px;
+      color: var(--accent);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--text-muted);
+      font-size: .8rem;
+    }
+    footer a { color: #555; text-decoration: none; }
+
+    @media (max-width: 500px) {
+      .inputs-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/">← All tools</a>
+  <h1>CSS Aspect Ratio Calculator</h1>
+  <p class="subtitle">Pick a ratio, enter a width or height — get the modern <code style="font-family:'DM Mono',monospace;font-size:.85em;background:#1d1d24;padding:.1em .35em;border-radius:3px;color:#c9a96e">aspect-ratio</code> property plus the legacy padding-bottom hack. Live preview, one-click copy.</p>
+</header>
+
+<main class="main">
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Ratio &amp; Dimensions</div>
+
+    <div class="presets">
+      <button class="preset-btn active" data-w="16" data-h="9">16:9</button>
+      <button class="preset-btn" data-w="4" data-h="3">4:3</button>
+      <button class="preset-btn" data-w="1" data-h="1">1:1</button>
+      <button class="preset-btn" data-w="21" data-h="9">21:9</button>
+      <button class="preset-btn" data-w="3" data-h="2">3:2</button>
+      <button class="preset-btn" data-w="9" data-h="16">9:16</button>
+      <button class="preset-btn" data-w="2" data-h="3">2:3</button>
+      <button class="preset-btn" data-w="5" data-h="4">5:4</button>
+    </div>
+
+    <div style="margin-bottom:1.2rem">
+      <div class="card-title" style="margin-bottom:.6rem">Custom Ratio</div>
+      <div class="ratio-custom-row">
+        <input type="number" id="ratioW" value="16" min="1" max="9999">
+        <span class="ratio-sep">:</span>
+        <input type="number" id="ratioH" value="9" min="1" max="9999">
+      </div>
+    </div>
+
+    <div class="inputs-row">
+      <div class="field">
+        <label for="inputW">Width (px)</label>
+        <input type="number" id="inputW" value="1280" placeholder="e.g. 1280">
+      </div>
+      <div class="field">
+        <label for="inputH">Height (px)</label>
+        <input type="number" id="inputH" value="" placeholder="auto-calculated">
+      </div>
+    </div>
+
+    <div class="result-dims" id="resultDims">
+      <div class="dim-item">
+        <span class="dim-label">Width</span>
+        <span class="dim-value" id="rW">1280px</span>
+      </div>
+      <span class="dim-sep">×</span>
+      <div class="dim-item">
+        <span class="dim-label">Height</span>
+        <span class="dim-value" id="rH">720px</span>
+      </div>
+      <span class="dim-sep" style="margin-left:auto;margin-right:0"></span>
+      <div class="dim-item" style="margin-left:auto">
+        <span class="dim-label">Ratio</span>
+        <span class="dim-value" id="rRatio">16 / 9</span>
+      </div>
+      <div class="dim-item">
+        <span class="dim-label">Padding %</span>
+        <span class="dim-value" id="rPad">56.25%</span>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-box" id="previewBox">
+        <span class="preview-label" id="previewLabel">1280 × 720</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS Output -->
+  <div class="card">
+    <div class="card-title">CSS Output</div>
+    <div class="code-section">
+
+      <div class="code-block-wrap">
+        <div class="code-block-label">
+          <span>Modern CSS</span>
+          <span class="badge badge-modern">Chrome 88+ · Firefox 89+ · Safari 15+</span>
+        </div>
+        <pre id="codeModern"></pre>
+        <button class="copy-btn" data-target="codeModern">Copy</button>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-block-label">
+          <span>Legacy (padding-bottom hack)</span>
+          <span class="badge badge-legacy">All browsers · IE 8+</span>
+        </div>
+        <pre id="codeLegacy"></pre>
+        <button class="copy-btn" data-target="codeLegacy">Copy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Explainer -->
+  <div class="card">
+    <div class="card-title">How It Works</div>
+    <div class="explainer">
+      <div class="explainer-item">
+        <h3>Modern: <code>aspect-ratio</code></h3>
+        <p>Set <code>aspect-ratio: 16 / 9</code> on any element. The browser calculates the height automatically from the element's width. No wrapper needed. Supported in all modern browsers since 2021.</p>
+      </div>
+      <div class="explainer-item">
+        <h3>Legacy: padding-bottom hack</h3>
+        <p>Percentage padding is relative to the <em>width</em> of the element, not the height. So <code>padding-bottom: 56.25%</code> on a zero-height wrapper always maintains a 16:9 ratio. Children are positioned <code>absolute</code> inside the wrapper.</p>
+      </div>
+      <div class="explainer-item">
+        <h3>Padding formula</h3>
+        <p>padding % = (height ÷ width) × 100. For 16:9: (9 ÷ 16) × 100 = <code>56.25%</code>. For 4:3: (3 ÷ 4) × 100 = <code>75%</code>.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Built by <a href="https://goosnav.com">Goosnav</a> · Tools run 100% in your browser</p>
+</footer>
+
+<script>
+  const state = { rw: 16, rh: 9, lastEdited: 'w' };
+
+  const $ = id => document.getElementById(id);
+  const ratioWIn = $('ratioW'), ratioHIn = $('ratioH');
+  const inputW = $('inputW'), inputH = $('inputH');
+
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+  function simplify(w, h) {
+    const g = gcd(Math.round(w), Math.round(h));
+    return [Math.round(w / g), Math.round(h / g)];
+  }
+
+  function update() {
+    const rw = parseFloat(ratioWIn.value) || 16;
+    const rh = parseFloat(ratioHIn.value) || 9;
+    state.rw = rw; state.rh = rh;
+
+    let W, H;
+    if (state.lastEdited === 'w') {
+      W = parseFloat(inputW.value) || 1280;
+      H = W * rh / rw;
+      inputH.value = '';
+      inputH.placeholder = Math.round(H) + 'px (auto)';
+    } else {
+      H = parseFloat(inputH.value) || 720;
+      W = H * rw / rh;
+      inputW.value = '';
+      inputW.placeholder = Math.round(W) + 'px (auto)';
+    }
+
+    const padPct = (rh / rw * 100).toFixed(4).replace(/\.?0+$/, '');
+    const [sw, sh] = simplify(rw, rh);
+
+    $('rW').textContent = Math.round(W) + 'px';
+    $('rH').textContent = Math.round(H) + 'px';
+    $('rRatio').textContent = sw + ' / ' + sh;
+    $('rPad').textContent = padPct + '%';
+    $('previewLabel').textContent = Math.round(W) + ' × ' + Math.round(H);
+
+    // scale preview box — max 560px wide, max 220px tall
+    const maxW = Math.min(560, window.innerWidth - 80);
+    const maxH = 220;
+    let previewW, previewH;
+    if ((maxW * rh / rw) <= maxH) {
+      previewW = maxW; previewH = maxW * rh / rw;
+    } else {
+      previewH = maxH; previewW = maxH * rw / rh;
+    }
+    const box = $('previewBox');
+    box.style.width = Math.round(previewW) + 'px';
+    box.style.height = Math.round(previewH) + 'px';
+
+    // modern CSS
+    $('codeModern').textContent =
+`.responsive-element {
+  width: 100%;
+  aspect-ratio: ${sw} / ${sh};
+}`;
+
+    // legacy CSS
+    $('codeLegacy').textContent =
+`/* Wrapper */
+.aspect-wrapper {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: ${padPct}%;
+  overflow: hidden;
+}
+
+/* Child (fills the wrapper) */
+.aspect-wrapper > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}`;
+  }
+
+  // preset buttons
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      ratioWIn.value = btn.dataset.w;
+      ratioHIn.value = btn.dataset.h;
+      state.lastEdited = 'w';
+      if (!inputW.value) inputW.value = 1280;
+      update();
+    });
+  });
+
+  // custom ratio inputs
+  [ratioWIn, ratioHIn].forEach(inp => {
+    inp.addEventListener('input', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      update();
+    });
+  });
+
+  // dimension inputs
+  inputW.addEventListener('input', () => { state.lastEdited = 'w'; update(); });
+  inputH.addEventListener('input', () => { state.lastEdited = 'h'; update(); });
+
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = $(btn.dataset.target).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+      });
+    });
+  });
+
+  update();
+</script>
+</body>
+</html>
