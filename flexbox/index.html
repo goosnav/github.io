@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Flexbox Generator — Free Online Tool</title>
+  <meta name="description" content="Generate CSS flexbox layouts visually. Set flex-direction, justify-content, align-items, flex-wrap, and gap. Per-item flex controls. 5 presets. Free, no signup.">
+  <meta property="og:title" content="CSS Flexbox Generator — Free Online Tool">
+  <meta property="og:description" content="Build CSS flexbox layouts visually with live preview. Presets include Centered, Space Between, Card Row, Sticky Footer, Navigation Bar. One-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/flexbox/">
+  <link rel="canonical" href="https://goosnav.github.io/flexbox/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Flexbox Generator",
+    "url": "https://goosnav.github.io/flexbox/",
+    "description": "Generate CSS flexbox layouts visually — presets, live preview, per-item controls, one-click copy.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #a78bfa; }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #8888a8; font-size: 1rem; }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .preset-btn {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 8px;
+      color: #c8c8e0;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      border-color: #a78bfa;
+      color: #a78bfa;
+    }
+
+    /* Controls */
+    .controls {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.5rem;
+    }
+    @media (max-width: 520px) { .controls { grid-template-columns: 1fr; } }
+
+    .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .control-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+      display: flex;
+      justify-content: space-between;
+    }
+    .control-group label span { color: #a78bfa; font-variant-numeric: tabular-nums; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #a78bfa;
+      cursor: pointer;
+      height: 4px;
+    }
+
+    .control-group select {
+      background: #0f0f13;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 7px;
+      color: #e8e8f0;
+      font-size: 0.88rem;
+      padding: 0.45rem 0.6rem;
+      cursor: pointer;
+    }
+    .control-group select:focus { outline: none; border-color: #a78bfa; }
+
+    .col-span-2 { grid-column: span 2; }
+    @media (max-width: 520px) { .col-span-2 { grid-column: span 1; } }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #555570;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Preview */
+    .preview-area {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .preview-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+      margin-bottom: 1rem;
+    }
+
+    #flex-preview {
+      display: flex;
+      min-height: 160px;
+      width: 100%;
+      background: #0f0f13;
+      border: 1px dashed #2a2a3a;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .flex-item {
+      background: linear-gradient(135deg, #a78bfa33, #60a5fa22);
+      border: 1.5px solid #a78bfa55;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a78bfa99;
+      min-width: 40px;
+      min-height: 40px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      padding: 8px 12px;
+      user-select: none;
+    }
+    .flex-item:hover {
+      background: linear-gradient(135deg, #a78bfa44, #60a5fa33);
+    }
+    .flex-item.selected {
+      border-color: #a78bfa;
+      background: linear-gradient(135deg, #a78bfa55, #60a5fa44);
+      color: #a78bfa;
+    }
+
+    /* Per-item panel */
+    .item-panel {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .item-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .item-panel-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+    }
+    .item-count-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .item-count-btn {
+      background: #0f0f13;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 6px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s;
+    }
+    .item-count-btn:hover { border-color: #a78bfa; }
+    .item-count-label {
+      font-size: 0.82rem;
+      color: #8888a8;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .item-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem 1rem;
+    }
+    @media (max-width: 520px) { .item-controls { grid-template-columns: 1fr 1fr; } }
+
+    .item-hint {
+      font-size: 0.78rem;
+      color: #555570;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    /* Output */
+    .output-area {
+      background: #1a1a26;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .output-header span {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #8888a8;
+    }
+
+    .copy-btn {
+      background: #a78bfa22;
+      border: 1.5px solid #a78bfa44;
+      border-radius: 8px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.4rem 0.9rem;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #a78bfa33; }
+    .copy-btn.copied { color: #34d399; border-color: #34d39944; background: #34d39922; }
+
+    pre {
+      font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+      font-size: 0.83rem;
+      line-height: 1.65;
+      color: #c8e6ff;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Related tools */
+    .related {
+      border-top: 1px solid #2a2a3a;
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+    }
+    .related p {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #555570;
+      margin-bottom: 0.75rem;
+    }
+    .related-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .related-links a {
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      border-radius: 7px;
+      color: #8888a8;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.75rem;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .related-links a:hover { border-color: #a78bfa; color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">← All Tools</a>
+      <h1>CSS Flexbox Generator</h1>
+      <p>Build flex layouts visually. Adjust container and item properties — copy the CSS.</p>
+    </header>
+
+    <!-- Presets -->
+    <div class="presets" id="presets">
+      <button class="preset-btn active" data-preset="centered">Centered</button>
+      <button class="preset-btn" data-preset="space-between">Space Between</button>
+      <button class="preset-btn" data-preset="card-row">Card Row</button>
+      <button class="preset-btn" data-preset="nav-bar">Navigation Bar</button>
+      <button class="preset-btn" data-preset="sticky-footer">Sticky Footer</button>
+    </div>
+
+    <!-- Container controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label>flex-direction</label>
+        <select id="direction">
+          <option value="row">row</option>
+          <option value="row-reverse">row-reverse</option>
+          <option value="column">column</option>
+          <option value="column-reverse">column-reverse</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>flex-wrap</label>
+        <select id="wrap">
+          <option value="nowrap">nowrap</option>
+          <option value="wrap">wrap</option>
+          <option value="wrap-reverse">wrap-reverse</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>justify-content</label>
+        <select id="justify">
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="space-between">space-between</option>
+          <option value="space-around">space-around</option>
+          <option value="space-evenly">space-evenly</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>align-items</label>
+        <select id="align-items">
+          <option value="stretch">stretch</option>
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="baseline">baseline</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>align-content</label>
+        <select id="align-content">
+          <option value="normal">normal</option>
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="space-between">space-between</option>
+          <option value="space-around">space-around</option>
+          <option value="stretch">stretch</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>gap <span id="gap-val">16px</span></label>
+        <input type="range" id="gap" min="0" max="48" value="16">
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area">
+      <div class="preview-label">Live Preview — click an item to edit it</div>
+      <div id="flex-preview"></div>
+    </div>
+
+    <!-- Per-item panel -->
+    <div class="item-panel">
+      <div class="item-panel-header">
+        <span class="item-panel-title" id="item-panel-title">Item 1 Properties</span>
+        <div class="item-count-row">
+          <button class="item-count-btn" id="remove-item">−</button>
+          <span class="item-count-label" id="item-count-label">4 items</span>
+          <button class="item-count-btn" id="add-item">+</button>
+        </div>
+      </div>
+      <div class="item-controls" id="item-controls">
+        <div class="control-group">
+          <label>flex-grow</label>
+          <select id="item-grow">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>flex-shrink</label>
+          <select id="item-shrink">
+            <option value="0">0</option>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>flex-basis</label>
+          <select id="item-basis">
+            <option value="auto">auto</option>
+            <option value="0">0</option>
+            <option value="100px">100px</option>
+            <option value="200px">200px</option>
+            <option value="25%">25%</option>
+            <option value="33%">33%</option>
+            <option value="50%">50%</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>align-self</label>
+          <select id="item-align-self">
+            <option value="auto">auto</option>
+            <option value="flex-start">flex-start</option>
+            <option value="flex-end">flex-end</option>
+            <option value="center">center</option>
+            <option value="stretch">stretch</option>
+            <option value="baseline">baseline</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>order</label>
+          <select id="item-order">
+            <option value="-2">-2</option>
+            <option value="-1">-1</option>
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="output-area">
+      <div class="output-header">
+        <span>CSS Output</span>
+        <button class="copy-btn" id="copy-btn">Copy CSS</button>
+      </div>
+      <pre id="css-output"></pre>
+    </div>
+
+    <!-- Related -->
+    <div class="related">
+      <p>More CSS Tools</p>
+      <div class="related-links">
+        <a href="/grid/">Grid Generator</a>
+        <a href="/gradient/">Gradient</a>
+        <a href="/box-shadow/">Box Shadow</a>
+        <a href="/border-radius/">Border Radius</a>
+        <a href="/text-shadow/">Text Shadow</a>
+        <a href="/animation/">Animation</a>
+        <a href="/filter/">Filter</a>
+        <a href="/transition/">Transition</a>
+        <a href="/clip-path/">Clip-Path</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PRESETS = {
+      'centered': {
+        direction: 'row', wrap: 'nowrap', justify: 'center',
+        alignItems: 'center', alignContent: 'normal', gap: 16,
+        items: [
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+        ]
+      },
+      'space-between': {
+        direction: 'row', wrap: 'nowrap', justify: 'space-between',
+        alignItems: 'center', alignContent: 'normal', gap: 0,
+        items: [
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+        ]
+      },
+      'card-row': {
+        direction: 'row', wrap: 'wrap', justify: 'flex-start',
+        alignItems: 'stretch', alignContent: 'flex-start', gap: 16,
+        items: [
+          { grow: '1', shrink: '1', basis: '200px', alignSelf: 'auto', order: '0' },
+          { grow: '1', shrink: '1', basis: '200px', alignSelf: 'auto', order: '0' },
+          { grow: '1', shrink: '1', basis: '200px', alignSelf: 'auto', order: '0' },
+          { grow: '1', shrink: '1', basis: '200px', alignSelf: 'auto', order: '0' },
+        ]
+      },
+      'nav-bar': {
+        direction: 'row', wrap: 'nowrap', justify: 'space-between',
+        alignItems: 'center', alignContent: 'normal', gap: 8,
+        items: [
+          { grow: '0', shrink: '0', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '1', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '0', basis: 'auto', alignSelf: 'auto', order: '0' },
+        ]
+      },
+      'sticky-footer': {
+        direction: 'column', wrap: 'nowrap', justify: 'flex-start',
+        alignItems: 'stretch', alignContent: 'normal', gap: 0,
+        items: [
+          { grow: '0', shrink: '0', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '1', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' },
+          { grow: '0', shrink: '0', basis: 'auto', alignSelf: 'auto', order: '0' },
+        ]
+      }
+    };
+
+    const PRESET_ITEM_LABELS = {
+      'centered': ['A', 'B', 'C'],
+      'space-between': ['Logo', 'Nav', 'Search', 'CTA'],
+      'card-row': ['Card 1', 'Card 2', 'Card 3', 'Card 4'],
+      'nav-bar': ['Logo', 'Links', 'Btn'],
+      'sticky-footer': ['Header', 'Main', 'Footer']
+    };
+
+    let state = {
+      preset: 'centered',
+      direction: 'row',
+      wrap: 'nowrap',
+      justify: 'center',
+      alignItems: 'center',
+      alignContent: 'normal',
+      gap: 16,
+      items: [],
+      selectedItem: 0
+    };
+
+    function defaultItem() {
+      return { grow: '0', shrink: '1', basis: 'auto', alignSelf: 'auto', order: '0' };
+    }
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      state.preset = key;
+      state.direction = p.direction;
+      state.wrap = p.wrap;
+      state.justify = p.justify;
+      state.alignItems = p.alignItems;
+      state.alignContent = p.alignContent;
+      state.gap = p.gap;
+      state.items = p.items.map(i => ({ ...i }));
+      state.selectedItem = 0;
+
+      document.getElementById('direction').value = p.direction;
+      document.getElementById('wrap').value = p.wrap;
+      document.getElementById('justify').value = p.justify;
+      document.getElementById('align-items').value = p.alignItems;
+      document.getElementById('align-content').value = p.alignContent;
+      document.getElementById('gap').value = p.gap;
+      document.getElementById('gap-val').textContent = p.gap + 'px';
+    }
+
+    function getItemLabel(index) {
+      const labels = PRESET_ITEM_LABELS[state.preset];
+      if (labels && labels[index]) return labels[index];
+      return `Item ${index + 1}`;
+    }
+
+    function syncItemPanel() {
+      const item = state.items[state.selectedItem];
+      if (!item) return;
+      document.getElementById('item-panel-title').textContent = `${getItemLabel(state.selectedItem)} Properties`;
+      document.getElementById('item-grow').value = item.grow;
+      document.getElementById('item-shrink').value = item.shrink;
+      document.getElementById('item-basis').value = item.basis;
+      document.getElementById('item-align-self').value = item.alignSelf;
+      document.getElementById('item-order').value = item.order;
+      document.getElementById('item-count-label').textContent = `${state.items.length} item${state.items.length !== 1 ? 's' : ''}`;
+    }
+
+    function buildCSS() {
+      let css = `.flex-container {\n  display: flex;\n  flex-direction: ${state.direction};\n  flex-wrap: ${state.wrap};\n  justify-content: ${state.justify};\n  align-items: ${state.alignItems};`;
+      if (state.alignContent !== 'normal') css += `\n  align-content: ${state.alignContent};`;
+      css += `\n  gap: ${state.gap}px;\n}`;
+
+      const hasCustomItems = state.items.some(item =>
+        item.grow !== '0' || item.shrink !== '1' || item.basis !== 'auto' || item.alignSelf !== 'auto' || item.order !== '0'
+      );
+
+      if (hasCustomItems) {
+        state.items.forEach((item, i) => {
+          const isDefault = item.grow === '0' && item.shrink === '1' && item.basis === 'auto' && item.alignSelf === 'auto' && item.order === '0';
+          if (!isDefault) {
+            const label = getItemLabel(i).toLowerCase().replace(/\s+/g, '-');
+            css += `\n\n.flex-item-${i + 1} { /* ${label} */`;
+            css += `\n  flex: ${item.grow} ${item.shrink} ${item.basis};`;
+            if (item.alignSelf !== 'auto') css += `\n  align-self: ${item.alignSelf};`;
+            if (item.order !== '0') css += `\n  order: ${item.order};`;
+            css += '\n}';
+          }
+        });
+      }
+      return css;
+    }
+
+    function buildPreview() {
+      const preview = document.getElementById('flex-preview');
+      preview.style.flexDirection = state.direction;
+      preview.style.flexWrap = state.wrap;
+      preview.style.justifyContent = state.justify;
+      preview.style.alignItems = state.alignItems;
+      preview.style.alignContent = state.alignContent;
+      preview.style.gap = state.gap + 'px';
+
+      preview.innerHTML = state.items.map((item, i) => {
+        const selected = i === state.selectedItem ? ' selected' : '';
+        const flexVal = `${item.grow} ${item.shrink} ${item.basis}`;
+        return `<div class="flex-item${selected}" data-index="${i}" style="flex:${flexVal};align-self:${item.alignSelf};order:${item.order}">${getItemLabel(i)}</div>`;
+      }).join('');
+
+      preview.querySelectorAll('.flex-item').forEach(el => {
+        el.addEventListener('click', () => {
+          state.selectedItem = +el.dataset.index;
+          syncItemPanel();
+          buildPreview();
+          update();
+        });
+      });
+    }
+
+    function update() {
+      buildPreview();
+      document.getElementById('css-output').textContent = buildCSS();
+    }
+
+    // Preset buttons
+    document.getElementById('presets').addEventListener('click', e => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(btn.dataset.preset);
+      syncItemPanel();
+      update();
+    });
+
+    // Container controls
+    ['direction', 'wrap', 'justify', 'align-items', 'align-content'].forEach(id => {
+      document.getElementById(id).addEventListener('change', e => {
+        const key = id.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        state[key] = e.target.value;
+        update();
+      });
+    });
+
+    document.getElementById('gap').addEventListener('input', e => {
+      state.gap = +e.target.value;
+      document.getElementById('gap-val').textContent = state.gap + 'px';
+      update();
+    });
+
+    // Per-item controls
+    ['item-grow', 'item-shrink', 'item-basis', 'item-align-self', 'item-order'].forEach(id => {
+      document.getElementById(id).addEventListener('change', e => {
+        const prop = id.replace('item-', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        state.items[state.selectedItem][prop] = e.target.value;
+        update();
+      });
+    });
+
+    // Add/remove items
+    document.getElementById('add-item').addEventListener('click', () => {
+      if (state.items.length >= 10) return;
+      state.items.push(defaultItem());
+      state.selectedItem = state.items.length - 1;
+      state.preset = '';
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      syncItemPanel();
+      update();
+    });
+
+    document.getElementById('remove-item').addEventListener('click', () => {
+      if (state.items.length <= 1) return;
+      state.items.splice(state.selectedItem, 1);
+      state.selectedItem = Math.min(state.selectedItem, state.items.length - 1);
+      syncItemPanel();
+      update();
+    });
+
+    // Copy
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const btn = document.getElementById('copy-btn');
+      navigator.clipboard.writeText(document.getElementById('css-output').textContent).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1800);
+      });
+    });
+
+    // Init
+    applyPreset('centered');
+    syncItemPanel();
+    update();
+  </script>
+</body>
+</html>
