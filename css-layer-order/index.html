@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @layer Order Visualizer — See Cascade Layer Priority Instantly</title>
+  <meta name="description" content="Visualize CSS @layer cascade order interactively. Drag to reorder layers, add rules to each layer, see which declaration wins. Understand the CSS cascade layer priority. Free, no signup.">
+  <meta property="og:title" content="CSS @layer Order Visualizer — See Cascade Layer Priority Instantly">
+  <meta property="og:description" content="Visualize CSS @layer cascade order interactively. Drag to reorder layers, add rules, see which declaration wins. Understand CSS cascade layers. Free.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-layer-order/">
+  <link rel="canonical" href="https://goosnav.github.io/css-layer-order/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS @layer Order Visualizer",
+    "url": "https://goosnav.github.io/css-layer-order/",
+    "description": "Visualize CSS @layer cascade order. Drag to reorder layers, see which declaration wins. Understand CSS cascade layers. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+      --win: #4caf8a;
+      --lose: #555470;
+      --layer-colors: #5b8dee, #ee5b8d, #8dee5b, #ee8d5b, #5beee8, #d45bee, #eede5b;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    a { color: var(--accent); }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header .back { font-size: .85rem; color: var(--text-muted); text-decoration: none; display: inline-block; margin-bottom: 1rem; }
+    header .back:hover { color: var(--accent); }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--text); margin-bottom: .5rem; }
+    header p { color: var(--text-muted); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+    /* Explainer strip */
+    .explainer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .explainer strong { color: var(--accent); }
+
+    /* Two-column layout */
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 680px) { .layout { grid-template-columns: 1fr; } }
+
+    /* Panel */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .panel-header {
+      padding: .75rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+    .panel-header span { color: var(--text-muted); }
+
+    /* Layer list */
+    .layer-list { padding: .75rem; display: flex; flex-direction: column; gap: .5rem; min-height: 200px; }
+
+    .layer-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .8rem;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: border-color .15s, opacity .15s;
+      user-select: none;
+    }
+    .layer-item:active { cursor: grabbing; }
+    .layer-item.dragging { opacity: .4; }
+    .layer-item.drag-over { border-color: var(--accent); }
+
+    .layer-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .layer-name {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      color: var(--text);
+    }
+
+    .layer-priority {
+      font-size: .75rem;
+      color: var(--text-muted);
+      background: var(--border);
+      border-radius: 4px;
+      padding: .15rem .4rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .drag-hint {
+      font-size: .75rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: .4rem;
+    }
+
+    /* Layer order legend — winner banner */
+    .order-banner {
+      padding: .6rem 1rem;
+      background: var(--code-bg);
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: .8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .order-banner .win-label { color: var(--win); font-weight: 500; }
+
+    /* Add layer form */
+    .add-layer-row {
+      display: flex;
+      gap: .5rem;
+      padding: .75rem;
+      border-top: 1px solid var(--border);
+    }
+    .add-layer-row input {
+      flex: 1;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .45rem .7rem;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      outline: none;
+    }
+    .add-layer-row input:focus { border-color: var(--accent); }
+    .btn {
+      background: var(--accent);
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: .45rem .85rem;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #e0be80; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: .3rem .6rem;
+      font-size: .75rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Rules panel */
+    .rules-list { padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
+
+    .rule-item {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .8rem;
+    }
+    .rule-item.winner { border-color: var(--win); }
+
+    .rule-item-header {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .3rem;
+      font-size: .78rem;
+    }
+    .rule-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      border-radius: 4px;
+      padding: .15rem .4rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      font-weight: 500;
+    }
+    .rule-badge.win-badge { background: rgba(76,175,138,.15); color: var(--win); }
+    .rule-badge.lose-badge { background: rgba(85,84,112,.2); color: var(--lose); }
+
+    .rule-decl {
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: var(--text-muted);
+    }
+    .rule-decl.winner { color: var(--text); }
+    .rule-decl .prop { color: #7dafff; }
+    .rule-decl .val { color: #f4b97c; }
+
+    /* Add rule form */
+    .add-rule-section {
+      border-top: 1px solid var(--border);
+      padding: .75rem;
+    }
+    .add-rule-section label {
+      display: block;
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-bottom: .35rem;
+    }
+    .rule-form { display: grid; grid-template-columns: 1fr auto 1fr auto; gap: .4rem; align-items: center; margin-bottom: .4rem; }
+    .rule-form input, .rule-form select {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .4rem .6rem;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .8rem;
+      outline: none;
+      min-width: 0;
+    }
+    .rule-form input:focus, .rule-form select:focus { border-color: var(--accent); }
+    .rule-form select option { background: var(--surface2); }
+    .rule-form .colon { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: .9rem; text-align: center; }
+
+    /* Cascade explanation box */
+    .cascade-explain {
+      margin-top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .cascade-explain .panel-header { cursor: pointer; }
+    .cascade-explain .panel-header:hover { color: var(--accent); }
+    .cascade-diagram {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .cascade-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: .85rem;
+    }
+    .cascade-arrow { color: var(--text-muted); }
+
+    /* Output */
+    .output-section {
+      margin-top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .output-header {
+      padding: .75rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    pre {
+      padding: 1rem 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: .3rem .7rem;
+      font-size: .8rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--win); color: var(--win); }
+
+    footer { text-align: center; margin-top: 4rem; color: #444; font-size: .85rem; }
+    footer a { color: #555; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a class="back" href="/">← All CSS Tools</a>
+    <h1>CSS @layer Order Visualizer</h1>
+    <p>Drag layers to reorder, add declarations per layer, and instantly see which rule wins the cascade. Understand how <code>@layer</code> priority works — no guesswork.</p>
+  </header>
+
+  <div class="explainer">
+    <strong>How @layer works:</strong> Layers declared <em>later</em> in the <code>@layer</code> statement win over earlier ones — regardless of selector specificity. Unlayered styles (outside any @layer) always beat layered ones. Drag the list below to experiment.
+  </div>
+
+  <div class="layout">
+    <!-- Layer order panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Layer Order <small style="font-size:.7rem">(drag to reorder, bottom = highest priority)</small></span>
+      </div>
+      <div class="layer-list" id="layerList"></div>
+      <div class="order-banner" id="orderBanner"></div>
+      <div class="add-layer-row">
+        <input type="text" id="newLayerName" placeholder="layer name, e.g. utilities" maxlength="40">
+        <button class="btn" onclick="addLayer()">+ Add</button>
+      </div>
+    </div>
+
+    <!-- Rules panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Rules &amp; Winner</span>
+        <span id="winnerLabel" style="font-size:.78rem;color:var(--win)"></span>
+      </div>
+      <div class="rules-list" id="rulesList"></div>
+      <div class="add-rule-section">
+        <label>Add a rule to a layer:</label>
+        <div class="rule-form">
+          <input type="text" id="ruleProp" placeholder="property" value="color">
+          <span class="colon">:</span>
+          <input type="text" id="ruleVal" placeholder="value" value="red">
+          <span></span>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <select id="ruleLayer" style="flex:1;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;color:var(--text);font-family:'DM Mono',monospace;font-size:.8rem;outline:none;"></select>
+          <button class="btn" onclick="addRule()">+ Add Rule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS Output -->
+  <div class="output-section">
+    <div class="output-header">
+      <span>CSS Output</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCSS()">Copy</button>
+    </div>
+    <pre id="cssOutput"></pre>
+  </div>
+
+  <div class="cascade-explain">
+    <div class="panel-header" onclick="toggleDiagram()">
+      <span>📚 How the CSS Cascade Layer Priority Works</span>
+      <span id="diagramToggle" style="font-size:.8rem">Show ▾</span>
+    </div>
+    <div class="cascade-diagram" id="cascadeDiagram" style="display:none">
+      <div class="cascade-row"><span style="color:var(--win);font-weight:600">Highest priority</span></div>
+      <div class="cascade-row"><span style="background:rgba(201,169,110,.15);color:var(--accent);padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">!important unlayered</span> <span class="cascade-arrow">← wins everything</span></div>
+      <div class="cascade-row"><span style="background:rgba(201,169,110,.1);color:var(--accent);padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">!important last layer</span></div>
+      <div class="cascade-row"><span style="background:rgba(201,169,110,.05);color:var(--accent);padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">!important first layer</span></div>
+      <div class="cascade-row"><span style="color:var(--text-muted)">↕ (reversed for !important)</span></div>
+      <div class="cascade-row" style="margin-top:.4rem"><span style="background:rgba(93,176,255,.2);color:#7dafff;padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">unlayered styles</span> <span class="cascade-arrow">← beats all normal layers</span></div>
+      <div class="cascade-row"><span style="background:rgba(93,176,255,.15);color:#7dafff;padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">last-declared layer</span> <span class="cascade-arrow">← highest normal layer</span></div>
+      <div class="cascade-row"><span style="background:rgba(93,176,255,.08);color:#7dafff;padding:.2rem .6rem;border-radius:4px;font-family:'DM Mono',monospace">first-declared layer</span> <span class="cascade-arrow">← lowest normal layer</span></div>
+      <div class="cascade-row" style="margin-top:.4rem"><span style="color:var(--lose)">Lowest priority</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Built by <a href="https://goosnav.com">Goosnav</a> · Tools run 100% in your browser</p>
+</footer>
+
+<script>
+  const LAYER_COLORS = ['#5b8dee','#ee5b8d','#8dee5b','#ee8d5b','#5beee8','#d45bee','#eede5b','#ee5b5b','#5beea1'];
+
+  // State
+  let layers = [
+    { id: 1, name: 'base' },
+    { id: 2, name: 'components' },
+    { id: 3, name: 'utilities' },
+  ];
+  let rules = [
+    { id: 1, layerId: 1, prop: 'color', val: 'blue' },
+    { id: 2, layerId: 2, prop: 'color', val: 'green' },
+    { id: 3, layerId: 3, prop: 'color', val: 'red' },
+  ];
+  let nextLayerId = 4;
+  let nextRuleId = 4;
+
+  // Drag state
+  let dragSrcIndex = null;
+
+  function colorForLayer(id) {
+    const idx = layers.findIndex(l => l.id === id);
+    return LAYER_COLORS[idx % LAYER_COLORS.length];
+  }
+
+  function layerPriority(layerId) {
+    // Later-declared layer = higher priority (higher index wins)
+    return layers.findIndex(l => l.id === layerId);
+  }
+
+  // For a given property, find winning rule
+  function findWinner(prop) {
+    const competing = rules.filter(r => r.prop === prop);
+    if (!competing.length) return null;
+    // highest index in layers list wins
+    let best = null, bestPrio = -1;
+    for (const r of competing) {
+      const prio = layerPriority(r.layerId);
+      if (prio > bestPrio) { bestPrio = prio; best = r; }
+    }
+    return best;
+  }
+
+  function render() {
+    renderLayers();
+    renderRules();
+    renderOutput();
+    populateLayerSelect();
+  }
+
+  function renderLayers() {
+    const list = document.getElementById('layerList');
+    list.innerHTML = '';
+
+    layers.forEach((layer, i) => {
+      const div = document.createElement('div');
+      div.className = 'layer-item';
+      div.draggable = true;
+      div.dataset.index = i;
+
+      const prio = i + 1;
+      const color = LAYER_COLORS[i % LAYER_COLORS.length];
+
+      div.innerHTML = `
+        <span class="layer-dot" style="background:${color}"></span>
+        <span class="layer-name">@layer ${layer.name}</span>
+        <span class="layer-priority">#${prio}</span>
+        <button class="btn-ghost" onclick="removeLayer(${layer.id})" title="Remove layer" style="padding:.2rem .5rem;font-size:.8rem">✕</button>
+      `;
+
+      div.addEventListener('dragstart', e => {
+        dragSrcIndex = i;
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+      div.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        list.querySelectorAll('.layer-item').forEach(el => el.classList.remove('drag-over'));
+        div.classList.add('drag-over');
+      });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', e => {
+        e.preventDefault();
+        div.classList.remove('drag-over');
+        if (dragSrcIndex === null || dragSrcIndex === i) return;
+        const moved = layers.splice(dragSrcIndex, 1)[0];
+        layers.splice(i, 0, moved);
+        render();
+      });
+
+      list.appendChild(div);
+    });
+
+    // Order banner
+    const banner = document.getElementById('orderBanner');
+    const names = layers.map(l => l.name);
+    banner.innerHTML = `<code>@layer ${names.join(', ')};</code><br><span class="win-label">Winner: ${names[names.length - 1]}</span> (last-declared beats earlier layers)`;
+  }
+
+  function renderRules() {
+    const list = document.getElementById('rulesList');
+    list.innerHTML = '';
+
+    // Group by prop
+    const propSet = [...new Set(rules.map(r => r.prop))];
+
+    if (!rules.length) {
+      list.innerHTML = '<div style="padding:.75rem;color:var(--text-muted);font-size:.85rem">Add rules below to see which layer wins.</div>';
+      document.getElementById('winnerLabel').textContent = '';
+      return;
+    }
+
+    propSet.forEach(prop => {
+      const winner = findWinner(prop);
+      const competing = rules.filter(r => r.prop === prop);
+
+      // header for this prop group
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.4rem;margin-bottom:.2rem;padding:0 .2rem';
+      hdr.textContent = prop;
+      list.appendChild(hdr);
+
+      competing.forEach(rule => {
+        const layer = layers.find(l => l.id === rule.layerId);
+        if (!layer) return;
+        const isWin = winner && winner.id === rule.id;
+        const color = colorForLayer(rule.layerId);
+
+        const div = document.createElement('div');
+        div.className = 'rule-item' + (isWin ? ' winner' : '');
+        div.innerHTML = `
+          <div class="rule-item-header">
+            <span class="layer-dot" style="background:${color}"></span>
+            <span class="rule-badge ${isWin ? 'win-badge' : 'lose-badge'}">${isWin ? '✓ wins' : 'overridden'}</span>
+            <span style="font-size:.75rem;color:var(--text-muted);font-family:'DM Mono',monospace">@layer ${layer.name}</span>
+            <button class="btn-ghost" onclick="removeRule(${rule.id})" style="margin-left:auto;padding:.15rem .4rem;font-size:.72rem">✕</button>
+          </div>
+          <div class="rule-decl ${isWin ? 'winner' : ''}">
+            <span class="prop">${rule.prop}</span>: <span class="val">${rule.val}</span>;
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    });
+
+    // Update winner label in header
+    const winnerLayer = rules.length ? layers[layers.length - 1] : null;
+    const allProps = [...new Set(rules.map(r => r.prop))];
+    if (allProps.length) {
+      const winLabels = allProps.map(p => {
+        const w = findWinner(p);
+        if (!w) return '';
+        const l = layers.find(x => x.id === w.layerId);
+        return l ? `${p}: ${w.val} (${l.name})` : '';
+      }).filter(Boolean);
+      document.getElementById('winnerLabel').textContent = winLabels.length ? `Wins: ${winLabels.join(' · ')}` : '';
+    } else {
+      document.getElementById('winnerLabel').textContent = '';
+    }
+  }
+
+  function renderOutput() {
+    // Build CSS output
+    let lines = [];
+    // Layer order declaration
+    lines.push(`@layer ${layers.map(l => l.name).join(', ')};`);
+    lines.push('');
+
+    // Group rules by layer (in layer order)
+    layers.forEach(layer => {
+      const layerRules = rules.filter(r => r.layerId === layer.id);
+      if (!layerRules.length) {
+        lines.push(`@layer ${layer.name} {`);
+        lines.push('  /* no rules yet */');
+        lines.push('}');
+      } else {
+        lines.push(`@layer ${layer.name} {`);
+        lines.push('  .element {');
+        layerRules.forEach(r => lines.push(`    ${r.prop}: ${r.val};`));
+        lines.push('  }');
+        lines.push('}');
+      }
+      lines.push('');
+    });
+
+    // Show winning declarations comment
+    const props = [...new Set(rules.map(r => r.prop))];
+    if (props.length) {
+      lines.push('/* Computed winners for .element: */');
+      lines.push('.element {');
+      props.forEach(p => {
+        const w = findWinner(p);
+        if (w) lines.push(`  ${p}: ${w.val}; /* from @layer ${layers.find(l=>l.id===w.layerId)?.name} */`);
+      });
+      lines.push('}');
+    }
+
+    document.getElementById('cssOutput').textContent = lines.join('\n');
+  }
+
+  function populateLayerSelect() {
+    const sel = document.getElementById('ruleLayer');
+    const current = sel.value;
+    sel.innerHTML = layers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+    if (current && layers.find(l => l.id == current)) sel.value = current;
+  }
+
+  function addLayer() {
+    const input = document.getElementById('newLayerName');
+    const name = input.value.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!name) return;
+    if (layers.find(l => l.name === name)) { input.value = ''; return; }
+    layers.push({ id: nextLayerId++, name });
+    input.value = '';
+    render();
+  }
+
+  function removeLayer(id) {
+    if (layers.length <= 1) return;
+    layers = layers.filter(l => l.id !== id);
+    rules = rules.filter(r => r.layerId !== id);
+    render();
+  }
+
+  function addRule() {
+    const prop = document.getElementById('ruleProp').value.trim();
+    const val = document.getElementById('ruleVal').value.trim();
+    const layerId = parseInt(document.getElementById('ruleLayer').value);
+    if (!prop || !val || !layerId) return;
+    rules.push({ id: nextRuleId++, layerId, prop, val });
+    render();
+  }
+
+  function removeRule(id) {
+    rules = rules.filter(r => r.id !== id);
+    render();
+  }
+
+  function copyCSS() {
+    const text = document.getElementById('cssOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  function toggleDiagram() {
+    const diag = document.getElementById('cascadeDiagram');
+    const toggle = document.getElementById('diagramToggle');
+    if (diag.style.display === 'none') {
+      diag.style.display = 'flex';
+      toggle.textContent = 'Hide ▴';
+    } else {
+      diag.style.display = 'none';
+      toggle.textContent = 'Show ▾';
+    }
+  }
+
+  // Allow Enter to add layer
+  document.getElementById('newLayerName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addLayer();
+  });
+
+  render();
+</script>
+</body>
+</html>
