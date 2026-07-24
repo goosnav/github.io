@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Variables Generator — Free Online Tool</title>
+  <meta name="description" content="Define CSS custom properties visually. Create --color, --spacing, --font-size, --border-radius variables with pickers and sliders. Live preview on sample UI. Copy the :root {} block instantly. Free, no signup.">
+  <meta property="og:title" content="CSS Variables Generator — Free Online Tool">
+  <meta property="og:description" content="Build a CSS variables :root block visually. Design tokens, dark mode palettes, typography scales, spacing systems. Live preview, one-click copy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-variables/">
+  <link rel="canonical" href="https://goosnav.github.io/css-variables/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Variables Generator",
+    "url": "https://goosnav.github.io/css-variables/",
+    "description": "Define CSS custom properties visually — colors, spacing, font sizes, border radii. Live preview, copy the :root block. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 820px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8888a8;
+      text-decoration: none;
+      margin-bottom: 1.25rem;
+    }
+    .back:hover { color: #b0b0cc; }
+    .back svg { width: 14px; height: 14px; }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #f0f0ff;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { font-size: 0.95rem; color: #8888a8; }
+
+    /* Preset row */
+    .presets {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .preset-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      border: 1.5px solid #2a2a3a;
+      background: #18181f;
+      color: #b0b0cc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      background: #6c63ff;
+      border-color: #6c63ff;
+      color: #fff;
+    }
+
+    /* Two-column layout */
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 600px) { .editor-grid { grid-template-columns: 1fr; } }
+
+    /* Variable group panels */
+    .panel {
+      background: #18181f;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8888a8;
+      border-bottom: 1px solid #2a2a3a;
+      background: #13131a;
+    }
+    .panel-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+
+    /* Variable row */
+    .var-row { display: flex; flex-direction: column; gap: 0.3rem; }
+    .var-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .var-name { font-size: 0.78rem; font-weight: 600; color: #9b9bc0; font-family: monospace; }
+    .var-value-display { font-size: 0.78rem; color: #6c63ff; font-family: monospace; }
+
+    /* Color swatch + input */
+    .color-row { display: flex; align-items: center; gap: 0.6rem; }
+    .color-swatch {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 1.5px solid #2a2a3a;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .color-hex {
+      flex: 1;
+      background: #0f0f13;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 6px;
+      color: #e8e8f0;
+      font-family: monospace;
+      font-size: 0.82rem;
+      padding: 0.3rem 0.5rem;
+    }
+    .color-hex:focus { outline: none; border-color: #6c63ff; }
+
+    /* Slider */
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a2a3a;
+      outline: none;
+      cursor: pointer;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #6c63ff;
+      cursor: pointer;
+      border: 2px solid #0f0f13;
+    }
+    .slider::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #6c63ff;
+      cursor: pointer;
+      border: 2px solid #0f0f13;
+    }
+
+    /* Preview */
+    .preview-section {
+      margin-bottom: 1.25rem;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8888a8;
+      margin-bottom: 0.6rem;
+    }
+    .preview-card {
+      background: var(--preview-bg, #ffffff);
+      border-radius: var(--preview-radius, 12px);
+      padding: 1.5rem;
+      border: 1.5px solid #2a2a3a;
+    }
+    .preview-card h2 {
+      color: var(--preview-text, #111111);
+      font-size: var(--preview-font-size, 20px);
+      margin-bottom: var(--preview-spacing, 12px);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .preview-card p {
+      color: var(--preview-muted, #555555);
+      font-size: 0.85rem;
+      margin-bottom: var(--preview-spacing, 12px);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+    }
+    .preview-btn {
+      display: inline-block;
+      background: var(--preview-primary, #6c63ff);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: var(--preview-radius, 12px);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: default;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .preview-tag {
+      display: inline-block;
+      background: var(--preview-accent, #ff6584);
+      color: #fff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Output */
+    .output-wrap { position: relative; }
+    .output {
+      background: #13131a;
+      border: 1.5px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #c8c8e8;
+      white-space: pre;
+      overflow-x: auto;
+      min-height: 80px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      padding: 0.35rem 0.8rem;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: #5a52e0; }
+    .copy-btn.copied { background: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back" href="/">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
+        All Tools
+      </a>
+      <h1>CSS Variables Generator</h1>
+      <p class="subtitle">Define CSS custom properties visually — live preview, copy the <code style="color:#6c63ff">:root {}</code> block</p>
+    </header>
+
+    <!-- Presets -->
+    <div class="presets" id="presets">
+      <button class="preset-btn active" data-preset="design-tokens">Design Token Starter</button>
+      <button class="preset-btn" data-preset="dark-mode">Dark Mode Palette</button>
+      <button class="preset-btn" data-preset="typography">Typography Scale</button>
+      <button class="preset-btn" data-preset="spacing">Spacing System</button>
+    </div>
+
+    <!-- Variable editors -->
+    <div class="editor-grid">
+      <!-- Colors -->
+      <div class="panel">
+        <div class="panel-head">Colors</div>
+        <div class="panel-body" id="colors-panel">
+          <div class="var-row" data-var="--color-primary" data-type="color">
+            <div class="var-label">
+              <span class="var-name">--color-primary</span>
+              <span class="var-value-display" id="disp--color-primary">#6c63ff</span>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-swatch" id="swatch--color-primary" value="#6c63ff">
+              <input type="text" class="color-hex" id="hex--color-primary" value="#6c63ff" maxlength="7">
+            </div>
+          </div>
+          <div class="var-row" data-var="--color-accent" data-type="color">
+            <div class="var-label">
+              <span class="var-name">--color-accent</span>
+              <span class="var-value-display" id="disp--color-accent">#ff6584</span>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-swatch" id="swatch--color-accent" value="#ff6584">
+              <input type="text" class="color-hex" id="hex--color-accent" value="#ff6584" maxlength="7">
+            </div>
+          </div>
+          <div class="var-row" data-var="--color-bg" data-type="color">
+            <div class="var-label">
+              <span class="var-name">--color-bg</span>
+              <span class="var-value-display" id="disp--color-bg">#ffffff</span>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-swatch" id="swatch--color-bg" value="#ffffff">
+              <input type="text" class="color-hex" id="hex--color-bg" value="#ffffff" maxlength="7">
+            </div>
+          </div>
+          <div class="var-row" data-var="--color-text" data-type="color">
+            <div class="var-label">
+              <span class="var-name">--color-text</span>
+              <span class="var-value-display" id="disp--color-text">#111111</span>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-swatch" id="swatch--color-text" value="#111111">
+              <input type="text" class="color-hex" id="hex--color-text" value="#111111" maxlength="7">
+            </div>
+          </div>
+          <div class="var-row" data-var="--color-muted" data-type="color">
+            <div class="var-label">
+              <span class="var-name">--color-muted</span>
+              <span class="var-value-display" id="disp--color-muted">#555555</span>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-swatch" id="swatch--color-muted" value="#555555">
+              <input type="text" class="color-hex" id="hex--color-muted" value="#555555" maxlength="7">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sizing -->
+      <div class="panel">
+        <div class="panel-head">Spacing &amp; Sizing</div>
+        <div class="panel-body">
+          <div class="var-row" data-var="--spacing-sm" data-type="px" data-min="2" data-max="32" data-step="1">
+            <div class="var-label">
+              <span class="var-name">--spacing-sm</span>
+              <span class="var-value-display" id="disp--spacing-sm">8px</span>
+            </div>
+            <input type="range" class="slider" id="range--spacing-sm" min="2" max="32" step="1" value="8">
+          </div>
+          <div class="var-row" data-var="--spacing-md" data-type="px" data-min="4" data-max="64" data-step="2">
+            <div class="var-label">
+              <span class="var-name">--spacing-md</span>
+              <span class="var-value-display" id="disp--spacing-md">16px</span>
+            </div>
+            <input type="range" class="slider" id="range--spacing-md" min="4" max="64" step="2" value="16">
+          </div>
+          <div class="var-row" data-var="--spacing-lg" data-type="px" data-min="8" data-max="128" data-step="4">
+            <div class="var-label">
+              <span class="var-name">--spacing-lg</span>
+              <span class="var-value-display" id="disp--spacing-lg">32px</span>
+            </div>
+            <input type="range" class="slider" id="range--spacing-lg" min="8" max="128" step="4" value="32">
+          </div>
+          <div class="var-row" data-var="--radius" data-type="px" data-min="0" data-max="32" data-step="1">
+            <div class="var-label">
+              <span class="var-name">--radius</span>
+              <span class="var-value-display" id="disp--radius">12px</span>
+            </div>
+            <input type="range" class="slider" id="range--radius" min="0" max="32" step="1" value="12">
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="panel">
+        <div class="panel-head">Typography</div>
+        <div class="panel-body">
+          <div class="var-row" data-var="--font-size-sm" data-type="px" data-min="10" data-max="20" data-step="1">
+            <div class="var-label">
+              <span class="var-name">--font-size-sm</span>
+              <span class="var-value-display" id="disp--font-size-sm">13px</span>
+            </div>
+            <input type="range" class="slider" id="range--font-size-sm" min="10" max="20" step="1" value="13">
+          </div>
+          <div class="var-row" data-var="--font-size-base" data-type="px" data-min="12" data-max="24" data-step="1">
+            <div class="var-label">
+              <span class="var-name">--font-size-base</span>
+              <span class="var-value-display" id="disp--font-size-base">16px</span>
+            </div>
+            <input type="range" class="slider" id="range--font-size-base" min="12" max="24" step="1" value="16">
+          </div>
+          <div class="var-row" data-var="--font-size-lg" data-type="px" data-min="16" data-max="40" data-step="1">
+            <div class="var-label">
+              <span class="var-name">--font-size-lg</span>
+              <span class="var-value-display" id="disp--font-size-lg">20px</span>
+            </div>
+            <input type="range" class="slider" id="range--font-size-lg" min="16" max="40" step="1" value="20">
+          </div>
+          <div class="var-row" data-var="--font-size-xl" data-type="px" data-min="20" data-max="64" data-step="2">
+            <div class="var-label">
+              <span class="var-name">--font-size-xl</span>
+              <span class="var-value-display" id="disp--font-size-xl">32px</span>
+            </div>
+            <input type="range" class="slider" id="range--font-size-xl" min="20" max="64" step="2" value="32">
+          </div>
+          <div class="var-row" data-var="--line-height" data-type="unitless" data-min="1" data-max="2" data-step="0.05">
+            <div class="var-label">
+              <span class="var-name">--line-height</span>
+              <span class="var-value-display" id="disp--line-height">1.5</span>
+            </div>
+            <input type="range" class="slider" id="range--line-height" min="1" max="2" step="0.05" value="1.5">
+          </div>
+        </div>
+      </div>
+
+      <!-- Effects -->
+      <div class="panel">
+        <div class="panel-head">Effects</div>
+        <div class="panel-body">
+          <div class="var-row" data-var="--shadow-sm" data-type="shadow-sm">
+            <div class="var-label">
+              <span class="var-name">--shadow-sm</span>
+              <span class="var-value-display" id="disp--shadow-sm">4px blur</span>
+            </div>
+            <input type="range" class="slider" id="range--shadow-sm" min="0" max="24" step="2" value="4">
+          </div>
+          <div class="var-row" data-var="--shadow-md" data-type="shadow-md">
+            <div class="var-label">
+              <span class="var-name">--shadow-md</span>
+              <span class="var-value-display" id="disp--shadow-md">12px blur</span>
+            </div>
+            <input type="range" class="slider" id="range--shadow-md" min="0" max="48" step="4" value="12">
+          </div>
+          <div class="var-row" data-var="--transition-speed" data-type="ms" data-min="50" data-max="600" data-step="50">
+            <div class="var-label">
+              <span class="var-name">--transition-speed</span>
+              <span class="var-value-display" id="disp--transition-speed">200ms</span>
+            </div>
+            <input type="range" class="slider" id="range--transition-speed" min="50" max="600" step="50" value="200">
+          </div>
+          <div class="var-row" data-var="--opacity-muted" data-type="unitless" data-min="0.3" data-max="1" data-step="0.05">
+            <div class="var-label">
+              <span class="var-name">--opacity-muted</span>
+              <span class="var-value-display" id="disp--opacity-muted">0.6</span>
+            </div>
+            <input type="range" class="slider" id="range--opacity-muted" min="0.3" max="1" step="0.05" value="0.6">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="preview-section">
+      <div class="section-label">Live Preview</div>
+      <div class="preview-card" id="preview-card">
+        <h2>Design System Preview <span class="preview-tag" id="preview-tag">New</span></h2>
+        <p id="preview-p">Your CSS custom properties applied to this sample UI. Adjust sliders and color pickers above to see changes in real time.</p>
+        <button class="preview-btn" id="preview-btn">Get Started</button>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="section-label">CSS Output</div>
+    <div class="output-wrap">
+      <pre class="output" id="output"></pre>
+      <button class="copy-btn" id="copy-btn">Copy CSS</button>
+    </div>
+  </div>
+
+  <script>
+    const PRESETS = {
+      'design-tokens': {
+        '--color-primary': '#6c63ff',
+        '--color-accent': '#ff6584',
+        '--color-bg': '#ffffff',
+        '--color-text': '#111111',
+        '--color-muted': '#555555',
+        '--spacing-sm': 8,
+        '--spacing-md': 16,
+        '--spacing-lg': 32,
+        '--radius': 12,
+        '--font-size-sm': 13,
+        '--font-size-base': 16,
+        '--font-size-lg': 20,
+        '--font-size-xl': 32,
+        '--line-height': 1.5,
+        '--shadow-sm': 4,
+        '--shadow-md': 12,
+        '--transition-speed': 200,
+        '--opacity-muted': 0.6
+      },
+      'dark-mode': {
+        '--color-primary': '#818cf8',
+        '--color-accent': '#fb7185',
+        '--color-bg': '#1e1e2e',
+        '--color-text': '#cdd6f4',
+        '--color-muted': '#a6adc8',
+        '--spacing-sm': 8,
+        '--spacing-md': 16,
+        '--spacing-lg': 32,
+        '--radius': 8,
+        '--font-size-sm': 13,
+        '--font-size-base': 16,
+        '--font-size-lg': 20,
+        '--font-size-xl': 32,
+        '--line-height': 1.6,
+        '--shadow-sm': 0,
+        '--shadow-md': 0,
+        '--transition-speed': 150,
+        '--opacity-muted': 0.7
+      },
+      'typography': {
+        '--color-primary': '#2563eb',
+        '--color-accent': '#7c3aed',
+        '--color-bg': '#fafafa',
+        '--color-text': '#0f172a',
+        '--color-muted': '#64748b',
+        '--spacing-sm': 6,
+        '--spacing-md': 12,
+        '--spacing-lg': 24,
+        '--radius': 4,
+        '--font-size-sm': 12,
+        '--font-size-base': 18,
+        '--font-size-lg': 24,
+        '--font-size-xl': 48,
+        '--line-height': 1.75,
+        '--shadow-sm': 2,
+        '--shadow-md': 8,
+        '--transition-speed': 200,
+        '--opacity-muted': 0.65
+      },
+      'spacing': {
+        '--color-primary': '#059669',
+        '--color-accent': '#f59e0b',
+        '--color-bg': '#ffffff',
+        '--color-text': '#1a1a1a',
+        '--color-muted': '#6b7280',
+        '--spacing-sm': 4,
+        '--spacing-md': 8,
+        '--spacing-lg': 16,
+        '--radius': 6,
+        '--font-size-sm': 12,
+        '--font-size-base': 14,
+        '--font-size-lg': 18,
+        '--font-size-xl': 28,
+        '--line-height': 1.5,
+        '--shadow-sm': 4,
+        '--shadow-md': 16,
+        '--transition-speed': 100,
+        '--opacity-muted': 0.55
+      }
+    };
+
+    // Current state
+    const state = { ...PRESETS['design-tokens'] };
+
+    function shadowValue(blur) {
+      return `0 ${Math.round(blur / 3)}px ${blur}px rgba(0,0,0,0.15)`;
+    }
+
+    function getVarValue(name, raw) {
+      const el = document.querySelector(`[data-var="${name}"]`);
+      if (!el) return String(raw);
+      const type = el.dataset.type;
+      if (type === 'color') return raw;
+      if (type === 'px') return raw + 'px';
+      if (type === 'ms') return raw + 'ms';
+      if (type === 'unitless') return String(parseFloat(raw).toFixed(2)).replace(/\.?0+$/, '') || '1';
+      if (type === 'shadow-sm') return shadowValue(raw);
+      if (type === 'shadow-md') return shadowValue(raw);
+      return String(raw);
+    }
+
+    function getDisplayValue(name, raw) {
+      const el = document.querySelector(`[data-var="${name}"]`);
+      if (!el) return String(raw);
+      const type = el.dataset.type;
+      if (type === 'color') return raw;
+      if (type === 'px') return raw + 'px';
+      if (type === 'ms') return raw + 'ms';
+      if (type === 'unitless') return String(parseFloat(raw).toFixed(2)).replace(/\.?0+$/, '') || '1';
+      if (type === 'shadow-sm' || type === 'shadow-md') return raw + 'px blur';
+      return String(raw);
+    }
+
+    function updateOutput() {
+      const lines = Object.entries(state).map(([k, v]) => `  ${k}: ${getVarValue(k, v)};`);
+      document.getElementById('output').textContent = ':root {\n' + lines.join('\n') + '\n}';
+    }
+
+    function updatePreview() {
+      const card = document.getElementById('preview-card');
+      card.style.setProperty('--preview-bg', state['--color-bg']);
+      card.style.setProperty('--preview-text', state['--color-text']);
+      card.style.setProperty('--preview-muted', state['--color-muted']);
+      card.style.setProperty('--preview-primary', state['--color-primary']);
+      card.style.setProperty('--preview-accent', state['--color-accent']);
+      card.style.setProperty('--preview-radius', state['--radius'] + 'px');
+      card.style.setProperty('--preview-font-size', state['--font-size-lg'] + 'px');
+      card.style.setProperty('--preview-spacing', state['--spacing-md'] + 'px');
+
+      document.getElementById('preview-p').style.lineHeight = getVarValue('--line-height', state['--line-height']);
+      document.getElementById('preview-card').style.boxShadow = shadowValue(state['--shadow-md']);
+    }
+
+    function syncDispatch(name, raw) {
+      state[name] = raw;
+      const disp = document.getElementById('disp' + name);
+      if (disp) disp.textContent = getDisplayValue(name, raw);
+      updateOutput();
+      updatePreview();
+    }
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      Object.assign(state, p);
+      // Update color inputs
+      Object.entries(p).forEach(([name, val]) => {
+        const swatch = document.getElementById('swatch' + name);
+        const hex = document.getElementById('hex' + name);
+        const range = document.getElementById('range' + name);
+        const disp = document.getElementById('disp' + name);
+        if (swatch) { swatch.value = val; }
+        if (hex) { hex.value = val; }
+        if (range) { range.value = val; }
+        if (disp) disp.textContent = getDisplayValue(name, val);
+      });
+      updateOutput();
+      updatePreview();
+    }
+
+    // Wire up color inputs
+    document.querySelectorAll('[data-type="color"]').forEach(row => {
+      const name = row.dataset.var;
+      const swatch = document.getElementById('swatch' + name);
+      const hex = document.getElementById('hex' + name);
+      swatch.addEventListener('input', () => {
+        hex.value = swatch.value;
+        syncDispatch(name, swatch.value);
+      });
+      hex.addEventListener('input', () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) {
+          swatch.value = hex.value;
+          syncDispatch(name, hex.value);
+        }
+      });
+    });
+
+    // Wire up sliders
+    document.querySelectorAll('.slider').forEach(slider => {
+      const name = slider.id.replace('range', '');
+      slider.addEventListener('input', () => {
+        const v = parseFloat(slider.value);
+        syncDispatch(name, v);
+      });
+    });
+
+    // Presets
+    document.getElementById('presets').addEventListener('click', e => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(btn.dataset.preset);
+    });
+
+    // Copy
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('output').textContent).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1800);
+      });
+    });
+
+    // Init
+    applyPreset('design-tokens');
+  </script>
+</body>
+</html>
