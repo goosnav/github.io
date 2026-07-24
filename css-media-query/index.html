@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Media Query Builder — Generate @media Rules Visually</title>
+  <meta name="description" content="Build CSS media queries visually. Set breakpoints, orientation, and media type, combine conditions with AND/OR, and copy the generated @media rule instantly. Free, no signup.">
+  <meta property="og:title" content="CSS Media Query Builder — Generate @media Rules Visually">
+  <meta property="og:description" content="Build CSS media queries visually. Set breakpoints, combine conditions, copy instantly. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-media-query/">
+  <link rel="canonical" href="https://goosnav.github.io/css-media-query/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Media Query Builder",
+    "url": "https://goosnav.github.io/css-media-query/",
+    "description": "Build CSS @media rules visually. Set breakpoints, orientation, and media type. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+      --danger: #e87070;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    header {
+      max-width: 860px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .85rem;
+      margin-bottom: 1.5rem;
+    }
+    .back:hover { color: var(--accent); }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .6rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    /* Presets */
+    .presets-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: .4rem .85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: .8rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Condition builder */
+    .section-label {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: .75rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    /* Media type row */
+    .type-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .type-btn {
+      padding: .4rem .9rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: .85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .type-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d0d0f;
+      font-weight: 600;
+    }
+
+    /* Conditions list */
+    #conditions-list {
+      display: grid;
+      gap: .75rem;
+    }
+
+    .condition-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .condition-row .connector {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: .05em;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .cond-select, .cond-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .85rem;
+      padding: .4rem .65rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .cond-select:focus, .cond-input:focus { border-color: var(--accent); }
+    .cond-input { width: 90px; }
+    .cond-unit {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: .2rem .4rem;
+      border-radius: 4px;
+      transition: color .15s;
+      margin-left: auto;
+    }
+    .remove-btn:hover { color: var(--danger); }
+
+    /* Add condition buttons */
+    .add-row {
+      display: flex;
+      gap: .5rem;
+      margin-top: .75rem;
+      flex-wrap: wrap;
+    }
+
+    .add-btn {
+      padding: .4rem .85rem;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: .8rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .connector-toggle {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: .75rem;
+    }
+
+    .toggle-btn {
+      padding: .25rem .6rem;
+      border-radius: 4px;
+      font-size: .78rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d0d0f;
+    }
+
+    /* Output */
+    .output-wrap {
+      position: relative;
+    }
+
+    .output-code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .9rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre;
+      overflow-x: auto;
+      min-height: 90px;
+    }
+
+    .token-at    { color: #b9a0e0; }
+    .token-media { color: #7ec8e3; }
+    .token-type  { color: #c9a96e; }
+    .token-feat  { color: #9fcfb3; }
+    .token-val   { color: #e08a8a; }
+    .token-op    { color: #a0a8c0; }
+    .token-punc  { color: #7a7888; }
+    .token-body  { color: #7a7888; }
+
+    .copy-btn {
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      padding: .35rem .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: .78rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: #6cc98a; color: #6cc98a; }
+
+    /* Explanation */
+    .explainer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .explainer h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .explainer-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .85rem 1rem;
+    }
+
+    .explainer-item .feat {
+      font-family: 'DM Mono', monospace;
+      font-size: .8rem;
+      color: var(--accent);
+      margin-bottom: .35rem;
+    }
+
+    .explainer-item p {
+      font-size: .82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 1rem; }
+      .cond-input { width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="https://goosnav.github.io/">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
+    All Tools
+  </a>
+  <h1>CSS Media Query Builder</h1>
+  <p class="subtitle">Build <code style="font-family:'DM Mono',monospace;font-size:.9em;color:var(--accent)">@media</code> rules visually — set breakpoints, orientation, and media type, then copy the result.</p>
+</header>
+
+<main>
+
+  <!-- Presets -->
+  <div>
+    <div class="section-label">Common Breakpoint Presets</div>
+    <div class="presets-row">
+      <button class="preset-btn" data-preset="mobile">📱 Mobile (≤480px)</button>
+      <button class="preset-btn" data-preset="tablet">📟 Tablet (≤768px)</button>
+      <button class="preset-btn" data-preset="laptop">💻 Laptop (≤1024px)</button>
+      <button class="preset-btn" data-preset="desktop">🖥 Desktop (≥1280px)</button>
+      <button class="preset-btn" data-preset="wide">🖥 Wide (≥1536px)</button>
+      <button class="preset-btn" data-preset="print">🖨 Print</button>
+      <button class="preset-btn" data-preset="landscape">↔ Landscape</button>
+      <button class="preset-btn" data-preset="portrait">↕ Portrait</button>
+      <button class="preset-btn" data-preset="dark">🌑 Dark Mode</button>
+      <button class="preset-btn" data-preset="motion">⚡ Reduced Motion</button>
+    </div>
+  </div>
+
+  <!-- Media type -->
+  <div class="card">
+    <div class="section-label">Media Type</div>
+    <div class="type-row">
+      <button class="type-btn active" data-type="all">all</button>
+      <button class="type-btn" data-type="screen">screen</button>
+      <button class="type-btn" data-type="print">print</button>
+    </div>
+  </div>
+
+  <!-- Conditions -->
+  <div class="card">
+    <div class="section-label">Conditions</div>
+    <div id="conditions-list"></div>
+
+    <div class="connector-toggle">
+      <span>Combine conditions with</span>
+      <button class="toggle-btn active" data-conn="and">AND</button>
+      <button class="toggle-btn" data-conn="or">OR</button>
+    </div>
+
+    <div class="add-row">
+      <button class="add-btn" data-add="min-width">+ min-width</button>
+      <button class="add-btn" data-add="max-width">+ max-width</button>
+      <button class="add-btn" data-add="min-height">+ min-height</button>
+      <button class="add-btn" data-add="max-height">+ max-height</button>
+      <button class="add-btn" data-add="orientation">+ orientation</button>
+      <button class="add-btn" data-add="prefers-color-scheme">+ prefers-color-scheme</button>
+      <button class="add-btn" data-add="prefers-reduced-motion">+ prefers-reduced-motion</button>
+      <button class="add-btn" data-add="hover">+ hover</button>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div>
+    <div class="section-label">Generated CSS</div>
+    <div class="output-wrap">
+      <div class="output-code" id="output"></div>
+      <button class="copy-btn" id="copy-btn">Copy</button>
+    </div>
+  </div>
+
+  <!-- Explainer -->
+  <div class="explainer">
+    <h2>How @media queries work</h2>
+    <div class="explainer-grid">
+      <div class="explainer-item">
+        <div class="feat">min-width</div>
+        <p>Applies when viewport is <strong>at least</strong> this wide. Mobile-first approach: start with base styles, add <code>min-width</code> overrides for larger screens.</p>
+      </div>
+      <div class="explainer-item">
+        <div class="feat">max-width</div>
+        <p>Applies when viewport is <strong>no wider</strong> than this. Desktop-first approach: start large, add <code>max-width</code> overrides for smaller screens.</p>
+      </div>
+      <div class="explainer-item">
+        <div class="feat">AND vs OR</div>
+        <p><code>and</code> — all conditions must be true. <code>,</code> (comma) acts as OR — any condition can match. Mix them for precise targeting.</p>
+      </div>
+      <div class="explainer-item">
+        <div class="feat">orientation</div>
+        <p><code>landscape</code> — width > height. <code>portrait</code> — height ≥ width. Useful for mobile layout shifts.</p>
+      </div>
+      <div class="explainer-item">
+        <div class="feat">prefers-color-scheme</div>
+        <p>Detects OS-level dark/light preference. Use <code>dark</code> to style for users who prefer dark interfaces.</p>
+      </div>
+      <div class="explainer-item">
+        <div class="feat">prefers-reduced-motion</div>
+        <p>Detects users who prefer less animation. Always wrap decorative animations in <code>reduce</code> checks for accessibility.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // State
+  const state = {
+    mediaType: 'all',
+    connector: 'and',
+    conditions: [],
+  };
+
+  let condId = 0;
+
+  // Feature definitions
+  const FEATURES = {
+    'min-width':   { kind: 'length', label: 'min-width', default: 768 },
+    'max-width':   { kind: 'length', label: 'max-width', default: 1024 },
+    'min-height':  { kind: 'length', label: 'min-height', default: 600 },
+    'max-height':  { kind: 'length', label: 'max-height', default: 900 },
+    'orientation': { kind: 'enum',   label: 'orientation', options: ['landscape', 'portrait'], default: 'landscape' },
+    'prefers-color-scheme': { kind: 'enum', label: 'prefers-color-scheme', options: ['dark', 'light'], default: 'dark' },
+    'prefers-reduced-motion': { kind: 'enum', label: 'prefers-reduced-motion', options: ['reduce', 'no-preference'], default: 'reduce' },
+    'hover': { kind: 'enum', label: 'hover', options: ['hover', 'none'], default: 'hover' },
+  };
+
+  // Presets
+  const PRESETS = {
+    mobile:   { type: 'screen', connector: 'and', conditions: [{ feature: 'max-width', value: '480', unit: 'px' }] },
+    tablet:   { type: 'screen', connector: 'and', conditions: [{ feature: 'max-width', value: '768', unit: 'px' }] },
+    laptop:   { type: 'screen', connector: 'and', conditions: [{ feature: 'max-width', value: '1024', unit: 'px' }] },
+    desktop:  { type: 'screen', connector: 'and', conditions: [{ feature: 'min-width', value: '1280', unit: 'px' }] },
+    wide:     { type: 'screen', connector: 'and', conditions: [{ feature: 'min-width', value: '1536', unit: 'px' }] },
+    print:    { type: 'print',  connector: 'and', conditions: [] },
+    landscape:{ type: 'screen', connector: 'and', conditions: [{ feature: 'orientation', value: 'landscape', unit: '' }] },
+    portrait: { type: 'screen', connector: 'and', conditions: [{ feature: 'orientation', value: 'portrait', unit: '' }] },
+    dark:     { type: 'all',   connector: 'and', conditions: [{ feature: 'prefers-color-scheme', value: 'dark', unit: '' }] },
+    motion:   { type: 'all',   connector: 'and', conditions: [{ feature: 'prefers-reduced-motion', value: 'reduce', unit: '' }] },
+  };
+
+  function addCondition(feature, preset) {
+    const def = FEATURES[feature];
+    const id = ++condId;
+    const cond = preset || {
+      id,
+      feature,
+      value: def.kind === 'length' ? String(def.default) : def.default,
+      unit: def.kind === 'length' ? 'px' : '',
+    };
+    cond.id = id;
+    state.conditions.push(cond);
+    renderConditions();
+    renderOutput();
+  }
+
+  function removeCondition(id) {
+    state.conditions = state.conditions.filter(c => c.id !== id);
+    renderConditions();
+    renderOutput();
+  }
+
+  function renderConditions() {
+    const list = document.getElementById('conditions-list');
+    if (state.conditions.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">No conditions — media query matches all viewports of the selected type.</p>';
+      return;
+    }
+
+    list.innerHTML = state.conditions.map((cond, i) => {
+      const def = FEATURES[cond.feature];
+      const connector = i === 0 ? '' : `<span class="connector">${state.connector.toUpperCase()}</span>`;
+
+      let valueHtml = '';
+      if (def.kind === 'length') {
+        valueHtml = `
+          <input class="cond-input" type="number" min="0" max="9999" value="${cond.value}" data-id="${cond.id}" data-key="value">
+          <select class="cond-select" style="width:60px" data-id="${cond.id}" data-key="unit">
+            <option${cond.unit === 'px' ? ' selected' : ''}>px</option>
+            <option${cond.unit === 'em' ? ' selected' : ''}>em</option>
+            <option${cond.unit === 'rem' ? ' selected' : ''}>rem</option>
+          </select>
+        `;
+      } else {
+        const opts = def.options.map(o => `<option${cond.value === o ? ' selected' : ''}>${o}</option>`).join('');
+        valueHtml = `<select class="cond-select" data-id="${cond.id}" data-key="value">${opts}</select>`;
+      }
+
+      return `
+        <div class="condition-row" data-id="${cond.id}">
+          ${connector}
+          <select class="cond-select" style="min-width:200px" data-id="${cond.id}" data-key="feature">
+            ${Object.keys(FEATURES).map(f => `<option${cond.feature === f ? ' selected' : ''}>${f}</option>`).join('')}
+          </select>
+          <span style="color:var(--text-muted);font-size:.85rem">:</span>
+          ${valueHtml}
+          <button class="remove-btn" data-remove="${cond.id}" title="Remove">×</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function buildQuery() {
+    const type = state.mediaType;
+    const parts = state.conditions.map(c => {
+      const def = FEATURES[c.feature];
+      if (def.kind === 'length') return `(${c.feature}: ${c.value}${c.unit})`;
+      return `(${c.feature}: ${c.value})`;
+    });
+
+    const conn = state.connector === 'and' ? ' and ' : ', ';
+
+    let query = '@media';
+    if (type !== 'all' || parts.length === 0) query += ' ' + type;
+
+    if (parts.length > 0) {
+      if (type !== 'all') query += ' and ';
+      else query += ' ';
+      if (state.connector === 'or') {
+        // OR: each condition is its own comma-separated query with the media type
+        if (type !== 'all') {
+          query = parts.map(p => `@media ${type} and ${p}`).join(',\n') ;
+        } else {
+          query = parts.map(p => `@media ${p}`).join(',\n');
+        }
+      } else {
+        query += parts.join(' and ');
+      }
+    }
+
+    return query;
+  }
+
+  function highlight(q) {
+    // Simple syntax highlight
+    return q
+      .replace(/(@media)/g, '<span class="token-at">$1</span>')
+      .replace(/\b(screen|print|all)\b/g, '<span class="token-type">$1</span>')
+      .replace(/\b(and)\b/g, '<span class="token-op">$1</span>')
+      .replace(/\(([\w-]+):/g, '(<span class="token-feat">$1</span>:')
+      .replace(/:\s*([\w]+(?:px|em|rem)?)/g, ': <span class="token-val">$1</span>');
+  }
+
+  function renderOutput() {
+    const query = buildQuery();
+    const full = query + ' {\n  /* your styles here */\n}';
+    document.getElementById('output').innerHTML = highlight(full) + '\n<span class="token-body">/* your styles here */</span>\n}';
+    // Simpler: just set text and re-apply highlight
+    const raw = query + ' {\n  /* your styles here */\n}';
+    const out = document.getElementById('output');
+    out.textContent = raw;
+    out.innerHTML = highlight(out.textContent);
+  }
+
+  // Event delegation
+  document.addEventListener('change', e => {
+    const t = e.target;
+    const id = t.dataset.id ? parseInt(t.dataset.id) : null;
+    const key = t.dataset.key;
+    if (id && key) {
+      const cond = state.conditions.find(c => c.id === id);
+      if (cond) {
+        if (key === 'feature') {
+          const newFeat = t.value;
+          const def = FEATURES[newFeat];
+          cond.feature = newFeat;
+          cond.value = def.kind === 'length' ? String(def.default) : def.default;
+          cond.unit = def.kind === 'length' ? 'px' : '';
+          renderConditions();
+        } else {
+          cond[key] = t.value;
+        }
+        renderOutput();
+      }
+    }
+  });
+
+  document.addEventListener('input', e => {
+    const t = e.target;
+    const id = t.dataset.id ? parseInt(t.dataset.id) : null;
+    const key = t.dataset.key;
+    if (id && key === 'value') {
+      const cond = state.conditions.find(c => c.id === id);
+      if (cond) { cond.value = t.value; renderOutput(); }
+    }
+  });
+
+  document.addEventListener('click', e => {
+    // Remove condition
+    if (e.target.dataset.remove) {
+      removeCondition(parseInt(e.target.dataset.remove));
+      return;
+    }
+
+    // Add condition
+    if (e.target.dataset.add) {
+      addCondition(e.target.dataset.add);
+      return;
+    }
+
+    // Media type
+    if (e.target.dataset.type) {
+      state.mediaType = e.target.dataset.type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === state.mediaType));
+      renderOutput();
+      return;
+    }
+
+    // Connector toggle
+    if (e.target.dataset.conn) {
+      state.connector = e.target.dataset.conn;
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.conn === state.connector));
+      renderConditions();
+      renderOutput();
+      return;
+    }
+
+    // Preset
+    if (e.target.dataset.preset) {
+      const p = PRESETS[e.target.dataset.preset];
+      if (!p) return;
+      state.mediaType = p.type;
+      state.connector = p.connector;
+      state.conditions = [];
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === state.mediaType));
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.conn === state.connector));
+      p.conditions.forEach(c => addCondition(c.feature, { feature: c.feature, value: c.value, unit: c.unit }));
+      renderConditions();
+      renderOutput();
+      return;
+    }
+
+    // Copy
+    if (e.target.id === 'copy-btn') {
+      const raw = buildQuery() + ' {\n  /* your styles here */\n}';
+      navigator.clipboard.writeText(raw).then(() => {
+        e.target.textContent = 'Copied!';
+        e.target.classList.add('copied');
+        setTimeout(() => { e.target.textContent = 'Copy'; e.target.classList.remove('copied'); }, 1500);
+      });
+    }
+  });
+
+  // Init
+  renderConditions();
+  renderOutput();
+</script>
+</body>
+</html>
