@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Cursor Showcase — All CSS cursor Values with Live Preview</title>
+  <meta name="description" content="Visual reference for every CSS cursor value. Hover each tile to see the cursor live, click to copy the CSS snippet. All 30+ cursor types grouped by category. Free, no signup.">
+  <meta property="og:title" content="CSS Cursor Showcase — All CSS cursor Values with Live Preview">
+  <meta property="og:description" content="Hover to preview, click to copy. All CSS cursor values in one place. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-cursor/">
+  <link rel="canonical" href="https://goosnav.github.io/css-cursor/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Cursor Showcase",
+    "url": "https://goosnav.github.io/css-cursor/",
+    "description": "Visual reference for every CSS cursor value. Hover to preview, click to copy the CSS snippet. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #15151a;
+      --surface2: #1d1d24;
+      --border: #2a2a35;
+      --text: #e8e6e0;
+      --text-muted: #7a7888;
+      --accent: #c9a96e;
+      --accent-dim: #8a6f45;
+      --code-bg: #111118;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    header {
+      max-width: 900px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .85rem;
+      margin-bottom: 1.5rem;
+    }
+    .back:hover { color: var(--accent); }
+    .back svg { width: 14px; height: 14px; }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .6rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .controls {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      padding: .6rem .75rem .6rem 2.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--text-muted); }
+
+    .filter-btns {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: .45rem .85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: .8rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(201,169,110,.07);
+    }
+
+    main { max-width: 900px; margin: 0 auto; }
+
+    .section-group { margin-bottom: 2.5rem; }
+    .section-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: .75rem;
+    }
+
+    .cursor-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      transition: border-color .15s, background .15s;
+      position: relative;
+      user-select: none;
+    }
+    .cursor-tile[data-hidden="true"] { display: none; }
+
+    .cursor-tile:hover {
+      border-color: var(--accent-dim);
+      background: var(--surface2);
+    }
+
+    .tile-preview {
+      width: 64px;
+      height: 44px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tile-name {
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      color: var(--accent);
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: .7rem;
+      font-family: 'DM Mono', monospace;
+      padding: .3rem .6rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: all .15s;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #4caf7a;
+      color: #4caf7a;
+    }
+
+    .no-results {
+      display: none;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 3rem 0;
+      font-size: .95rem;
+    }
+    .no-results.visible { display: block; }
+
+    .explainer {
+      margin-top: 3rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+    }
+    .explainer h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .explainer p { color: var(--text-muted); line-height: 1.7; margin-bottom: .75rem; font-size: .9rem; }
+    .explainer code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .1rem .35rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="/">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    All tools
+  </a>
+  <h1>CSS Cursor Showcase</h1>
+  <p class="subtitle">Hover any tile to see the cursor live. Click <em>Copy</em> to get the CSS snippet. All 32 cursor values, grouped by category.</p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+    <input id="search" type="text" placeholder="Search cursors…" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-cat="all">All</button>
+    <button class="filter-btn" data-cat="pointer">Pointer</button>
+    <button class="filter-btn" data-cat="resize">Resize</button>
+    <button class="filter-btn" data-cat="text">Text</button>
+    <button class="filter-btn" data-cat="drag">Drag</button>
+    <button class="filter-btn" data-cat="status">Status</button>
+    <button class="filter-btn" data-cat="zoom">Zoom</button>
+    <button class="filter-btn" data-cat="misc">Misc</button>
+  </div>
+</div>
+
+<main id="main">
+
+  <div class="section-group" data-group="pointer">
+    <div class="section-label">Pointer &amp; Selection</div>
+    <div class="grid" id="grid-pointer"></div>
+  </div>
+
+  <div class="section-group" data-group="resize">
+    <div class="section-label">Resize &amp; Scroll</div>
+    <div class="grid" id="grid-resize"></div>
+  </div>
+
+  <div class="section-group" data-group="text">
+    <div class="section-label">Text</div>
+    <div class="grid" id="grid-text"></div>
+  </div>
+
+  <div class="section-group" data-group="drag">
+    <div class="section-label">Drag &amp; Drop</div>
+    <div class="grid" id="grid-drag"></div>
+  </div>
+
+  <div class="section-group" data-group="status">
+    <div class="section-label">Status</div>
+    <div class="grid" id="grid-status"></div>
+  </div>
+
+  <div class="section-group" data-group="zoom">
+    <div class="section-label">Zoom</div>
+    <div class="grid" id="grid-zoom"></div>
+  </div>
+
+  <div class="section-group" data-group="misc">
+    <div class="section-label">Misc</div>
+    <div class="grid" id="grid-misc"></div>
+  </div>
+
+  <p class="no-results" id="no-results">No cursors match your search.</p>
+
+  <div class="explainer">
+    <h2>How to use CSS cursors</h2>
+    <p>Set the cursor on any element with the <code>cursor</code> property: <code>cursor: pointer;</code>. It accepts a single keyword or a comma-separated fallback list ending with a keyword.</p>
+    <p>You can also use a custom image: <code>cursor: url('my.cur') 4 4, pointer;</code> — the numbers are the hotspot coordinates (x y), and the keyword at the end is the mandatory fallback if the image fails to load.</p>
+    <p>The <code>none</code> value hides the cursor entirely — useful for custom game UIs or full-screen immersive experiences. Pair it with JS to render your own cursor element for the best results.</p>
+  </div>
+</main>
+
+<script>
+const CURSORS = {
+  pointer: [
+    { value: 'default',     label: 'default',     icon: '↖' },
+    { value: 'pointer',     label: 'pointer',     icon: '☞' },
+    { value: 'crosshair',   label: 'crosshair',   icon: '+' },
+    { value: 'cell',        label: 'cell',        icon: '⊕' },
+    { value: 'context-menu',label: 'context-menu',icon: '↖✦' },
+    { value: 'help',        label: 'help',        icon: '?↖' },
+    { value: 'alias',       label: 'alias',       icon: '↖↩' },
+    { value: 'copy',        label: 'copy',        icon: '↖+' },
+    { value: 'move',        label: 'move',        icon: '✛' },
+  ],
+  resize: [
+    { value: 'n-resize',    label: 'n-resize',    icon: '↑' },
+    { value: 's-resize',    label: 's-resize',    icon: '↓' },
+    { value: 'e-resize',    label: 'e-resize',    icon: '→' },
+    { value: 'w-resize',    label: 'w-resize',    icon: '←' },
+    { value: 'ne-resize',   label: 'ne-resize',   icon: '↗' },
+    { value: 'nw-resize',   label: 'nw-resize',   icon: '↖' },
+    { value: 'se-resize',   label: 'se-resize',   icon: '↘' },
+    { value: 'sw-resize',   label: 'sw-resize',   icon: '↙' },
+    { value: 'ew-resize',   label: 'ew-resize',   icon: '↔' },
+    { value: 'ns-resize',   label: 'ns-resize',   icon: '↕' },
+    { value: 'nesw-resize', label: 'nesw-resize', icon: '⤢' },
+    { value: 'nwse-resize', label: 'nwse-resize', icon: '⤡' },
+    { value: 'col-resize',  label: 'col-resize',  icon: '⇿' },
+    { value: 'row-resize',  label: 'row-resize',  icon: '⇳' },
+    { value: 'all-scroll',  label: 'all-scroll',  icon: '⊕' },
+  ],
+  text: [
+    { value: 'text',          label: 'text',          icon: 'I' },
+    { value: 'vertical-text', label: 'vertical-text', icon: 'Ī' },
+  ],
+  drag: [
+    { value: 'grab',    label: 'grab',    icon: '✋' },
+    { value: 'grabbing',label: 'grabbing',icon: '✊' },
+    { value: 'no-drop', label: 'no-drop', icon: '⊘' },
+  ],
+  status: [
+    { value: 'not-allowed', label: 'not-allowed', icon: '⛔' },
+    { value: 'wait',        label: 'wait',        icon: '⏳' },
+    { value: 'progress',    label: 'progress',    icon: '↖⏳' },
+  ],
+  zoom: [
+    { value: 'zoom-in',  label: 'zoom-in',  icon: '🔍+' },
+    { value: 'zoom-out', label: 'zoom-out', icon: '🔍−' },
+  ],
+  misc: [
+    { value: 'none',        label: 'none',        icon: '∅' },
+    { value: 'auto',        label: 'auto',        icon: 'A' },
+    { value: 'inherit',     label: 'inherit',     icon: '↑' },
+    { value: 'initial',     label: 'initial',     icon: '◌' },
+    { value: 'unset',       label: 'unset',       icon: '—' },
+  ],
+};
+
+function makeTile(cat, item) {
+  const tile = document.createElement('div');
+  tile.className = 'cursor-tile';
+  tile.dataset.cat = cat;
+  tile.dataset.value = item.value;
+
+  const preview = document.createElement('div');
+  preview.className = 'tile-preview';
+  preview.style.cursor = item.value;
+  preview.title = `Hover to see cursor: ${item.value}`;
+  preview.textContent = item.icon;
+  preview.style.fontSize = '1.3rem';
+  preview.style.userSelect = 'none';
+
+  const name = document.createElement('div');
+  name.className = 'tile-name';
+  name.textContent = item.value;
+
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'cursor: ' + item.value + ';';
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText('cursor: ' + item.value + ';').then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'cursor: ' + item.value + ';';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  });
+
+  tile.appendChild(preview);
+  tile.appendChild(name);
+  tile.appendChild(btn);
+  return tile;
+}
+
+// Render all tiles
+Object.entries(CURSORS).forEach(([cat, items]) => {
+  const grid = document.getElementById('grid-' + cat);
+  if (!grid) return;
+  items.forEach(item => grid.appendChild(makeTile(cat, item)));
+});
+
+// Filter by category button
+const filterBtns = document.querySelectorAll('.filter-btn');
+let activeCat = 'all';
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCat = btn.dataset.cat;
+    applyFilter();
+  });
+});
+
+// Search
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', applyFilter);
+
+function applyFilter() {
+  const q = searchInput.value.toLowerCase().trim();
+  const tiles = document.querySelectorAll('.cursor-tile');
+  let visible = 0;
+
+  tiles.forEach(tile => {
+    const matchCat = activeCat === 'all' || tile.dataset.cat === activeCat;
+    const matchQ = !q || tile.dataset.value.includes(q);
+    const show = matchCat && matchQ;
+    tile.dataset.hidden = show ? 'false' : 'true';
+    if (show) visible++;
+  });
+
+  // Hide empty section groups
+  document.querySelectorAll('.section-group').forEach(group => {
+    const cat = group.dataset.group;
+    const anyVisible = [...group.querySelectorAll('.cursor-tile')].some(t => t.dataset.hidden !== 'true');
+    group.style.display = anyVisible ? '' : 'none';
+  });
+
+  document.getElementById('no-results').classList.toggle('visible', visible === 0);
+}
+</script>
+</body>
+</html>
