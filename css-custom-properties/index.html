@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Custom Properties Inspector — Audit & Visualize CSS Variables</title>
+  <meta name="description" content="Paste any CSS with custom properties and instantly get a visual audit: color swatches, spacing bars, font previews, and a clean copy-ready :root block. Free, no signup.">
+  <meta property="og:title" content="CSS Custom Properties Inspector — Audit & Visualize CSS Variables">
+  <meta property="og:description" content="Paste CSS with custom properties and instantly get color swatches, spacing bars, and font previews. Audit your design tokens visually. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-custom-properties/">
+  <link rel="canonical" href="https://goosnav.github.io/css-custom-properties/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Custom Properties Inspector",
+    "url": "https://goosnav.github.io/css-custom-properties/",
+    "description": "Paste CSS custom properties and get a visual audit with color swatches, spacing bars, font previews, and copy-ready :root output. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f3ef;
+      --surface: #ffffff;
+      --surface2: #f8f7f4;
+      --border: #d8d6ce;
+      --border-strong: #b0ada4;
+      --text: #1a1916;
+      --text-muted: #6b6960;
+      --text-faint: #9e9c94;
+      --accent: #1a1916;
+      --accent-inv: #f4f3ef;
+      --tag-color: #1d4ed8;
+      --tag-spacing: #047857;
+      --tag-font: #7c3aed;
+      --tag-number: #b45309;
+      --tag-other: #374151;
+      --rule: 1px solid var(--border);
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Layout ─── */
+    .header {
+      border-bottom: var(--rule);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: var(--surface);
+    }
+
+    .back {
+      font-size: .8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .back:hover { color: var(--text); }
+    .back::before { content: '←  '; }
+
+    .header-title {
+      flex: 1;
+    }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .header-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: .15rem;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      height: calc(100vh - 61px);
+    }
+
+    @media (max-width: 720px) {
+      .main { grid-template-columns: 1fr; height: auto; }
+      .panel-input { border-right: none; border-bottom: var(--rule); max-height: 320px; }
+    }
+
+    /* ─── Left panel ─── */
+    .panel-input {
+      border-right: var(--rule);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+    }
+
+    .panel-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: .9rem 1.25rem .5rem;
+      border-bottom: var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: .5rem;
+    }
+
+    .btn-ghost {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .25rem .6rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      border: none;
+      outline: none;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .78rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--surface);
+      padding: 1rem 1.25rem;
+    }
+
+    .count-bar {
+      padding: .6rem 1.25rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: var(--text-faint);
+      border-top: var(--rule);
+    }
+    .count-bar span { color: var(--text-muted); }
+
+    /* ─── Right panel ─── */
+    .panel-results {
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .results-header {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: .9rem 1.5rem;
+      border-bottom: var(--rule);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .results-header .tabs {
+      display: flex;
+      gap: .25rem;
+    }
+
+    .tab {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: .25rem .6rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .tab:hover { color: var(--text-muted); }
+    .tab.active { color: var(--text); border-color: var(--border-strong); background: var(--surface); }
+
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .empty-state p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-faint);
+      line-height: 1.8;
+    }
+
+    .empty-state .hint {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: .75rem;
+      color: var(--text-faint);
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: .75rem 1.25rem;
+      text-align: left;
+      font-family: 'IBM Plex Mono', monospace;
+      line-height: 1.9;
+    }
+
+    /* ─── Property cards ─── */
+    .prop-list {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .prop-card {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      align-items: center;
+      gap: 0;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .prop-card:hover { border-color: var(--border-strong); }
+
+    /* Visual preview cell */
+    .prop-preview {
+      width: 36px;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: var(--rule);
+      flex-shrink: 0;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.12);
+      flex-shrink: 0;
+    }
+
+    .spacing-bar-wrap {
+      width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spacing-bar {
+      background: var(--tag-spacing);
+      border-radius: 2px;
+      width: 6px;
+      opacity: .7;
+      min-height: 2px;
+      max-height: 28px;
+    }
+
+    .font-icon {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--tag-font);
+      line-height: 1;
+      font-family: serif;
+    }
+
+    .num-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      font-weight: 600;
+      color: var(--tag-number);
+    }
+
+    .other-icon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      color: var(--text-faint);
+    }
+
+    /* Text cells */
+    .prop-body {
+      padding: .6rem .75rem;
+      min-width: 0;
+    }
+
+    .prop-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prop-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: .15rem;
+    }
+
+    .prop-type {
+      padding: .5rem .75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: .3rem;
+    }
+
+    .tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .15rem .4rem;
+      border-radius: 3px;
+    }
+
+    .tag-color  { color: var(--tag-color);   background: #eff6ff; }
+    .tag-space  { color: var(--tag-spacing); background: #f0fdf4; }
+    .tag-font   { color: var(--tag-font);    background: #faf5ff; }
+    .tag-number { color: var(--tag-number);  background: #fffbeb; }
+    .tag-other  { color: var(--tag-other);   background: #f9fafb; }
+
+    /* ─── Font preview section ─── */
+    .font-preview-section {
+      margin: 0 1.25rem 1.25rem;
+    }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin: 1rem 0 .5rem;
+    }
+
+    .font-preview-card {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: .75rem 1rem;
+      margin-bottom: .5rem;
+    }
+
+    .font-preview-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+    }
+
+    .font-preview-sample {
+      font-size: 1.1rem;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    /* ─── Spacing section ─── */
+    .spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: .75rem 1rem;
+    }
+
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .spacing-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: var(--text-muted);
+      width: 160px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .spacing-viz {
+      flex: 1;
+      height: 8px;
+      background: #e6f7f0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .spacing-fill {
+      height: 100%;
+      background: var(--tag-spacing);
+      border-radius: 2px;
+      opacity: .75;
+    }
+
+    .spacing-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-faint);
+      width: 50px;
+      text-align: right;
+    }
+
+    /* ─── Color palette section ─── */
+    .color-palette {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .5rem .75rem;
+      border-bottom: var(--rule);
+    }
+    .color-row:last-child { border-bottom: none; }
+
+    .color-swatch-lg {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.1);
+      flex-shrink: 0;
+    }
+
+    .color-info { flex: 1; min-width: 0; }
+    .color-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .73rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .color-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-muted);
+      margin-top: .1rem;
+    }
+
+    /* ─── Output panel ─── */
+    .output-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+    }
+    .output-panel.visible { display: flex; }
+
+    .output-area {
+      padding: 1.25rem;
+    }
+
+    pre {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      color: var(--accent-inv);
+      background: var(--accent);
+      border: none;
+      border-radius: 5px;
+      padding: .55rem 1.1rem;
+      cursor: pointer;
+      transition: opacity .15s;
+      margin-top: .75rem;
+    }
+    .copy-btn:hover { opacity: .85; }
+    .copy-btn:active { opacity: .7; }
+
+    /* active section hide/show */
+    .props-view { display: flex; flex-direction: column; }
+    .props-view.hidden { display: none; }
+    .output-area.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back" href="/">All Tools</a>
+  <div class="header-title">
+    <h1>CSS Custom Properties Inspector</h1>
+    <p class="header-sub">Paste CSS variables — get color swatches, spacing bars, font previews, and clean output</p>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT: Input -->
+  <div class="panel-input">
+    <div class="panel-label">
+      <span>CSS Input</span>
+      <div class="panel-actions">
+        <button class="btn-ghost" onclick="loadExample()">Example</button>
+        <button class="btn-ghost" onclick="clearInput()">Clear</button>
+      </div>
+    </div>
+    <textarea id="cssInput" placeholder=":root {
+  --color-primary: #1a1916;
+  --color-accent: #d97706;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 6px;
+  --opacity-muted: 0.6;
+}" spellcheck="false"></textarea>
+    <div class="count-bar" id="countBar">Paste CSS above to inspect your custom properties</div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="panel-results">
+    <div class="results-header">
+      <span id="resultCount">—</span>
+      <div class="tabs">
+        <button class="tab active" id="tabAll" onclick="switchTab('all')">All</button>
+        <button class="tab" id="tabColors" onclick="switchTab('colors')">Colors</button>
+        <button class="tab" id="tabSpacing" onclick="switchTab('spacing')">Spacing</button>
+        <button class="tab" id="tabFonts" onclick="switchTab('fonts')">Fonts</button>
+        <button class="tab" id="tabOutput" onclick="switchTab('output')">Output</button>
+      </div>
+    </div>
+
+    <div id="emptyState" class="empty-state">
+      <p>Paste any CSS with <code>--custom-properties</code><br>and this tool will classify them for you.</p>
+      <div class="hint">
+        Works with:<br>
+        :root { --name: value; }<br>
+        selector { --name: value; }<br>
+        Raw declarations: --name: value;<br>
+        Nested inside any block
+      </div>
+    </div>
+
+    <!-- All properties list -->
+    <div id="viewAll" class="props-view hidden">
+      <div class="prop-list" id="propList"></div>
+    </div>
+
+    <!-- Colors view -->
+    <div id="viewColors" class="props-view hidden">
+      <div class="font-preview-section">
+        <div class="section-label">Color Palette</div>
+        <div class="color-palette" id="colorPalette"></div>
+      </div>
+    </div>
+
+    <!-- Spacing view -->
+    <div id="viewSpacing" class="props-view hidden">
+      <div class="font-preview-section">
+        <div class="section-label">Spacing Scale</div>
+        <div class="spacing-grid" id="spacingGrid"></div>
+      </div>
+    </div>
+
+    <!-- Fonts view -->
+    <div id="viewFonts" class="props-view hidden">
+      <div class="font-preview-section" id="fontsSection"></div>
+    </div>
+
+    <!-- Output view -->
+    <div id="viewOutput" class="props-view hidden">
+      <div class="output-area">
+        <pre id="outputCode"></pre>
+        <button class="copy-btn" onclick="copyOutput()">Copy :root { } block</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Parse ───────────────────────────────────────────────────────────────────
+
+  function parseCustomProps(css) {
+    const re = /--([\w-]+)\s*:\s*([^;}{]+?)(?=\s*;|\s*}|\s*$)/g;
+    const props = [];
+    let m;
+    while ((m = re.exec(css)) !== null) {
+      const name = '--' + m[1].trim();
+      const value = m[2].trim();
+      if (value) props.push({ name, value, type: classifyValue(name, value) });
+    }
+    return props;
+  }
+
+  // ─── Classify ────────────────────────────────────────────────────────────────
+
+  function classifyValue(name, value) {
+    // Color?
+    if (isColor(value)) return 'color';
+    // Font / family?
+    const nl = name.toLowerCase();
+    if (/font|family|typeface/.test(nl) || isFontValue(value)) return 'font';
+    // Spacing / size?
+    if (isSpacing(value)) return 'spacing';
+    // Pure number / ratio / opacity?
+    if (/^-?\d*\.?\d+$/.test(value.trim())) return 'number';
+    return 'other';
+  }
+
+  const COLOR_RE = /^(#[0-9a-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|oklch\(|lch\(|color\(|transparent|currentcolor|[a-z]{3,20})$/i;
+  const CSS_KEYWORDS = new Set(['none','auto','inherit','initial','revert','unset','normal','bold','italic','underline','solid','dashed','dotted','relative','absolute','fixed','sticky','flex','grid','block','inline']);
+
+  function isColor(v) {
+    const vt = v.trim();
+    if (/^#[0-9a-f]{3,8}$/i.test(vt)) return true;
+    if (/^(rgb|rgba|hsl|hsla|oklch|lch|color)\s*\(/.test(vt)) return true;
+    if (/^(transparent|currentcolor)$/i.test(vt)) return true;
+    // Named colors (crude: 3+ alpha chars, not a keyword)
+    if (/^[a-z]{3,20}$/i.test(vt) && !CSS_KEYWORDS.has(vt.toLowerCase())) {
+      // test if browser parses it as a color
+      try {
+        const tmp = document.createElement('div');
+        tmp.style.color = vt;
+        if (tmp.style.color !== '') return true;
+      } catch(e) {}
+    }
+    return false;
+  }
+
+  function isFontValue(v) {
+    return /,\s*(sans-serif|serif|monospace|cursive|fantasy|system-ui)/.test(v) ||
+           /'[^']+'\s*,/.test(v) ||
+           /"[^"]+"\s*,/.test(v);
+  }
+
+  function isSpacing(v) {
+    return /^-?\d*\.?\d+(px|rem|em|vh|vw|vmin|vmax|ch|ex|cm|mm|pt|pc|%)(\s+(-?\d*\.?\d+(px|rem|em|vh|vw|vmin|vmax|ch|ex|cm|mm|pt|pc|%)?))*$/.test(v.trim());
+  }
+
+  // ─── Convert any unit to px for comparison ───────────────────────────────────
+
+  function toPx(value) {
+    const m = value.trim().match(/^(-?\d*\.?\d+)(px|rem|em|vh|vw|%|ch)?$/);
+    if (!m) return 0;
+    const n = parseFloat(m[1]);
+    const u = m[2] || 'px';
+    const map = { px: 1, rem: 16, em: 16, vh: window.innerHeight / 100, vw: window.innerWidth / 100, '%': 1, ch: 8 };
+    return n * (map[u] || 1);
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
+  let allProps = [];
+  let activeTab = 'all';
+
+  function render(props) {
+    allProps = props;
+    const n = props.length;
+    document.getElementById('countBar').textContent = n ? `${n} custom propert${n === 1 ? 'y' : 'ies'} detected` : 'No custom properties found';
+    document.getElementById('resultCount').textContent = n ? `${n} propert${n === 1 ? 'y' : 'ies'}` : '—';
+
+    const empty = document.getElementById('emptyState');
+    if (!n) {
+      empty.style.display = 'block';
+      ['viewAll','viewColors','viewSpacing','viewFonts','viewOutput'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      return;
+    }
+    empty.style.display = 'none';
+    renderAll(props);
+    renderColors(props.filter(p => p.type === 'color'));
+    renderSpacing(props.filter(p => p.type === 'spacing'));
+    renderFonts(props.filter(p => p.type === 'font'));
+    renderOutput(props);
+    showTab(activeTab);
+  }
+
+  function renderAll(props) {
+    const list = document.getElementById('propList');
+    list.innerHTML = props.map(p => {
+      const preview = makePreview(p);
+      const tagCls = { color: 'tag-color', spacing: 'tag-space', font: 'tag-font', number: 'tag-number', other: 'tag-other' }[p.type];
+      const tagLabel = p.type;
+      return `<div class="prop-card">
+        <div class="prop-preview">${preview}</div>
+        <div class="prop-body">
+          <div class="prop-name">${p.name}</div>
+          <div class="prop-value">${escHtml(p.value)}</div>
+        </div>
+        <div class="prop-type"><span class="tag ${tagCls}">${tagLabel}</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  function makePreview(p) {
+    if (p.type === 'color') {
+      return `<div class="swatch" style="background:${p.value}"></div>`;
+    }
+    if (p.type === 'spacing') {
+      // Single-value spacing bar
+      const single = p.value.trim().split(/\s+/)[0];
+      const px = Math.max(2, Math.min(28, toPx(single)));
+      return `<div class="spacing-bar-wrap"><div class="spacing-bar" style="height:${px}px"></div></div>`;
+    }
+    if (p.type === 'font') return `<span class="font-icon">Aa</span>`;
+    if (p.type === 'number') return `<span class="num-icon">#</span>`;
+    return `<span class="other-icon">—</span>`;
+  }
+
+  function renderColors(colors) {
+    const el = document.getElementById('colorPalette');
+    if (!colors.length) { el.innerHTML = '<div style="padding:.75rem 1rem;font-family:IBM Plex Mono,monospace;font-size:.75rem;color:var(--text-faint)">No color variables found</div>'; return; }
+    el.innerHTML = colors.map(p => `
+      <div class="color-row">
+        <div class="color-swatch-lg" style="background:${p.value}"></div>
+        <div class="color-info">
+          <div class="color-name">${p.name}</div>
+          <div class="color-val">${escHtml(p.value)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderSpacing(spaces) {
+    const el = document.getElementById('spacingGrid');
+    if (!spaces.length) { el.innerHTML = '<div style="font-family:IBM Plex Mono,monospace;font-size:.75rem;color:var(--text-faint)">No spacing/size variables found</div>'; return; }
+    // Sort by computed px value ascending
+    const sorted = spaces.map(p => ({ ...p, px: toPx(p.value.trim().split(/\s+/)[0]) }))
+                         .sort((a, b) => a.px - b.px);
+    const max = sorted[sorted.length - 1]?.px || 1;
+    el.innerHTML = sorted.map(p => `
+      <div class="spacing-row">
+        <div class="spacing-name">${p.name}</div>
+        <div class="spacing-viz"><div class="spacing-fill" style="width:${Math.max(2, (p.px / max) * 100)}%"></div></div>
+        <div class="spacing-val">${escHtml(p.value)}</div>
+      </div>`).join('');
+  }
+
+  function renderFonts(fonts) {
+    const el = document.getElementById('fontsSection');
+    if (!fonts.length) { el.innerHTML = '<div class="section-label" style="padding:1rem 0 0">No font variables found</div><div style="padding:.75rem;font-family:IBM Plex Mono,monospace;font-size:.75rem;color:var(--text-faint);background:var(--surface);border:var(--rule);border-radius:6px">Font variables usually contain \'Font Name\', sans-serif or similar.</div>'; return; }
+    el.innerHTML = '<div class="section-label">Font Variables</div>' + fonts.map(p => {
+      // Extract display name
+      const familyMatch = p.value.match(/['"]([^'"]+)['"]/);
+      const displayFont = familyMatch ? `'${familyMatch[1]}', sans-serif` : p.value;
+      return `<div class="font-preview-card">
+        <div class="font-preview-name">${p.name} = ${escHtml(p.value)}</div>
+        <div class="font-preview-sample" style="font-family:${p.value}">
+          The quick brown fox jumps over the lazy dog — 0123456789
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderOutput(props) {
+    const lines = props.map(p => `  ${p.name}: ${p.value};`).join('\n');
+    document.getElementById('outputCode').textContent = `:root {\n${lines}\n}`;
+  }
+
+  // ─── Tabs ────────────────────────────────────────────────────────────────────
+
+  function showTab(tab) {
+    ['all','colors','spacing','fonts','output'].forEach(t => {
+      document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('active', t === tab);
+      document.getElementById(`view${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
+    });
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    if (allProps.length) showTab(tab);
+  }
+
+  // ─── Utilities ───────────────────────────────────────────────────────────────
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('outputCode').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy :root { } block', 1500);
+    });
+  }
+
+  function clearInput() {
+    document.getElementById('cssInput').value = '';
+    render([]);
+  }
+
+  function loadExample() {
+    document.getElementById('cssInput').value = `:root {
+  /* Colors */
+  --color-bg: #f8f7f4;
+  --color-surface: #ffffff;
+  --color-text: #1a1916;
+  --color-text-muted: rgba(26, 25, 22, 0.55);
+  --color-accent: #d97706;
+  --color-accent-light: #fef3c7;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+  --color-info: hsl(210, 100%, 56%);
+  --color-border: #e2e0d8;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  /* Misc */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --transition: 0.15s ease;
+  --opacity-disabled: 0.4;
+}`;
+    // trigger parse
+    render(parseCustomProps(document.getElementById('cssInput').value));
+  }
+
+  // ─── Wire up input ───────────────────────────────────────────────────────────
+
+  let debounceTimer;
+  document.getElementById('cssInput').addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      render(parseCustomProps(document.getElementById('cssInput').value));
+    }, 200);
+  });
+</script>
+
+</body>
+</html>
