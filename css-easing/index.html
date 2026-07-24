@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Easing Visualizer — cubic-bezier & Animation Timing</title>
+  <meta name="description" content="Visualize CSS easing functions interactively. Edit cubic-bezier() curves, see animated previews, compare named easings, and copy ready-to-use CSS. Free, no signup.">
+  <meta property="og:title" content="CSS Easing Visualizer — cubic-bezier & Animation Timing">
+  <meta property="og:description" content="Edit cubic-bezier() control points on a live canvas, watch animated previews, compare all named CSS easings side-by-side. Free, in-browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goosnav.github.io/css-easing/">
+  <link rel="canonical" href="https://goosnav.github.io/css-easing/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSS Easing Visualizer",
+    "url": "https://goosnav.github.io/css-easing/",
+    "description": "Visualize CSS easing functions and cubic-bezier curves with animated previews. Compare named easings, edit control points, and copy CSS values. Free, no signup.",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f3ef;
+      --surface: #ffffff;
+      --surface2: #f8f7f4;
+      --border: #d8d6ce;
+      --border-strong: #b0ada4;
+      --text: #1a1916;
+      --text-muted: #6b6960;
+      --text-faint: #9e9c94;
+      --accent: #1a1916;
+      --curve-color: #7c3aed;
+      --handle-p1: #1d4ed8;
+      --handle-p2: #db2777;
+      --rule: 1px solid var(--border);
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .header {
+      border-bottom: var(--rule);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: var(--surface);
+    }
+
+    .back {
+      font-size: .8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .back:hover { color: var(--text); }
+    .back::before { content: '←  '; }
+
+    .header-title { flex: 1; }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    .header-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: .2rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      main { grid-template-columns: 1fr; padding: 1rem; }
+    }
+
+    /* ─── Left panel ─── */
+    .left-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .card {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .card-title {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Bezier canvas */
+    .bezier-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--surface2);
+      border: var(--rule);
+      border-radius: 6px;
+      overflow: visible;
+      touch-action: none;
+    }
+
+    #bezierCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Value inputs */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: .5rem;
+      margin-top: .75rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: .25rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .85rem;
+      padding: .35rem .4rem;
+      border: var(--rule);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+    .input-group input:focus { border-color: var(--border-strong); }
+
+    .input-group.p1 label { color: var(--handle-p1); }
+    .input-group.p2 label { color: var(--handle-p2); }
+
+    /* Output CSS */
+    .css-output {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .85rem;
+      padding: .6rem .75rem;
+      background: var(--surface2);
+      border: var(--rule);
+      border-radius: 6px;
+      word-break: break-all;
+      color: var(--curve-color);
+      position: relative;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .css-output:hover { background: #ede9fe; }
+
+    .copy-hint {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .65rem;
+      color: var(--text-faint);
+      margin-top: .3rem;
+    }
+
+    /* Named easing presets */
+    .presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+
+    .preset-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      padding: .3rem .5rem;
+      border: var(--rule);
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .preset-btn:hover { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+    .preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ─── Right panel ─── */
+    .right-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* Animation preview */
+    .preview-track {
+      background: var(--surface2);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: 1.5rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-ball {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--curve-color);
+      position: relative;
+      left: 0;
+    }
+
+    .preview-track-line {
+      position: absolute;
+      top: 50%;
+      left: 1.25rem;
+      right: 1.25rem;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .preview-controls {
+      display: flex;
+      gap: .5rem;
+      margin-top: .75rem;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .8rem;
+      padding: .4rem .75rem;
+      border: var(--rule);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.primary:hover { opacity: .85; }
+
+    .duration-label {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 80px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Compare grid */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .75rem;
+    }
+
+    .compare-card {
+      background: var(--surface);
+      border: var(--rule);
+      border-radius: 6px;
+      padding: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .compare-card:hover { border-color: var(--border-strong); }
+    .compare-card.active-compare { border-color: var(--curve-color); background: #f5f3ff; }
+
+    .compare-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem;
+      font-weight: 600;
+      margin-bottom: .35rem;
+    }
+
+    .compare-mini-canvas {
+      width: 100%;
+      height: 60px;
+      display: block;
+    }
+
+    .compare-track {
+      margin-top: .5rem;
+      height: 20px;
+      background: var(--surface2);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .compare-ball {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--curve-color);
+    }
+
+    .section-title {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: .75rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .8rem;
+      color: var(--text-faint);
+      border-top: var(--rule);
+      margin-top: 2rem;
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(2rem);
+      background: var(--accent);
+      color: #fff;
+      font-size: .8rem;
+      padding: .5rem 1.25rem;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      font-size: .7rem;
+      color: var(--text-muted);
+      margin-top: .5rem;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: .25rem;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back" href="/">All Tools</a>
+  <div class="header-title">
+    <h1>CSS Easing Visualizer</h1>
+    <p class="header-sub">Drag handles · copy cubic-bezier() · preview animation</p>
+  </div>
+</header>
+
+<main>
+  <!-- Left: editor -->
+  <div class="left-panel">
+
+    <div class="card">
+      <div class="card-title">Curve Editor</div>
+      <div class="bezier-wrap">
+        <canvas id="bezierCanvas"></canvas>
+      </div>
+
+      <div class="legend">
+        <span><span class="legend-dot" style="background:var(--handle-p1)"></span>P1 (x1,y1)</span>
+        <span><span class="legend-dot" style="background:var(--handle-p2)"></span>P2 (x2,y2)</span>
+      </div>
+
+      <div class="inputs-grid">
+        <div class="input-group p1">
+          <label>x1</label>
+          <input type="number" id="x1" min="-2" max="3" step="0.01" value="0.25">
+        </div>
+        <div class="input-group p1">
+          <label>y1</label>
+          <input type="number" id="y1" min="-2" max="3" step="0.01" value="0.1">
+        </div>
+        <div class="input-group p2">
+          <label>x2</label>
+          <input type="number" id="x2" min="-2" max="3" step="0.01" value="0.25">
+        </div>
+        <div class="input-group p2">
+          <label>y2</label>
+          <input type="number" id="y2" min="-2" max="3" step="0.01" value="1">
+        </div>
+      </div>
+
+      <div style="margin-top:.75rem">
+        <div class="css-output" id="cssOutput" title="Click to copy">cubic-bezier(0.25, 0.1, 0.25, 1)</div>
+        <div class="copy-hint">Click to copy CSS value</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Named Easings</div>
+      <div class="presets-grid" id="presets"></div>
+    </div>
+
+  </div>
+
+  <!-- Right: preview + compare -->
+  <div class="right-panel">
+
+    <div class="card">
+      <div class="card-title">Animation Preview</div>
+      <div class="preview-track" id="previewTrack">
+        <div class="preview-track-line"></div>
+        <div class="preview-ball" id="previewBall"></div>
+      </div>
+      <div class="preview-controls">
+        <button class="btn primary" id="playBtn">▶ Play</button>
+        <button class="btn" id="loopBtn">Loop: off</button>
+        <span class="duration-label">
+          Duration:
+          <input type="range" id="durationSlider" min="200" max="3000" value="800" step="100">
+          <span id="durationVal">0.8s</span>
+        </span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Compare All Named Easings — click to load</div>
+      <div class="compare-grid" id="compareGrid"></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>Built by <a href="https://goosnav.com">Goosnav</a> · Runs 100% in your browser · No data sent anywhere</p>
+</footer>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+// ─── Named easings ────────────────────────────────────────────────
+const PRESETS = [
+  { name: 'ease',        v: [0.25, 0.1, 0.25, 1]    },
+  { name: 'linear',      v: [0,    0,    1,    1]    },
+  { name: 'ease-in',     v: [0.42, 0,    1,    1]    },
+  { name: 'ease-out',    v: [0,    0,    0.58, 1]    },
+  { name: 'ease-in-out', v: [0.42, 0,    0.58, 1]    },
+  { name: 'ease-in-sine',    v: [0.12, 0,    0.39, 0]    },
+  { name: 'ease-out-sine',   v: [0.61, 1,    0.88, 1]    },
+  { name: 'ease-in-out-sine',v: [0.37, 0,    0.63, 1]    },
+  { name: 'ease-in-quad',    v: [0.11, 0,    0.5,  0]    },
+  { name: 'ease-out-quad',   v: [0.5,  1,    0.89, 1]    },
+  { name: 'ease-in-out-quad',v: [0.45, 0,    0.55, 1]    },
+  { name: 'ease-in-cubic',   v: [0.32, 0,    0.67, 0]    },
+  { name: 'ease-out-cubic',  v: [0.33, 1,    0.68, 1]    },
+  { name: 'ease-in-out-cubic',v:[0.65, 0,    0.35, 1]    },
+  { name: 'ease-in-quart',   v: [0.5,  0,    0.75, 0]    },
+  { name: 'ease-out-quart',  v: [0.25, 1,    0.5,  1]    },
+  { name: 'ease-in-quint',   v: [0.64, 0,    0.78, 0]    },
+  { name: 'ease-out-quint',  v: [0.22, 1,    0.36, 1]    },
+  { name: 'ease-in-expo',    v: [0.7,  0,    0.84, 0]    },
+  { name: 'ease-out-expo',   v: [0.16, 1,    0.3,  1]    },
+  { name: 'ease-in-circ',    v: [0.55, 0,    1,    0.45] },
+  { name: 'ease-out-circ',   v: [0,    0.55, 0.45, 1]    },
+  { name: 'ease-in-back',    v: [0.36, 0,    0.66, -0.56]},
+  { name: 'ease-out-back',   v: [0.34, 1.56, 0.64, 1]    },
+  { name: 'ease-in-out-back',v: [0.68,-0.6,  0.32, 1.6]  },
+];
+
+// ─── State ────────────────────────────────────────────────────────
+let x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1;
+let dragging = null; // 'p1' | 'p2'
+let looping = false;
+let animId = null;
+let duration = 800;
+let activePreset = null;
+
+// ─── Canvas ───────────────────────────────────────────────────────
+const canvas = document.getElementById('bezierCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const s = Math.min(rect.width, rect.height);
+  canvas.width = s * devicePixelRatio;
+  canvas.height = s * devicePixelRatio;
+  canvas.style.width = s + 'px';
+  canvas.style.height = s + 'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  drawCurve();
+}
+
+function canvasSize() {
+  return canvas.width / devicePixelRatio;
+}
+
+// Map unit [0,1] coords to canvas pixels with padding
+function PAD() { return canvasSize() * 0.12; }
+function toCanvas(nx, ny) {
+  const pad = PAD(), sz = canvasSize();
+  const w = sz - pad * 2;
+  return { x: pad + nx * w, y: pad + (1 - ny) * w };
+}
+function fromCanvas(cx, cy) {
+  const pad = PAD(), sz = canvasSize();
+  const w = sz - pad * 2;
+  return { x: (cx - pad) / w, y: 1 - (cy - pad) / w };
+}
+
+function cubicBezierY(t, p1y, p2y) {
+  const u = 1 - t;
+  return 3 * u * u * t * p1y + 3 * u * t * t * p2y + t * t * t;
+}
+// Solve x(t)=target via Newton-Raphson
+function solveBezierT(targetX, p1x, p2x) {
+  let t = targetX;
+  for (let i = 0; i < 8; i++) {
+    const u = 1 - t;
+    const xt = 3*u*u*t*p1x + 3*u*t*t*p2x + t*t*t;
+    const dxt = 3*u*u*p1x + 6*u*t*(p2x-p1x) + 3*t*t*(1-p2x);
+    if (Math.abs(dxt) < 1e-9) break;
+    t -= (xt - targetX) / dxt;
+    t = Math.max(0, Math.min(1, t));
+  }
+  return t;
+}
+
+function drawCurve() {
+  const sz = canvasSize();
+  const pad = PAD();
+  ctx.clearRect(0, 0, sz, sz);
+
+  // Grid
+  ctx.strokeStyle = '#e8e6e0';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const n = i / 4;
+    const { x: gx, y: gy } = toCanvas(n, n);
+    ctx.beginPath(); ctx.moveTo(pad, gy); ctx.lineTo(sz - pad, gy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(gx, pad); ctx.lineTo(gx, sz - pad); ctx.stroke();
+  }
+
+  // Diagonal reference
+  ctx.strokeStyle = '#d0cec7';
+  ctx.setLineDash([4, 4]);
+  const c0 = toCanvas(0, 0), c1 = toCanvas(1, 1);
+  ctx.beginPath(); ctx.moveTo(c0.x, c0.y); ctx.lineTo(c1.x, c1.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Control lines
+  const p0 = toCanvas(0, 0), p3 = toCanvas(1, 1);
+  const cp1 = toCanvas(x1, y1), cp2 = toCanvas(x2, y2);
+
+  ctx.strokeStyle = '#c4b5fd80';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(cp1.x, cp1.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(cp2.x, cp2.y); ctx.stroke();
+
+  // Bezier curve
+  ctx.strokeStyle = '#7c3aed';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p3.x, p3.y);
+  ctx.stroke();
+
+  // Anchor dots (fixed)
+  [p0, p3].forEach(p => {
+    ctx.fillStyle = '#1a1916';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // Control handles
+  [{ p: cp1, c: '#1d4ed8' }, { p: cp2, c: '#db2777' }].forEach(({ p, c }) => {
+    ctx.fillStyle = c;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.stroke();
+  });
+
+  // Axis labels
+  ctx.fillStyle = '#9e9c94';
+  ctx.font = `${sz * 0.045}px IBM Plex Mono, monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('time →', sz / 2, sz - 2);
+  ctx.save();
+  ctx.translate(8, sz / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('progress ↑', 0, 0);
+  ctx.restore();
+}
+
+// ─── Drag ─────────────────────────────────────────────────────────
+function hitHandle(cx, cy, px, py, r) {
+  return Math.hypot(cx - px, cy - py) <= r;
+}
+
+function getPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+
+canvas.addEventListener('pointerdown', e => {
+  const { x, y } = getPointerPos(e);
+  const cp1 = toCanvas(x1, y1), cp2 = toCanvas(x2, y2);
+  if (hitHandle(x, y, cp1.x, cp1.y, 12)) { dragging = 'p1'; canvas.setPointerCapture(e.pointerId); }
+  else if (hitHandle(x, y, cp2.x, cp2.y, 12)) { dragging = 'p2'; canvas.setPointerCapture(e.pointerId); }
+});
+
+canvas.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const { x, y } = getPointerPos(e);
+  const n = fromCanvas(x, y);
+  if (dragging === 'p1') { x1 = Math.max(-0.5, Math.min(1.5, n.x)); y1 = Math.max(-1, Math.min(2, n.y)); }
+  if (dragging === 'p2') { x2 = Math.max(-0.5, Math.min(1.5, n.x)); y2 = Math.max(-1, Math.min(2, n.y)); }
+  syncInputs();
+  updateOutput();
+  drawCurve();
+});
+
+canvas.addEventListener('pointerup', () => { dragging = null; });
+
+// ─── Inputs sync ──────────────────────────────────────────────────
+const inX1 = document.getElementById('x1');
+const inY1 = document.getElementById('y1');
+const inX2 = document.getElementById('x2');
+const inY2 = document.getElementById('y2');
+
+function syncInputs() {
+  inX1.value = round(x1); inY1.value = round(y1);
+  inX2.value = round(x2); inY2.value = round(y2);
+}
+
+function round(n) { return Math.round(n * 1000) / 1000; }
+
+[inX1, inY1, inX2, inY2].forEach(inp => {
+  inp.addEventListener('input', () => {
+    x1 = parseFloat(inX1.value) || 0;
+    y1 = parseFloat(inY1.value) || 0;
+    x2 = parseFloat(inX2.value) || 0;
+    y2 = parseFloat(inY2.value) || 0;
+    activePreset = null;
+    updatePresetButtons();
+    updateOutput();
+    drawCurve();
+  });
+});
+
+// ─── Output ───────────────────────────────────────────────────────
+const cssOutput = document.getElementById('cssOutput');
+
+function cubicStr() {
+  return `cubic-bezier(${round(x1)}, ${round(y1)}, ${round(x2)}, ${round(y2)})`;
+}
+
+function updateOutput() {
+  cssOutput.textContent = cubicStr();
+}
+
+cssOutput.addEventListener('click', () => {
+  navigator.clipboard.writeText(cubicStr()).then(() => showToast());
+});
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+// ─── Presets ──────────────────────────────────────────────────────
+const presetsEl = document.getElementById('presets');
+
+function loadPreset(p, fromCompare) {
+  [x1, y1, x2, y2] = p.v;
+  activePreset = p.name;
+  syncInputs();
+  updateOutput();
+  drawCurve();
+  updatePresetButtons();
+  if (!fromCompare) updateCompareHighlight();
+}
+
+function updatePresetButtons() {
+  presetsEl.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.name === activePreset);
+  });
+}
+
+PRESETS.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.dataset.name = p.name;
+  btn.textContent = p.name;
+  btn.addEventListener('click', () => loadPreset(p));
+  presetsEl.appendChild(btn);
+});
+
+// ─── Animation preview ────────────────────────────────────────────
+const ball = document.getElementById('previewBall');
+const track = document.getElementById('previewTrack');
+const playBtn = document.getElementById('playBtn');
+const loopBtn = document.getElementById('loopBtn');
+const durationSlider = document.getElementById('durationSlider');
+const durationVal = document.getElementById('durationVal');
+
+durationSlider.addEventListener('input', () => {
+  duration = parseInt(durationSlider.value);
+  durationVal.textContent = (duration / 1000).toFixed(1) + 's';
+});
+
+function getTrackWidth() {
+  return track.clientWidth - 36 - 24; // subtract ball width and left padding
+}
+
+function playAnimation() {
+  if (animId) cancelAnimationFrame(animId);
+  const start = performance.now();
+  playBtn.textContent = '■ Stop';
+
+  function frame(now) {
+    const elapsed = now - start;
+    let progress = Math.min(elapsed / duration, 1);
+
+    // Apply cubic-bezier easing: solve for Y given X=progress
+    const t = solveBezierT(progress, x1, x2);
+    const easedY = cubicBezierY(t, y1, y2);
+    const tx = Math.max(0, easedY) * getTrackWidth();
+
+    ball.style.transform = `translateX(${tx}px)`;
+
+    if (progress < 1) {
+      animId = requestAnimationFrame(frame);
+    } else {
+      if (looping) {
+        setTimeout(playAnimation, 300);
+      } else {
+        playBtn.textContent = '▶ Play';
+        animId = null;
+      }
+    }
+  }
+  animId = requestAnimationFrame(frame);
+}
+
+playBtn.addEventListener('click', () => {
+  if (animId) {
+    cancelAnimationFrame(animId);
+    animId = null;
+    playBtn.textContent = '▶ Play';
+    ball.style.transform = 'translateX(0)';
+  } else {
+    playAnimation();
+  }
+});
+
+loopBtn.addEventListener('click', () => {
+  looping = !looping;
+  loopBtn.textContent = looping ? 'Loop: on' : 'Loop: off';
+});
+
+// ─── Compare grid ─────────────────────────────────────────────────
+const compareGrid = document.getElementById('compareGrid');
+const compareAnimIds = new Map();
+
+function drawMiniCurve(canvas, vx1, vy1, vx2, vy2, color) {
+  const dpr = devicePixelRatio;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 60 * dpr;
+  const c = canvas.getContext('2d');
+  c.scale(dpr, dpr);
+  const W = rect.width, H = 60, pad = 8;
+
+  c.clearRect(0, 0, W, H);
+  c.strokeStyle = '#e8e6e0';
+  c.lineWidth = 1;
+  c.beginPath(); c.moveTo(pad, H - pad); c.lineTo(W - pad, H - pad); c.stroke();
+  c.beginPath(); c.moveTo(pad, pad); c.lineTo(pad, H - pad); c.stroke();
+
+  const tx = n => pad + n * (W - pad * 2);
+  const ty = n => (H - pad) - n * (H - pad * 2);
+
+  c.strokeStyle = color || '#7c3aed';
+  c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(tx(0), ty(0));
+  c.bezierCurveTo(tx(vx1), ty(vy1), tx(vx2), ty(vy2), tx(1), ty(1));
+  c.stroke();
+}
+
+function updateCompareHighlight() {
+  compareGrid.querySelectorAll('.compare-card').forEach(card => {
+    card.classList.toggle('active-compare', card.dataset.name === activePreset);
+  });
+}
+
+PRESETS.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'compare-card';
+  card.dataset.name = p.name;
+
+  const name = document.createElement('div');
+  name.className = 'compare-name';
+  name.textContent = p.name;
+
+  const mini = document.createElement('canvas');
+  mini.className = 'compare-mini-canvas';
+
+  const trackEl = document.createElement('div');
+  trackEl.className = 'compare-track';
+  const ballEl = document.createElement('div');
+  ballEl.className = 'compare-ball';
+  trackEl.appendChild(ballEl);
+
+  card.appendChild(name);
+  card.appendChild(mini);
+  card.appendChild(trackEl);
+  compareGrid.appendChild(card);
+
+  // Draw mini curve after appended (need layout)
+  requestAnimationFrame(() => drawMiniCurve(mini, ...p.v));
+
+  // Animate on hover
+  let hoverAnimId = null;
+  card.addEventListener('mouseenter', () => {
+    if (hoverAnimId) return;
+    const [bx1, by1, bx2, by2] = p.v;
+    const trackW = trackEl.clientWidth - 14 - 6;
+    const start = performance.now();
+    const dur = 800;
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / dur, 1);
+      const t = solveBezierT(progress, bx1, bx2);
+      const easedY = cubicBezierY(t, by1, by2);
+      ballEl.style.left = (3 + Math.max(0, easedY) * trackW) + 'px';
+      if (progress < 1) hoverAnimId = requestAnimationFrame(step);
+      else hoverAnimId = null;
+    }
+    hoverAnimId = requestAnimationFrame(step);
+  });
+
+  card.addEventListener('mouseleave', () => {
+    if (hoverAnimId) { cancelAnimationFrame(hoverAnimId); hoverAnimId = null; }
+    ballEl.style.left = '3px';
+  });
+
+  card.addEventListener('click', () => loadPreset(p, true));
+});
+
+// ─── Init ─────────────────────────────────────────────────────────
+window.addEventListener('resize', () => { resizeCanvas(); });
+resizeCanvas();
+loadPreset(PRESETS[0]);
+</script>
+</body>
+</html>
